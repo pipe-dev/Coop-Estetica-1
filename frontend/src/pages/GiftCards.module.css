@@ -1,0 +1,137 @@
+.giftCards { padding-top: var(--navbar-height); }
+
+.hero {
+  position: relative;
+  height: 40vh;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+}
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.12) 0%, transparent 70%);
+}
+.heroContent { position: relative; text-align: center; z-index: 1; }
+.heroTitle { font-family: var(--font-heading); font-size: var(--fs-4xl); color: var(--color-white); margin-bottom: var(--space-md); }
+.accent { background: var(--gradient-gold-horizontal); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.heroDesc { color: var(--color-silver-light); font-size: var(--fs-md); }
+
+/* Gift Cards */
+.cardsSection { padding: var(--space-section) 0; background: var(--color-cream); }
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+  margin-top: var(--space-3xl);
+}
+.giftCard {
+  perspective: 1000px;
+}
+.giftCardInner {
+  background: linear-gradient(135deg, var(--card-color) 0%, rgba(0,0,0,0.8) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.giftCardShimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 4s infinite;
+}
+.giftCardBrand {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-widest);
+  opacity: 0.7;
+}
+.giftCardName {
+  font-family: var(--font-heading);
+  font-size: var(--fs-xl);
+  margin-top: var(--space-lg);
+}
+.giftCardValue {
+  font-family: var(--font-heading);
+  font-size: var(--fs-3xl);
+  font-weight: var(--fw-bold);
+  margin: var(--space-sm) 0;
+}
+.giftCardDesc {
+  font-size: var(--fs-sm);
+  opacity: 0.8;
+  margin-bottom: var(--space-md);
+}
+
+/* Memberships */
+.membershipsSection { padding: var(--space-section) 0; background: var(--color-black); }
+.membershipsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+  margin-top: var(--space-3xl);
+}
+.membershipCard {
+  position: relative;
+  background: var(--color-black-soft);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  transition: all var(--transition-base);
+}
+.membershipCard:hover { border-color: var(--color-gold-muted); }
+.popular {
+  border-color: var(--color-gold);
+  background: linear-gradient(180deg, rgba(212,175,55,0.08) 0%, var(--color-black-soft) 40%);
+  box-shadow: var(--shadow-gold);
+}
+.popularBadge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gradient-gold);
+  color: var(--color-black);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+.planName { font-family: var(--font-heading); font-size: var(--fs-xl); color: var(--color-white); }
+.planPrice { display: flex; align-items: baseline; gap: 2px; }
+.currency { font-size: var(--fs-lg); color: var(--color-gold); font-weight: var(--fw-semibold); }
+.amount { font-family: var(--font-heading); font-size: var(--fs-4xl); font-weight: var(--fw-bold); color: var(--color-white); }
+.period { font-size: var(--fs-sm); color: var(--color-gray-400); }
+.planFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+  text-align: left;
+}
+.planFeatures li { display: flex; align-items: center; gap: var(--space-sm); font-size: var(--fs-sm); color: var(--color-gray-300); }
+.check { color: var(--color-gold); font-size: var(--fs-xs); }
+
+@media (max-width: 768px) {
+  .cardsGrid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .membershipsGrid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+  .heroTitle { font-size: var(--fs-2xl); }
+}

@@ -1,0 +1,29 @@
+.navbar {
+  position: fixed;
+  bottom: var(--space-2xl);
+  top: auto;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-navbar);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* Allow clicking through empty space */
+}
+
+.navContainer {
+  display: flex;
+  justify-content: center;
+  pointer-events: auto; /* Re-enable clicks for the tabs */
+}
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    bottom: var(--space-md);
+  }
+}

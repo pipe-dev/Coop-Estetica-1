@@ -1,0 +1,114 @@
+/* ── SectionTitle wrapper ── */
+.wrapper {
+  max-width: 720px;
+  margin-bottom: 3rem;
+}
+
+/* ── Alignment ── */
+.center {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.left {
+  text-align: left;
+}
+
+/* ── Subtitle ── */
+.subtitle {
+  display: inline-block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 1rem;
+}
+
+/* ── Decorative line ── */
+.line {
+  width: 50px;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-gold-light));
+  margin-bottom: 1.25rem;
+  border-radius: 2px;
+}
+
+.center .line {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Title ── */
+.title {
+  font-family: var(--font-heading);
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-black);
+  margin: 0 0 1rem;
+}
+
+/* ── Description ── */
+.description {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #666;
+  margin: 0;
+  max-width: 600px;
+}
+
+.center .description {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ── Light mode (for dark backgrounds) ── */
+.light .title {
+  color: var(--color-white);
+}
+
+.light .description {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.15rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
+
+  .wrapper {
+    margin-bottom: 2.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+  }
+
+  .description {
+    font-size: 0.88rem;
+  }
+
+  .line {
+    width: 36px;
+  }
+
+  .wrapper {
+    margin-bottom: 1.75rem;
+  }
+}

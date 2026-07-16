@@ -1,0 +1,210 @@
+/* ── Carousel container ── */
+.carousel {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* ── Decorative quote marks ── */
+.quoteOpen,
+.quoteClose {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--color-gold);
+  opacity: 0.3;
+  user-select: none;
+  pointer-events: none;
+}
+
+.quoteOpen {
+  text-align: left;
+  margin-bottom: -1.5rem;
+}
+
+.quoteClose {
+  text-align: right;
+  margin-top: -1.5rem;
+  transform: rotate(180deg);
+}
+
+/* ── Slide area ── */
+.slideArea {
+  position: relative;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.slide {
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* ── Stars ── */
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.15rem;
+}
+
+.starFilled {
+  color: var(--color-gold);
+}
+
+.starEmpty {
+  color: var(--color-silver-light);
+}
+
+/* ── Text ── */
+.text {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+  font-style: italic;
+  margin: 0 0 1.5rem;
+  quotes: none;
+}
+
+/* ── Author ── */
+.author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-gold-light);
+}
+
+.name {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-black);
+  margin: 0;
+}
+
+.role {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--color-silver);
+  margin: 0.15rem 0 0;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-silver-light);
+  background: transparent;
+  color: var(--color-gold);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.arrow:hover {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+/* ── Dots ── */
+.dots {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-silver-light);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.dotActive {
+  background: var(--color-gold);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .carousel {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .quoteOpen,
+  .quoteClose {
+    font-size: 3.5rem;
+  }
+
+  .slideArea {
+    min-height: 200px;
+  }
+
+  .text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quoteOpen,
+  .quoteClose {
+    font-size: 2.75rem;
+  }
+
+  .slideArea {
+    min-height: 180px;
+  }
+
+  .text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .stars {
+    font-size: 1rem;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .arrow {
+    width: 34px;
+    height: 34px;
+    font-size: 1.25rem;
+  }
+}

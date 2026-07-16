@@ -1,0 +1,187 @@
+.team { padding-top: var(--navbar-height); }
+
+.hero {
+  position: relative;
+  height: 45vh;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+  overflow: hidden;
+}
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.1) 0%, transparent 70%);
+}
+.heroContent { position: relative; text-align: center; z-index: 1; padding: 0 var(--container-padding); }
+.heroSub {
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-widest);
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  margin-bottom: var(--space-md);
+}
+.heroTitle {
+  font-family: var(--font-heading);
+  font-size: var(--fs-4xl);
+  color: var(--color-white);
+  margin-bottom: var(--space-md);
+}
+.accent {
+  background: var(--gradient-gold-horizontal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.heroDesc { font-size: var(--fs-md); color: var(--color-silver-light); }
+
+.teamSection { padding: var(--space-section) 0; background: var(--color-cream); }
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-xl);
+}
+
+.memberCard {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+.memberCard:hover { box-shadow: var(--shadow-gold); }
+
+.memberImageWrapper {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+}
+.memberImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+.memberCard:hover .memberImage { transform: scale(1.05); }
+.memberOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13,13,13,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+.memberCard:hover .memberOverlay { opacity: 1; }
+.viewMore {
+  color: var(--color-gold-light);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  border: 1px solid var(--color-gold);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-full);
+}
+
+.memberInfo { padding: var(--space-lg); text-align: center; }
+.memberName {
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+  margin-bottom: var(--space-xs);
+}
+.memberRole {
+  color: var(--color-gold-dark);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  margin-bottom: var(--space-xs);
+}
+.memberExp { font-size: var(--fs-xs); color: var(--color-gray-400); }
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal-backdrop);
+  padding: var(--space-xl);
+}
+.modal {
+  position: relative;
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  max-width: 650px;
+  width: 100%;
+  overflow: hidden;
+  z-index: var(--z-modal);
+}
+.modalClose {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  font-size: var(--fs-lg);
+  color: var(--color-gray-500);
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-cream);
+  transition: all var(--transition-fast);
+}
+.modalClose:hover { background: var(--color-gold); color: var(--color-white); }
+.modalContent {
+  display: flex;
+  gap: var(--space-xl);
+  padding: var(--space-2xl);
+}
+.modalImage {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.modalInfo { display: flex; flex-direction: column; gap: var(--space-sm); }
+.modalName {
+  font-family: var(--font-heading);
+  font-size: var(--fs-2xl);
+}
+.modalRole {
+  color: var(--color-gold-dark);
+  font-weight: var(--fw-medium);
+}
+.modalTags { display: flex; gap: var(--space-sm); flex-wrap: wrap; }
+.tag {
+  font-size: var(--fs-xs);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-cream);
+  border-radius: var(--radius-full);
+  color: var(--color-gray-600);
+}
+.modalBio {
+  font-size: var(--fs-sm);
+  color: var(--color-gray-500);
+  line-height: var(--lh-relaxed);
+  margin-top: var(--space-sm);
+}
+
+@media (max-width: 768px) {
+  .teamGrid { grid-template-columns: repeat(2, 1fr); }
+  .modalContent { flex-direction: column; align-items: center; text-align: center; }
+  .modalImage { width: 150px; height: 150px; }
+  .modalTags { justify-content: center; }
+  .heroTitle { font-size: var(--fs-2xl); }
+}
+@media (max-width: 480px) {
+  .teamGrid { grid-template-columns: 1fr; max-width: 360px; margin: 0 auto; }
+}

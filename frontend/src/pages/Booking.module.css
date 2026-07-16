@@ -1,0 +1,275 @@
+.booking { padding-top: var(--navbar-height); }
+
+.hero {
+  position: relative;
+  height: 35vh;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-black);
+}
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.1) 0%, transparent 70%);
+}
+.heroContent { position: relative; text-align: center; z-index: 1; }
+.heroTitle {
+  font-family: var(--font-heading);
+  font-size: var(--fs-4xl);
+  color: var(--color-white);
+}
+.accent {
+  background: var(--gradient-gold-horizontal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bookingSection { padding: var(--space-3xl) 0 var(--space-section); background: var(--color-cream); }
+
+/* Progress */
+.progress {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: var(--space-3xl);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.progressStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  position: relative;
+  flex: 1;
+}
+.progressCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-gray-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-gray-400);
+  background: var(--color-white);
+  position: relative;
+  z-index: 2;
+  transition: all var(--transition-base);
+}
+.progressActive .progressCircle {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+.progressDone .progressCircle {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: var(--color-white);
+}
+.progressLabel {
+  font-size: var(--fs-xs);
+  color: var(--color-gray-400);
+  text-align: center;
+  transition: color var(--transition-base);
+}
+.progressActive .progressLabel { color: var(--color-gold-dark); font-weight: var(--fw-medium); }
+.progressLine {
+  position: absolute;
+  top: 20px;
+  left: calc(50% + 24px);
+  right: calc(-50% + 24px);
+  height: 2px;
+  background: var(--color-gray-200);
+  z-index: 1;
+}
+.progressDone .progressLine { background: var(--color-gold); }
+
+/* Step Container */
+.stepContainer {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  min-height: 400px;
+}
+.stepTitle {
+  font-family: var(--font-heading);
+  font-size: var(--fs-2xl);
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+.subTitle {
+  font-family: var(--font-heading);
+  font-size: var(--fs-lg);
+  margin-bottom: var(--space-md);
+  margin-top: var(--space-xl);
+}
+.stepActions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-gray-100);
+}
+.disabled { opacity: 0.5; pointer-events: none; }
+
+/* Category Cards */
+.categoriesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+.categoryCard {
+  position: relative;
+  height: 140px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+}
+.categoryCard:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.categorySelected { border-color: var(--color-gold); box-shadow: var(--shadow-gold); }
+.categoryImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.categoryOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13,13,13,0.5);
+}
+.categoryName {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  color: var(--color-white);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-sm);
+  z-index: 1;
+}
+
+/* Service Options */
+.servicesList {
+  margin-top: var(--space-xl);
+}
+.serviceOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.serviceOption:hover { border-color: var(--color-gold-muted); }
+.serviceSelected { border-color: var(--color-gold); background: rgba(212,175,55,0.05); }
+.serviceOptName { font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.serviceOptDesc { font-size: var(--fs-xs); color: var(--color-gray-400); margin-top: 2px; }
+.serviceOptMeta { text-align: right; }
+.serviceOptMeta span { display: block; font-size: var(--fs-xs); color: var(--color-gray-400); }
+.serviceOptPrice { font-family: var(--font-heading); font-size: var(--fs-lg); color: var(--color-gold-dark); font-weight: var(--fw-bold); }
+
+/* Specialists */
+.specialistsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+.specialistCard {
+  text-align: center;
+  padding: var(--space-lg);
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.specialistCard:hover { border-color: var(--color-gold-muted); transform: translateY(-2px); }
+.specialistSelected { border-color: var(--color-gold); background: rgba(212,175,55,0.05); box-shadow: var(--shadow-gold); }
+.specialistImg { width: 80px; height: 80px; border-radius: var(--radius-full); object-fit: cover; margin: 0 auto var(--space-sm); }
+.specialistName { font-family: var(--font-heading); font-size: var(--fs-base); }
+.specialistRole { font-size: var(--fs-xs); color: var(--color-gold-dark); margin-top: 2px; }
+.specialistExp { font-size: var(--fs-xs); color: var(--color-gray-400); margin-top: 2px; }
+
+/* Date/Time */
+.dateTimeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+}
+.fieldLabel {
+  display: block;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  margin-bottom: var(--space-sm);
+  color: var(--color-gray-600);
+}
+.dateInput {
+  width: 100%;
+  padding: var(--space-md);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-base);
+  transition: border-color var(--transition-base);
+}
+.dateInput:focus { outline: none; border-color: var(--color-gold); }
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-sm);
+}
+.timeSlot {
+  padding: var(--space-sm);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+.timeSlot:hover { border-color: var(--color-gold); color: var(--color-gold-dark); }
+.timeSelected { background: var(--color-gold); border-color: var(--color-gold); color: var(--color-white); font-weight: var(--fw-semibold); }
+
+/* Summary */
+.summary {
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--color-cream);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+}
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--color-cream-dark);
+}
+.summaryLabel { font-size: var(--fs-sm); color: var(--color-gray-500); }
+.summaryValue { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.summaryTotal { border-bottom: none; padding-top: var(--space-md); margin-top: var(--space-sm); border-top: 2px solid var(--color-gold); }
+.summaryPrice { font-family: var(--font-heading); font-size: var(--fs-xl); color: var(--color-gold-dark); font-weight: var(--fw-bold); }
+
+@media (max-width: 768px) {
+  .categoriesGrid { grid-template-columns: repeat(2, 1fr); }
+  .specialistsGrid { grid-template-columns: repeat(2, 1fr); }
+  .dateTimeGrid { grid-template-columns: 1fr; }
+  .timeGrid { grid-template-columns: repeat(3, 1fr); }
+  .heroTitle { font-size: var(--fs-2xl); }
+  .progress { gap: 0; }
+  .progressLabel { font-size: 0.65rem; }
+}
+@media (max-width: 480px) {
+  .categoriesGrid { grid-template-columns: 1fr; }
+  .specialistsGrid { grid-template-columns: 1fr; }
+  .stepContainer { padding: var(--space-lg); }
+}

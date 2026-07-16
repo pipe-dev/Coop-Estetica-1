@@ -1,0 +1,70 @@
+.tabsContainer {
+  position: relative;
+  margin: 0 auto;
+  display: flex;
+  width: fit-content;
+  border-radius: 9999px;
+  padding: 4px;
+  list-style: none;
+  align-items: center;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-wide);
+  transition: color 0.25s ease;
+  border-radius: 9999px;
+  user-select: none;
+}
+
+@media (min-width: 768px) {
+  .tab {
+    padding: 12px 24px;
+    font-size: 0.9rem;
+  }
+}
+
+.tabContent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 10;
+}
+
+.tabText {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  background: var(--color-white); 
+}
+
+.hoverCursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08); /* Very subtle hover accent overlay */
+}
