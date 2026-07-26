@@ -1,0 +1,43 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05); /* fallback skeleton color */
+}
+
+.placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Massive blur for the tiny 20px image */
+  filter: blur(20px) saturate(1.5);
+  transform: scale(1.1); /* Prevent blur edges from bleeding into transparent bounds */
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+.placeholder.hidden {
+  opacity: 0;
+}
+
+.hdImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  /* Nice scale + fade in effect */
+  transform: scale(1.05);
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hdImage.loaded {
+  opacity: 1;
+  transform: scale(1);
+}

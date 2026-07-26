@@ -11,6 +11,12 @@
   pointer-events: none; /* Allow clicking through empty space */
 }
 
+.navGlass {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 9999px; /* Since it wraps SlideTabs */
+}
+
 .navContainer {
   display: flex;
   justify-content: center;

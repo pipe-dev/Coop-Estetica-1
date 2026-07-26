@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// Catheryne Ríos Estética – Catálogo de Servicios
+// Catheryne Ríos Estética – Catálogo de Servicios (COP - Pesos Colombianos)
 // ─────────────────────────────────────────────
 
 export const serviceCategories = [
@@ -17,7 +17,7 @@ export const serviceCategories = [
         description:
           'Limado, cutículas, hidratación y esmaltado tradicional para unas manos cuidadas y elegantes.',
         duration: '45 min',
-        price: 350,
+        price: 35000,
       },
       {
         id: 'manicura-gel',
@@ -25,7 +25,7 @@ export const serviceCategories = [
         description:
           'Aplicación de gel semipermanente con secado UV para un acabado brillante que dura hasta 3 semanas.',
         duration: '60 min',
-        price: 550,
+        price: 55000,
       },
       {
         id: 'unas-acrilicas',
@@ -33,7 +33,7 @@ export const serviceCategories = [
         description:
           'Extensión y esculpido de uñas acrílicas personalizadas con diseño a tu elección.',
         duration: '90 min',
-        price: 850,
+        price: 85000,
       },
       {
         id: 'nail-art',
@@ -41,7 +41,7 @@ export const serviceCategories = [
         description:
           'Diseños exclusivos con piedras, foil, degradados y técnicas de arte avanzado en uñas.',
         duration: '75 min',
-        price: 650,
+        price: 65000,
       },
       {
         id: 'tratamiento-fortalecedor',
@@ -49,7 +49,7 @@ export const serviceCategories = [
         description:
           'Tratamiento intensivo con queratina y vitaminas para reparar y fortalecer uñas débiles o quebradizas.',
         duration: '30 min',
-        price: 300,
+        price: 30000,
       },
     ],
   },
@@ -68,7 +68,7 @@ export const serviceCategories = [
         description:
           'Corte, limado, exfoliación, hidratación profunda y esmaltado para unos pies suaves y cuidados.',
         duration: '50 min',
-        price: 400,
+        price: 40000,
       },
       {
         id: 'pedicura-spa',
@@ -76,7 +76,7 @@ export const serviceCategories = [
         description:
           'Experiencia completa con baño aromático, mascarilla de parafina, masaje relajante y esmaltado.',
         duration: '75 min',
-        price: 650,
+        price: 65000,
       },
       {
         id: 'pedicura-gel',
@@ -84,7 +84,7 @@ export const serviceCategories = [
         description:
           'Pedicura completa con aplicación de esmaltado semipermanente de larga duración.',
         duration: '60 min',
-        price: 550,
+        price: 55000,
       },
       {
         id: 'tratamiento-callosidades',
@@ -92,7 +92,7 @@ export const serviceCategories = [
         description:
           'Eliminación profesional de callosidades y durezas con hidratación intensiva restauradora.',
         duration: '40 min',
-        price: 450,
+        price: 45000,
       },
     ],
   },
@@ -111,7 +111,7 @@ export const serviceCategories = [
         description:
           'Corte personalizado con lavado, acondicionamiento y peinado profesional adaptado a tu estilo.',
         duration: '60 min',
-        price: 500,
+        price: 50000,
       },
       {
         id: 'coloracion-completa',
@@ -119,7 +119,7 @@ export const serviceCategories = [
         description:
           'Tinte profesional de raíz a puntas con productos de alta gama que protegen la fibra capilar.',
         duration: '120 min',
-        price: 1200,
+        price: 120000,
       },
       {
         id: 'balayage-highlights',
@@ -127,7 +127,7 @@ export const serviceCategories = [
         description:
           'Técnica de iluminación a mano alzada para un efecto natural y dimensional de alto impacto.',
         duration: '150 min',
-        price: 1800,
+        price: 180000,
       },
       {
         id: 'tratamiento-keratina',
@@ -135,7 +135,7 @@ export const serviceCategories = [
         description:
           'Alisado y restauración profunda con keratina brasileña para un cabello liso, brillante y sin frizz.',
         duration: '120 min',
-        price: 2500,
+        price: 250000,
       },
       {
         id: 'hidratacion-profunda',
@@ -143,7 +143,7 @@ export const serviceCategories = [
         description:
           'Mascarilla nutritiva con aceites esenciales y vapor de ozono para revitalizar el cabello dañado.',
         duration: '45 min',
-        price: 600,
+        price: 60000,
       },
       {
         id: 'peinado-evento',
@@ -151,7 +151,7 @@ export const serviceCategories = [
         description:
           'Peinado elaborado para bodas, graduaciones y eventos especiales con fijación duradera.',
         duration: '90 min',
-        price: 900,
+        price: 90000,
       },
     ],
   },
@@ -170,7 +170,7 @@ export const serviceCategories = [
         description:
           'Extracción, exfoliación enzimática y mascarilla purificante para una piel limpia y renovada.',
         duration: '60 min',
-        price: 700,
+        price: 70000,
       },
       {
         id: 'facial-antiedad',
@@ -178,7 +178,7 @@ export const serviceCategories = [
         description:
           'Tratamiento con ácido hialurónico, colágeno y vitamina C para reducir líneas de expresión.',
         duration: '75 min',
-        price: 1200,
+        price: 120000,
       },
       {
         id: 'facial-hidratante',
@@ -186,7 +186,7 @@ export const serviceCategories = [
         description:
           'Hidratación intensiva con partículas de oro y sérum de rosa mosqueta para luminosidad extrema.',
         duration: '60 min',
-        price: 950,
+        price: 95000,
       },
       {
         id: 'microdermoabrasion',
@@ -194,7 +194,7 @@ export const serviceCategories = [
         description:
           'Renovación celular con cristales de diamante para mejorar textura, tono y reducir manchas.',
         duration: '45 min',
-        price: 800,
+        price: 80000,
       },
       {
         id: 'facial-peeling',
@@ -202,7 +202,7 @@ export const serviceCategories = [
         description:
           'Exfoliación química controlada con ácidos AHA/BHA para unificar el tono y estimular la regeneración.',
         duration: '40 min',
-        price: 900,
+        price: 90000,
       },
     ],
   },
@@ -221,7 +221,7 @@ export const serviceCategories = [
         description:
           'Look elegante y sofisticado perfecto para reuniones, cenas y compromisos sociales.',
         duration: '45 min',
-        price: 600,
+        price: 60000,
       },
       {
         id: 'maquillaje-novia',
@@ -229,7 +229,7 @@ export const serviceCategories = [
         description:
           'Maquillaje nupcial de larga duración con prueba previa incluida y productos de alta gama.',
         duration: '90 min',
-        price: 1500,
+        price: 150000,
       },
       {
         id: 'maquillaje-editorial',
@@ -237,7 +237,7 @@ export const serviceCategories = [
         description:
           'Look creativo y artístico para sesiones fotográficas, pasarelas y producciones editoriales.',
         duration: '75 min',
-        price: 1200,
+        price: 120000,
       },
       {
         id: 'maquillaje-express',
@@ -245,7 +245,7 @@ export const serviceCategories = [
         description:
           'Retoque rápido y profesional para verte radiante en cualquier momento del día.',
         duration: '25 min',
-        price: 350,
+        price: 35000,
       },
       {
         id: 'clase-automaquillaje',
@@ -253,7 +253,7 @@ export const serviceCategories = [
         description:
           'Sesión personalizada donde aprenderás técnicas profesionales adaptadas a tu tipo de rostro.',
         duration: '120 min',
-        price: 1000,
+        price: 100000,
       },
     ],
   },
@@ -272,7 +272,7 @@ export const serviceCategories = [
         description:
           'Masaje sueco con aceites esenciales de lavanda para liberar tensión y alcanzar la calma total.',
         duration: '60 min',
-        price: 800,
+        price: 80000,
       },
       {
         id: 'masaje-piedras-calientes',
@@ -280,7 +280,7 @@ export const serviceCategories = [
         description:
           'Terapia con piedras volcánicas que combina calor profundo y presión para aliviar contracturas.',
         duration: '75 min',
-        price: 1100,
+        price: 110000,
       },
       {
         id: 'exfoliacion-corporal',
@@ -288,7 +288,7 @@ export const serviceCategories = [
         description:
           'Scrub con sales minerales del Mar Muerto y aceites nutritivos para una piel sedosa y renovada.',
         duration: '45 min',
-        price: 650,
+        price: 65000,
       },
       {
         id: 'envoltura-chocolate',
@@ -296,7 +296,7 @@ export const serviceCategories = [
         description:
           'Envoltura corporal con cacao puro y manteca de karité que nutre, desintoxica y suaviza la piel.',
         duration: '60 min',
-        price: 900,
+        price: 90000,
       },
       {
         id: 'drenaje-linfatico',
@@ -304,7 +304,7 @@ export const serviceCategories = [
         description:
           'Masaje especializado de baja presión para estimular la circulación y reducir la retención de líquidos.',
         duration: '60 min',
-        price: 950,
+        price: 95000,
       },
       {
         id: 'ritual-aureo',
@@ -312,10 +312,8 @@ export const serviceCategories = [
         description:
           'Nuestra experiencia insignia: exfoliación con oro, envoltura nutritiva y masaje final con aromaterapia.',
         duration: '120 min',
-        price: 2800,
+        price: 280000,
       },
     ],
   },
 ];
-
-

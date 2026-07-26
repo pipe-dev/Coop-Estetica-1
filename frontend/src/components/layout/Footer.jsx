@@ -1,16 +1,30 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { FaInstagram, FaFacebookF, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
 import styles from './Footer.module.css';
 
 /**
  * Footer con 4 columnas: About, Links, Horario, Contacto.
- * <!-- Cambiar nombre "Catheryne Ríos Estética" cuando se defina -->
+ * Para la ruta /tienda muestra un diseño minimalista.
  */
 const Footer = () => {
+  const location = useLocation();
+  const isShop = location.pathname === '/tienda';
+  const isHome = location.pathname === '/';
+
+  if (isHome) {
+    return (
+      <footer className={styles.footer} style={{ paddingBottom: 0, minHeight: 0 }}>
+        {/* Línea decorativa dorada */}
+        <div className={styles.topLine} />
+      </footer>
+    );
+  }
+
   const quickLinks = [
     { to: '/', label: 'Inicio' },
+    { to: '/tienda', label: 'Tienda' },
     { to: '/servicios', label: 'Servicios' },
-    { to: '/equipo', label: 'Nuestro Equipo' },
-    { to: '/galeria', label: 'Galería' },
+    { to: '/nosotros', label: 'Nosotros' },
     { to: '/contacto', label: 'Contacto' },
     { to: '/reservar', label: 'Reservar Cita' },
   ];
@@ -20,6 +34,31 @@ const Footer = () => {
     { day: 'Sábados', hours: '10:00 – 18:00' },
     { day: 'Domingos', hours: '10:00 – 14:00' },
   ];
+
+  const isServices = location.pathname === '/servicios';
+  const isContact = location.pathname === '/contacto';
+  const isAbout = location.pathname === '/nosotros';
+
+  if (isShop || isServices || isContact || isAbout) {
+    const footerTitle = isShop
+      ? 'TIENDA'
+      : isServices
+      ? 'SERVICIOS'
+      : isContact
+      ? 'PATROCINADOR'
+      : 'NOSOTROS';
+    return (
+      <footer className={styles.shopFooter}>
+        {/* Línea decorativa dorada */}
+        <div className={styles.topLine} />
+        <div className={`${styles.shopFooterContainer} ${isContact ? styles.sponsorFooterContainer : ''}`}>
+          <h2 className={`${styles.shopFooterTitle} ${isContact ? styles.sponsorFooterTitle : ''}`}>
+            {footerTitle}
+          </h2>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className={styles.footer}>
@@ -45,7 +84,7 @@ const Footer = () => {
                 className={styles.socialLink}
                 aria-label="Instagram"
               >
-                📷
+                <FaInstagram size={18} />
               </a>
               <a
                 href="https://facebook.com"
@@ -54,7 +93,7 @@ const Footer = () => {
                 className={styles.socialLink}
                 aria-label="Facebook"
               >
-                👤
+                <FaFacebookF size={18} />
               </a>
               <a
                 href="https://tiktok.com"
@@ -63,7 +102,7 @@ const Footer = () => {
                 className={styles.socialLink}
                 aria-label="TikTok"
               >
-                🎵
+                <FaTiktok size={18} />
               </a>
               <a
                 href="https://wa.me/"
@@ -72,7 +111,7 @@ const Footer = () => {
                 className={styles.socialLink}
                 aria-label="WhatsApp"
               >
-                💬
+                <FaWhatsapp size={18} />
               </a>
             </div>
           </div>

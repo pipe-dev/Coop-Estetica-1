@@ -14,9 +14,9 @@ const fadeInUp = {
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
 const giftCards = [
-  { id: 1, name: 'Experiencia Dorada', value: 2500, color: '#D4AF37', description: 'Ideal para un tratamiento especial' },
-  { id: 2, name: 'Experiencia Platino', value: 5000, color: '#C0C0C0', description: 'Para un día completo de spa' },
-  { id: 3, name: 'Experiencia Suprema', value: 10000, color: '#B8860B', description: 'La experiencia definitiva de lujo' },
+  { id: 1, name: 'Experiencia Dorada', value: 150000, color: '#D4AF37', description: 'Ideal para un tratamiento especial' },
+  { id: 2, name: 'Experiencia Platino', value: 300000, color: '#C0C0C0', description: 'Para un día completo de spa' },
+  { id: 3, name: 'Experiencia Suprema', value: 600000, color: '#B8860B', description: 'La experiencia definitiva de lujo' },
 ]
 
 function GiftCards() {

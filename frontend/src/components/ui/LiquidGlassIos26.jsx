@@ -16,7 +16,9 @@ export const LiquidGlassIos26 = ({
   saturate = 200,          // Edge color saturation (%)
   brightness = 1.15,       // Edge brightness boost
   glassTintOpacity = 0.002, // Base color tint (white opacity)
-  glassBg = null           // Custom background (e.g. radial-gradient)
+  glassBg = null,          // Custom background (e.g. radial-gradient)
+  disableContentFilter = false, // Optimization for grids: disable text refraction
+  contentPadding = 6       // Padding inside the glass content layer
 }) => {
   const filterId = useId().replace(/:/g, "");
   
@@ -31,6 +33,8 @@ export const LiquidGlassIos26 = ({
         position: 'relative',
         borderRadius,
         overflow: 'visible',
+        transform: 'translateZ(0)', // Force GPU layering
+        willChange: 'transform',
       }}
     >
       {/* 
@@ -143,11 +147,13 @@ export const LiquidGlassIos26 = ({
           z-index: 10;
           width: 100%;
           height: 100%;
-          padding: 6px;
+          padding: ${contentPadding}px;
           
           /* SVG mirror distortion applied to text */
+          ${disableContentFilter ? '' : `
           filter: url(${filterUrl});
           -webkit-filter: url(${filterUrl});
+          `}
         }
       `}</style>
 

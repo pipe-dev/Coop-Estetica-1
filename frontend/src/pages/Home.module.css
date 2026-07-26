@@ -3,6 +3,10 @@
    ============================================ */
 
 /* ===== HERO ===== */
+.home {
+  background: var(--color-black);
+}
+
 .hero {
   position: relative;
   height: 450vh; /* creates the scroll distance for the video and storytelling panels */
@@ -130,7 +134,71 @@
   text-align: center !important;
 }
 
-/* Force outline text inside Ver Servicios to render white */
+/* ===== SQUARE GOLD BUTTONS (HERO) ===== */
+.heroSquareButton {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 150px !important;
+  height: 120px !important;
+  border-radius: 16px !important;
+  background: radial-gradient(circle at center, #d8b654 0%, #a6842c 70%, #7c6220 100%) !important;
+  box-shadow: 
+    0 10px 25px rgba(0,0,0,0.5), 
+    inset 0 2px 4px rgba(255,255,255,0.4),
+    inset 0 -3px 6px rgba(0,0,0,0.3) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.6) !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroSquareButton::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%);
+  pointer-events: none;
+}
+
+.heroSquareButton:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 
+    0 15px 35px rgba(0,0,0,0.6), 
+    inset 0 2px 4px rgba(255,255,255,0.5),
+    inset 0 -3px 6px rgba(0,0,0,0.3) !important;
+  background: radial-gradient(circle at center, #e6c567 0%, #b89539 70%, #8c7128 100%) !important;
+}
+
+.heroSquareButton:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 
+    0 5px 15px rgba(0,0,0,0.4), 
+    inset 0 3px 8px rgba(0,0,0,0.5) !important;
+}
+
+.heroSquareIcon {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  margin-bottom: 12px;
+  color: #ffffff !important;
+}
+
+.heroSquareText {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  color: #ffffff !important;
+}
+
 .storyOutlineButton span {
   color: var(--color-white) !important;
 }
@@ -303,59 +371,7 @@
   margin-top: var(--space-3xl);
 }
 
-/* ===== LUXURY BANNER ===== */
-.luxuryBanner {
-  position: relative;
-  padding: var(--space-5xl) 0;
-  overflow: hidden;
-}
 
-.luxuryBannerBg {
-  position: absolute;
-  inset: 0;
-}
-
-.luxuryBannerBg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.luxuryBannerOverlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(13, 13, 13, 0.8);
-}
-
-.luxuryBannerContent {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.luxuryBannerTitle {
-  font-family: var(--font-heading);
-  font-size: var(--fs-4xl);
-  color: var(--color-white);
-  margin-bottom: var(--space-lg);
-}
-
-.luxuryBannerTitle em {
-  font-style: italic;
-  background: var(--gradient-gold-horizontal);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.luxuryBannerText {
-  font-size: var(--fs-lg);
-  color: var(--color-silver-light);
-  line-height: var(--lh-relaxed);
-  margin-bottom: var(--space-2xl);
-}
 
 /* ===== TESTIMONIALS ===== */
 .testimonialsSection {
@@ -363,158 +379,14 @@
   background: var(--color-cream);
 }
 
-/* ===== MEMBERSHIPS ===== */
-.membershipsSection {
-  padding: var(--space-section) 0;
-  background: var(--color-black);
-}
 
-.membershipsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-xl);
-  margin-top: var(--space-3xl);
-}
 
-.membershipCard {
-  position: relative;
-  background: var(--color-black-soft);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-lg);
-  transition: border-color var(--transition-base);
-}
 
-.membershipCard:hover {
-  border-color: var(--color-gold-muted);
-}
-
-.membershipCardPopular {
-  border-color: var(--color-gold);
-  background: linear-gradient(180deg, rgba(212, 175, 55, 0.08) 0%, var(--color-black-soft) 40%);
-  box-shadow: var(--shadow-gold);
-}
-
-.popularBadge {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--gradient-gold);
-  color: var(--color-black);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-  letter-spacing: var(--ls-wide);
-  text-transform: uppercase;
-  padding: var(--space-xs) var(--space-lg);
-  border-radius: var(--radius-full);
-}
-
-.membershipName {
-  font-family: var(--font-heading);
-  font-size: var(--fs-xl);
-  color: var(--color-white);
-}
-
-.membershipPrice {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.membershipCurrency {
-  font-size: var(--fs-lg);
-  color: var(--color-gold);
-  font-weight: var(--fw-semibold);
-}
-
-.membershipAmount {
-  font-family: var(--font-heading);
-  font-size: var(--fs-4xl);
-  font-weight: var(--fw-bold);
-  color: var(--color-white);
-}
-
-.membershipPeriod {
-  font-size: var(--fs-sm);
-  color: var(--color-gray-400);
-}
-
-.membershipFeatures {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  width: 100%;
-  text-align: left;
-}
-
-.membershipFeature {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  font-size: var(--fs-sm);
-  color: var(--color-gray-300);
-  padding: var(--space-xs) 0;
-}
-
-.featureCheck {
-  color: var(--color-gold);
-  font-size: var(--fs-xs);
-  flex-shrink: 0;
-}
-
-/* ===== CTA FINAL ===== */
-.ctaSection {
-  padding: var(--space-section) 0;
-  background: var(--color-cream);
-}
-
-.ctaContent {
-  text-align: center;
-  max-width: 650px;
-  margin: 0 auto;
-}
-
-.ctaTitle {
-  font-family: var(--font-heading);
-  font-size: var(--fs-3xl);
-  margin-bottom: var(--space-md);
-}
-
-.ctaText {
-  font-size: var(--fs-md);
-  color: var(--color-gray-600);
-  line-height: var(--lh-relaxed);
-  margin-bottom: var(--space-2xl);
-}
-
-.ctaButtons {
-  display: flex;
-  gap: var(--space-md);
-  justify-content: center;
-  flex-wrap: wrap;
-}
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .servicesGrid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .membershipsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .membershipsGrid > *:last-child {
-    grid-column: 1 / -1;
-    max-width: 400px;
-    margin: 0 auto;
-    width: 100%;
   }
 }
 
@@ -596,18 +468,6 @@
     font-size: var(--fs-2xl);
   }
 
-  .membershipsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .membershipsGrid > *:last-child {
-    max-width: none;
-  }
-
-  .membershipCard {
-    padding: var(--space-xl);
-  }
-
   .ctaTitle {
     font-size: var(--fs-2xl);
   }
@@ -686,4 +546,33 @@
   background-color: #333333 !important;
   box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3) !important;
   transform: translateY(-2px);
+}
+
+/* ===== SIDE DOCK (RETURNING USER) ===== */
+.sideDockContainer {
+  position: absolute;
+  top: 140px;
+  left: 5%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 20;
+}
+
+@media (max-width: 768px) {
+  .sideDockContainer {
+    top: 110px;
+    bottom: auto;
+    left: 4%;
+    transform: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: auto;
+  }
+  
+  .sideDockContainer > * {
+    transform: scale(0.8);
+    transform-origin: left center;
+  }
 }

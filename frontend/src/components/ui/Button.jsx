@@ -10,6 +10,7 @@ const Button = ({
   children,
   variant = 'primary',
   size = 'md',
+  shape = 'pill',
   onClick,
   href,
   className = '',
@@ -27,6 +28,7 @@ const Button = ({
   const glassClasses = [
     styles.button,
     styles[size],
+    styles[shape],
   ]
     .filter(Boolean)
     .join(' ');
@@ -41,22 +43,31 @@ const Button = ({
   const isPrimary = variant === 'primary';
   const isOutline = variant === 'outline';
   
-  // Faint gold tint for primary, silver/transparent for others
-  const glassTintOpacity = isPrimary ? 0.08 : 0.002;
-  const glassBg = isPrimary 
-    ? 'radial-gradient(circle, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.02) 80%)'
-    : null;
+  // Smoky black glass removed. Square buttons now use transparent glass identical to the navbar.
+  const isSquare = shape === 'square';
+  const glassTintOpacity = isSquare ? 0.002 : (isPrimary ? 0.08 : 0.002);
+  const glassBg = isSquare
+    ? null
+    : (isPrimary ? 'radial-gradient(circle, rgba(212, 175, 55, 0.35) 0%, rgba(212, 175, 55, 0.02) 80%)' : null);
 
   // Text color override for visibility (Gold for primary/outline, Silver for secondary)
   const textColor = isPrimary || isOutline ? 'var(--color-gold)' : 'var(--color-silver-light)';
 
   const innerStyle = {
     color: textColor,
+    display: shape === 'square' ? 'flex' : 'block',
+    flexDirection: shape === 'square' ? 'column' : 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%'
   };
+
+  const currentBorderRadius = shape === 'square' ? 16 : 9999;
 
   const glassContent = (
     <LiquidGlassIos26 
-      borderRadius={9999}
+      borderRadius={currentBorderRadius}
       scale={0.05}
       baseFrequency={0.08}
       numOctaves={3}

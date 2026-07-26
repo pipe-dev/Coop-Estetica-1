@@ -2,10 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useTransform, useMotionValueEvent, AnimatePresence } from 'framer-motion'
 import gsap from 'gsap'
-import { ShoppingCart, Gift } from 'lucide-react'
+import { ShoppingCart, Gift, Calendar, ShoppingBag, Sparkles, Gem } from 'lucide-react'
 import SectionTitle from '../components/ui/SectionTitle'
 import Button from '../components/ui/Button'
-import { memberships } from '../data/memberships'
 import styles from './Home.module.css'
 
 /* ⚠️ NOTA: "Catheryne Ríos Estética" es placeholder. Cambiar por el nombre real del negocio. */
@@ -56,6 +55,16 @@ function Home() {
         ease: "power1.inOut"
       })
     }
+    
+    // Constant slow beat for the "Agendar Cita" button (Returning User Hero)
+    gsap.to('#beat-btn', {
+      scale: 1.15,
+      "--glass-bg-color": "rgba(255, 255, 255, 0.05)",
+      duration: 1.5,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    })
   }, [])
   
   const { scrollYProgress } = useScroll({
@@ -122,17 +131,25 @@ function Home() {
 
           {isReturningUser ? (
             <motion.div
-              className={styles.heroContentStory}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.2 }}
-              style={{ zIndex: 10, textAlign: 'center', width: '100%', left: 0, right: 0, margin: '0 auto', alignItems: 'center', transform: 'none' }}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className={styles.sideDockContainer}
             >
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Button variant="primary" size="lg" href="/reservar">Agendar Cita</Button>
-                <Button variant="outline" size="lg" href="/tienda">Ver Tienda</Button>
-                <Button variant="outline" size="lg" href="/servicios">Ver Servicios</Button>
+              <div id="beat-btn">
+                <Button variant="primary" shape="square" href="/reservar">
+                  <Calendar size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                  <span className={styles.heroSquareText}>Agendar Cita</span>
+                </Button>
               </div>
+              <Button variant="outline" shape="square" href="/tienda">
+                <ShoppingBag size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                <span className={styles.heroSquareText}>Ver Tienda</span>
+              </Button>
+              <Button variant="outline" shape="square" href="/servicios">
+                <Gem size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                <span className={styles.heroSquareText}>Ver Servicios</span>
+              </Button>
             </motion.div>
           ) : (
             <AnimatePresence mode="wait">
@@ -233,8 +250,9 @@ function Home() {
                           visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
                         }}
                       >
-                        <Button className={styles.storyCtaButton} variant="primary" size="lg" href="/reservar">
-                          Agendar Cita
+                        <Button variant="primary" shape="square" href="/reservar">
+                          <Calendar size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                          <span className={styles.heroSquareText}>Agendar Cita</span>
                         </Button>
                       </motion.div>
                       <motion.div
@@ -243,8 +261,9 @@ function Home() {
                           visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
                         }}
                       >
-                        <Button className={`${styles.storyCtaButton} ${styles.storyOutlineButton}`} variant="outline" size="lg" href="/tienda">
-                          Ver Tienda
+                        <Button variant="outline" shape="square" href="/tienda">
+                          <ShoppingBag size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                          <span className={styles.heroSquareText}>Ver Tienda</span>
                         </Button>
                       </motion.div>
                     </motion.div>
@@ -258,119 +277,7 @@ function Home() {
         </div>
       </section>
 
-      {/* ===== E-COMMERCE CTA BANNER ===== */}
-      <section className={styles.luxuryBanner}>
-        <div className={styles.luxuryBannerBg}>
-          <img src="/images/service_hair.png" alt="Productos de cuidado" />
-        </div>
-        <div className={styles.luxuryBannerOverlay} />
-        <div className="container">
-          <motion.div
-            className={styles.luxuryBannerContent}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={stagger}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            <motion.h2 className={styles.luxuryBannerTitle} variants={fadeInUp} style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-              Piel Preciosa con nuestros productos.
-            </motion.h2>
-            <motion.p className={styles.luxuryBannerText} variants={fadeInUp} style={{ maxWidth: '500px', fontSize: '1.2rem', marginBottom: '2rem' }}>
-              Compra hoy y transforma tu rutina de cuidado y belleza
-            </motion.p>
-            <motion.div variants={fadeInUp} style={{ padding: '10px' }}>
-              <div ref={ctaButtonRef} style={{ display: 'inline-block', borderRadius: 'var(--radius-full)' }}>
-                <Button variant="primary" size="lg" href="/tienda" style={{ fontSize: '1.2rem', padding: '1.2rem 3rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                  COMPRA AHORA
-                  <ShoppingCart size={22} style={{ marginLeft: '12px' }} />
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* ===== CTA FINAL ===== */}
-      <section className={styles.ctaSection}>
-        <div className="container">
-          <motion.div
-            className={styles.ctaContent}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-            variants={stagger}
-          >
-            <motion.h2 className={styles.ctaTitle} variants={fadeInUp}>
-              Nuestra agenda se llena rápido. Tu belleza no puede esperar.
-            </motion.h2>
-            <motion.p className={styles.ctaText} variants={fadeInUp}>
-              Asegura tu lugar esta semana antes de que nos quedemos sin disponibilidad. Toca aquí y reserva tu momento.
-            </motion.p>
-            <motion.div className={styles.ctaButtons} variants={fadeInUp}>
-              <Button variant="primary" size="lg" href="/reservar" className={styles.smokyButton}>
-                Reservar Ahora
-              </Button>
-              <Button variant="outline" size="lg" href="/gift-cards" className={styles.smokyButton}>
-                Regalar Experiencia
-                <Gift size={20} style={{ marginLeft: '10px' }} />
-              </Button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ===== MEMBERSHIPS ===== */}
-      <section className={styles.membershipsSection} id="memberships">
-        <div className="container">
-          <SectionTitle
-            subtitle="Membresías"
-            title="Planes exclusivos para clientas VIP"
-            description="Accede a beneficios únicos y precios preferenciales con nuestros planes de membresía"
-            light
-          />
-          <motion.div
-            className={styles.membershipsGrid}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-80px' }}
-            variants={stagger}
-          >
-            {memberships.map((plan, i) => (
-              <motion.div
-                key={plan.id}
-                className={`${styles.membershipCard} ${plan.popular ? styles.membershipCardPopular : ''}`}
-                variants={fadeInUp}
-                custom={i}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
-              >
-                {plan.popular && <div className={styles.popularBadge}>Más Popular</div>}
-                <h3 className={styles.membershipName}>{plan.name}</h3>
-                <div className={styles.membershipPrice}>
-                  <span className={styles.membershipCurrency}>$</span>
-                  <span className={styles.membershipAmount}>{plan.price.toLocaleString()}</span>
-                  <span className={styles.membershipPeriod}>/mes</span>
-                </div>
-                <ul className={styles.membershipFeatures}>
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className={styles.membershipFeature}>
-                      <span className={styles.featureCheck}>✦</span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  variant={plan.popular ? 'primary' : 'outline'}
-                  size="md"
-                  href="/contacto"
-                >
-                  Elegir Plan
-                </Button>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
     </main>
   )
 }

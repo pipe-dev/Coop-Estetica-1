@@ -9,10 +9,10 @@ import styles from './Navbar.module.css'
 
 const navLinks = [
   { name: 'Inicio', path: '/' },
+  { name: 'Tienda', path: '/tienda' },
   { name: 'Servicios', path: '/servicios' },
-  { name: 'Equipo', path: '/equipo' },
-  { name: 'Galería', path: '/galeria' },
-  { name: 'Contacto', path: '/contacto' },
+  { name: 'Nosotros', path: '/nosotros' },
+  { name: 'Patrocinador', path: '/patrocinador' },
 ]
 
 function Navbar() {
@@ -139,6 +139,7 @@ function Navbar() {
                 saturate={200}
                 brightness={1.15}
                 glassTintOpacity={0.002}
+                className={styles.navGlass}
               >
                 <SlideTabs tabs={navLinks} />
               </LiquidGlassIos26>

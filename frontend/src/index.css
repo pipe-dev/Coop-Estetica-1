@@ -120,7 +120,7 @@
   --z-base: 1;
   --z-dropdown: 10;
   --z-sticky: 50;
-  --z-navbar: 100;
+  --z-navbar: 500;
   --z-modal-backdrop: 200;
   --z-modal: 300;
   --z-toast: 400;
@@ -146,7 +146,14 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
 }
+
+/* ── Native App Look: Hide Scrollbar ── */
+::-webkit-scrollbar {
+  display: none;
+}
+
 
 body {
   font-family: var(--font-body);
@@ -156,6 +163,7 @@ body {
   color: var(--color-black);
   background-color: var(--color-cream);
   overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 img,

@@ -211,3 +211,41 @@
     font-size: 0.95rem;
   }
 }
+
+/* ── Minimalist Shop Footer ── */
+.shopFooter {
+  background-color: transparent; /* Assuming shop is already black */
+  display: flex;
+  flex-direction: column;
+}
+
+.shopFooterContainer {
+  padding: 8rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.sponsorFooterContainer {
+  background: linear-gradient(180deg, #070D1E 0%, #050814 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.shopFooterTitle {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 11vw, 10rem);
+  font-weight: 800; /* Bold/mucho peso */
+  color: var(--color-gold); /* Dorado */
+  margin: 0;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  opacity: 0.9;
+  text-align: center;
+  max-width: 100%;
+}
+
+.sponsorFooterTitle {
+  font-size: clamp(1.58rem, 6.9vw, 6.3rem);
+}

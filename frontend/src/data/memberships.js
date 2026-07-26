@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────
-// Catheryne Ríos Estética – Planes de Membresía
+// Catheryne Ríos Estética – Planes de Membresía (COP - Pesos Colombianos)
 // ─────────────────────────────────────────────
 
 export const memberships = [
   {
     id: 'plata',
     name: 'Plata',
-    price: 999,
+    price: 99900,
     popular: false,
     color: '#C0C0C0',
     features: [
@@ -20,7 +20,7 @@ export const memberships = [
   {
     id: 'oro',
     name: 'Oro',
-    price: 1999,
+    price: 199900,
     popular: true,
     color: '#D4AF37',
     features: [
@@ -36,7 +36,7 @@ export const memberships = [
   {
     id: 'platino',
     name: 'Platino',
-    price: 3499,
+    price: 349900,
     popular: false,
     color: '#E5E4E2',
     features: [
@@ -52,5 +52,3 @@ export const memberships = [
     ],
   },
 ];
-
-
