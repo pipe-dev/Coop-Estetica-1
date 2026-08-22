@@ -1,0 +1,182 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.fieldLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #CCCCCC;
+}
+
+.triggerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.triggerBtn:hover, .triggerActive {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.clockIcon {
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.timeText {
+  flex: 1;
+  text-align: left;
+  letter-spacing: 0.5px;
+}
+
+.chevronIcon {
+  color: #A3A3A3;
+  transition: transform 0.2s ease;
+}
+
+.chevronRotated {
+  transform: rotate(180deg);
+  color: var(--color-gold);
+}
+
+/* SLEEK ULTRA-COMPACT POPOVER */
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 10050;
+  width: 250px;
+  background: #121212;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.95), 0 0 20px rgba(212, 175, 55, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.selectorRow {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1fr;
+  gap: 8px;
+}
+
+.colGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.colHeader {
+  font-size: 0.68rem;
+  color: var(--color-gold);
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.hoursGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+}
+
+.minGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cellBtn {
+  padding: 5px 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #E5E5E5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+.cellBtn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+.cellActive {
+  background: var(--color-gold) !important;
+  color: #0E0E0E !important;
+  font-weight: 800 !important;
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 2px 6px rgba(212, 175, 55, 0.4);
+}
+
+.periodBox {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+}
+
+.periodPill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #A3A3A3;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.periodActive {
+  background: var(--color-gold) !important;
+  color: #0E0E0E !important;
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.doneBtn {
+  width: 100%;
+  padding: 7px;
+  background: rgba(212, 175, 55, 0.18);
+  border: 1px solid var(--color-gold);
+  border-radius: 8px;
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.doneBtn:hover {
+  background: var(--color-gold);
+  color: #0E0E0E;
+}

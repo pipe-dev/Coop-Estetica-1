@@ -70,10 +70,52 @@ function Navbar() {
     }
   }
 
+  const [isHiddenByModal, setIsHiddenByModal] = useState(false)
+  const [scrollHidden, setScrollHidden] = useState(false)
+
+  useEffect(() => {
+    const handleModalToggle = (e) => {
+      setIsHiddenByModal(!!e.detail?.hide)
+    }
+    window.addEventListener('toggleNavbarModal', handleModalToggle)
+    return () => window.removeEventListener('toggleNavbarModal', handleModalToggle)
+  }, [])
+
+  useEffect(() => {
+    let lastY = window.scrollY
+    const handleScroll = () => {
+      const currentY = window.scrollY
+      if (currentY > 100 && currentY > lastY + 5) {
+        setScrollHidden(true)
+      } else if (currentY < lastY - 5 || currentY <= 40) {
+        setScrollHidden(false)
+      }
+      lastY = currentY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const isCollapsed = isHero && !showFullNavInHero;
+  const isCatalogPage = location.pathname === '/tienda' || location.pathname === '/servicios' || location.pathname === '/reservar';
+  const shouldHideNav = isHiddenByModal || (isCatalogPage && scrollHidden && !isHovered);
+  
+  // Detect if navbar is floating over light/white background vs dark hero
+  const isLightBackground = !(location.pathname === '/' && isHero);
 
   return (
-    <header className={styles.navbar}>
+    <motion.header 
+      className={styles.navbar}
+      initial={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ 
+        opacity: shouldHideNav ? 0 : (isCatalogPage ? (isHovered ? 1 : 0.45) : 1), 
+        y: shouldHideNav ? 80 : 0,
+        scale: shouldHideNav ? 0.95 : (isCatalogPage ? (isHovered ? 1 : 0.96) : 1)
+      }}
+      transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ pointerEvents: shouldHideNav ? 'none' : 'auto' }}
+    >
       <div 
         className={styles.navContainer}
         onPointerEnter={() => {
@@ -137,17 +179,18 @@ function Navbar() {
                 bevelBlur={16}
                 bevelWidth={22}
                 saturate={200}
-                brightness={1.15}
-                glassTintOpacity={0.002}
-                className={styles.navGlass}
+                brightness={isLightBackground ? 1.2 : 1.15}
+                glassTintOpacity={isLightBackground ? 0.92 : 0.002}
+                glassBg={isLightBackground ? 'linear-gradient(135deg, rgba(13, 13, 13, 0.90) 0%, rgba(26, 26, 26, 0.95) 100%)' : null}
+                className={`${styles.navGlass} ${isLightBackground ? styles.navGlassDark : styles.navGlassLight}`}
               >
-                <SlideTabs tabs={navLinks} />
+                <SlideTabs tabs={navLinks} isLightBackground={isLightBackground} />
               </LiquidGlassIos26>
             </motion.div>
           </motion.div>
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }
 

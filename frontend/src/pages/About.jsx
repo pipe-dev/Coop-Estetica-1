@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Calendar, MapPin, Phone, Mail, Clock, ExternalLink, Copy, Check, Navigation } from 'lucide-react'
 import SectionTitle from '../components/ui/SectionTitle'
 import Button from '../components/ui/Button'
 import { CylinderCarousel } from '../components/ui/CylinderCarousel'
+import GiftCardCustomizer from '../components/ui/GiftCardCustomizer'
 import { team } from '../data/team'
 import { FaWhatsapp, FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa6'
 import styles from './About.module.css'
@@ -16,13 +19,22 @@ const fadeInUp = {
 }
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
+const getSpaStatus = () => {
+  const now = new Date()
+  const day = now.getDay()
+  const hour = now.getHours()
+  if (day === 0) return { isOpen: false, text: 'Cerrado los Domingos' }
+  if (hour >= 9 && hour < 19) return { isOpen: true, text: 'Abierto ahora (hasta 7:00 PM)' }
+  return { isOpen: false, text: 'Cerrado ahora (Abre 9:00 AM)' }
+}
+
 const baseImages = [
-  { id: 1, src: '/images/service_nails.png', category: 'unas', alt: 'Diseño de uñas premium' },
-  { id: 2, src: '/images/service_hair.png', category: 'cabello', alt: 'Estilismo capilar' },
-  { id: 3, src: '/images/service_facial.png', category: 'rostro', alt: 'Tratamiento facial' },
-  { id: 4, src: '/images/service_makeup.png', category: 'maquillaje', alt: 'Maquillaje profesional' },
-  { id: 5, src: '/images/service_body.png', category: 'cuerpo', alt: 'Tratamiento corporal' },
-  { id: 6, src: '/images/hero_spa_interior.png', category: 'spa', alt: 'Interior del spa' },
+  { id: 1, src: '/images/service_nails.png', category: 'unas', alt: 'Diseño de uñas premium', title: 'DISEÑO DE UÑAS', subtitle: 'Manicura & Pedicura de Lujo', cta: 'AGENDAR UÑAS' },
+  { id: 2, src: '/images/service_hair.png', category: 'cabello', alt: 'Estilismo capilar', title: 'ESTILISMO CAPILAR', subtitle: 'Cortes, Color & Tratamientos', cta: 'AGENDAR CABELLO' },
+  { id: 3, src: '/images/service_facial.png', category: 'rostro', alt: 'Tratamiento facial', title: 'TRATAMIENTOS FACIALES', subtitle: 'Rejuvenecimiento & Cuidado Facial', cta: 'AGENDAR FACIAL' },
+  { id: 4, src: '/images/service_makeup.png', category: 'maquillaje', alt: 'Maquillaje profesional', title: 'MAQUILLAJE PROFESIONAL', subtitle: 'Maquillaje Social & Eventos', cta: 'AGENDAR MAQUILLAJE' },
+  { id: 5, src: '/images/service_body.png', category: 'cuerpo', alt: 'Tratamiento corporal', title: 'TRATAMIENTOS CORPORALES', subtitle: 'Masajes & Terapias Corporales', cta: 'AGENDAR CORPORAL' },
+  { id: 6, src: '/images/hero_spa_interior.png', category: 'spa', alt: 'Interior del spa', title: 'EXPERIENCIA SPA', subtitle: 'Sanctuary & Relajación Total', cta: 'AGENDAR EXPERIENCIA' },
 ]
 
 // Duplicate images to create a fuller cylinder (12 images)
@@ -32,17 +44,7 @@ function About() {
   const [selectedMember, setSelectedMember] = useState(null)
   const [lightbox, setLightbox] = useState(null)
 
-  // Contact form state & handlers
-  const [form, setForm] = useState({ name: '', email: '', phone: '', service: '', message: '' })
-  const [sent, setSent] = useState(false)
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setSent(true)
-    setTimeout(() => setSent(false), 3000)
-  }
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+  const spaStatus = getSpaStatus()
 
   // Close lightbox on scroll
   useEffect(() => {
@@ -58,6 +60,19 @@ function About() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [lightbox]);
+
+  // Hide Navbar when lightbox or member modal is open
+  useEffect(() => {
+    if (lightbox || selectedMember) {
+      window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: true } }))
+    } else {
+      window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: false } }))
+    }
+
+    return () => {
+      window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: false } }))
+    }
+  }, [lightbox, selectedMember]);
 
   return (
     <main className={styles.about}>
@@ -121,121 +136,112 @@ function About() {
         </div>
       </section>
 
-      {/* CONTACT SECTION (Moved from Contact page) */}
+      {/* GIFT CARD CUSTOMIZER MODULE SECTION */}
+      <section className={styles.giftCardModuleSection}>
+        <div className="container">
+          <GiftCardCustomizer showTitle={true} />
+        </div>
+      </section>
+
+      {/* INTERACTIVE CONTACT SECTION */}
       <section className={styles.contactSection}>
         <div className="container">
-          <div className={styles.contactGrid}>
-            {/* Info */}
-            <motion.div
-              className={styles.infoCol}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
-            >
-              <motion.div variants={fadeInUp}>
-                <SectionTitle subtitle="Visítanos" title="Información de Contacto" align="left" />
-              </motion.div>
-
-              <motion.div className={styles.infoCards} variants={fadeInUp}>
-                <div className={styles.infoCard}>
-                  <span className={styles.infoIcon}>📍</span>
-                  <div>
-                    <h4>Ubicación</h4>
-                    <p>Av. Elegancia #1234, Col. Premium<br />Ciudad, CP 00000</p>
-                  </div>
-                </div>
-                <div className={styles.infoCard}>
-                  <span className={styles.infoIcon}>📞</span>
-                  <div>
-                    <h4>Teléfono</h4>
-                    <p>+52 (55) 1234-5678</p>
-                  </div>
-                </div>
-                <div className={styles.infoCard}>
-                  <span className={styles.infoIcon}><FaWhatsapp /></span>
-                  <div>
-                    <h4>WhatsApp</h4>
-                    <p>+52 (55) 1234-5678</p>
-                  </div>
-                </div>
-                <div className={styles.infoCard}>
-                  <span className={styles.infoIcon}>✉️</span>
-                  <div>
-                    <h4>Email</h4>
-                    <p>reservas@catheryneriosestetica.com</p>
-                  </div>
-                </div>
-                <div className={styles.infoCard}>
-                  <span className={styles.infoIcon}>🕐</span>
-                  <div>
-                    <h4>Horario</h4>
-                    <p>Lun - Sáb: 9:00 AM - 7:00 PM<br />Domingo: Cerrado</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div className={styles.socialLinks} variants={fadeInUp}>
-                <a href="#" className={styles.socialLink} aria-label="Instagram"><FaInstagram style={{marginRight: '6px'}} /> Instagram</a>
-                <a href="#" className={styles.socialLink} aria-label="Facebook"><FaFacebookF style={{marginRight: '6px'}} /> Facebook</a>
-                <a href="#" className={styles.socialLink} aria-label="TikTok"><FaTiktok style={{marginRight: '6px'}} /> TikTok</a>
-              </motion.div>
-            </motion.div>
-
-            {/* Form */}
-            <motion.div
-              className={styles.formCol}
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <div className={styles.formCard}>
-                <h3 className={styles.formTitle}>Envíanos un mensaje</h3>
-                {sent ? (
-                  <motion.div className={styles.successMsg} initial={{ scale: 0.8 }} animate={{ scale: 1 }}>
-                    <span className={styles.successIcon}>✨</span>
-                    <p>¡Mensaje enviado! Te contactaremos pronto.</p>
-                  </motion.div>
-                ) : (
-                  <form onSubmit={handleSubmit} className={styles.form}>
-                    <div className={styles.formRow}>
-                      <div className={styles.field}>
-                        <label>Nombre completo</label>
-                        <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="Tu nombre" />
-                      </div>
-                      <div className={styles.field}>
-                        <label>Teléfono</label>
-                        <input type="tel" name="phone" value={form.phone} onChange={handleChange} placeholder="Tu teléfono" />
-                      </div>
-                    </div>
-                    <div className={styles.field}>
-                      <label>Email</label>
-                      <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="tu@email.com" />
-                    </div>
-                    <div className={styles.field}>
-                      <label>Servicio de interés</label>
-                      <select name="service" value={form.service} onChange={handleChange}>
-                        <option value="">Seleccionar...</option>
-                        <option value="unas">Manos & Uñas</option>
-                        <option value="pies">Pies</option>
-                        <option value="cabello">Cabello</option>
-                        <option value="rostro">Rostro</option>
-                        <option value="maquillaje">Maquillaje</option>
-                        <option value="cuerpo">Cuerpo</option>
-                        <option value="otro">Otro</option>
-                      </select>
-                    </div>
-                    <div className={styles.field}>
-                      <label>Mensaje</label>
-                      <textarea name="message" value={form.message} onChange={handleChange} rows="4" placeholder="Cuéntanos cómo podemos ayudarte..." />
-                    </div>
-                    <Button variant="primary" size="lg">Enviar Mensaje</Button>
-                  </form>
-                )}
+          <motion.div
+            className={styles.infoColCentered}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+          >
+            <motion.div variants={fadeInUp} className={styles.contactHeader}>
+              <SectionTitle subtitle="Visítanos" title="Información de Contacto" align="center" />
+              
+              {/* Dynamic Status Pill */}
+              <div className={`${styles.statusBadge} ${spaStatus.isOpen ? styles.statusOpen : styles.statusClosed}`}>
+                <span className={styles.statusDot} />
+                <span>{spaStatus.text}</span>
               </div>
             </motion.div>
-          </div>
+
+            <motion.div className={styles.interactiveGrid} variants={fadeInUp}>
+              {/* 1. UBICACIÓN */}
+              <div className={styles.interactiveCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconCircle}><MapPin size={20} /></div>
+                  <span className={styles.cardBadge}>Nuestra Sede</span>
+                </div>
+                <h3 className={styles.cardTitle}>Ubicación</h3>
+                <p className={styles.cardDesc}>Av. Elegancia #1234, Col. Premium<br />Ciudad, CP 00000</p>
+                <a
+                  href="https://maps.google.com/?q=Av.+Elegancia+1234"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.actionBtnPrimary}
+                >
+                  <Navigation size={14} />
+                  <span>Cómo Llegar (Maps)</span>
+                </a>
+              </div>
+
+              {/* 2. TELÉFONO Y WHATSAPP */}
+              <div className={styles.interactiveCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconCircle}><Phone size={20} /></div>
+                  <span className={styles.cardBadge}>Atención Inmediata</span>
+                </div>
+                <h3 className={styles.cardTitle}>Teléfono & WhatsApp</h3>
+                <p className={styles.cardDesc}>+52 (55) 1234-5678</p>
+                <div className={styles.btnGroup}>
+                  <a href="tel:+525512345678" className={styles.actionBtnSecondary}>
+                    <Phone size={14} />
+                    <span>Llamar</span>
+                  </a>
+                  <a
+                    href="https://wa.me/525512345678?text=Hola!%20Me%20gustaría%20solicitar%20información%20o%20reservar%20una%20cita%20en%20Catheryne%20Ríos%20Estética."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.actionBtnGold}
+                  >
+                    <FaWhatsapp size={15} />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* 3. HORARIO Y AGENDAMIENTO */}
+              <div className={styles.interactiveCard}>
+                <div className={styles.cardHeader}>
+                  <div className={styles.iconCircle}><Clock size={20} /></div>
+                  <span className={styles.cardBadge}>Horarios</span>
+                </div>
+                <h3 className={styles.cardTitle}>Horario de Atención</h3>
+                <p className={styles.cardDesc}>Lun - Sáb: 9:00 AM - 7:00 PM<br />Domingos: Cerrado</p>
+                <Link to="/servicios" className={styles.actionBtnPrimary}>
+                  <Calendar size={14} />
+                  <span>Agendar solo con cita</span>
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* SOCIAL MEDIA HUB */}
+            <div className={styles.socialHub}>
+              <span className={styles.socialHubTitle}>Síguenos en Redes Sociales</span>
+              <div className={styles.socialButtonsGroup}>
+                <a href="#" className={`${styles.socialPill} ${styles.igPill}`} aria-label="Instagram">
+                  <FaInstagram size={16} />
+                  <span>Instagram</span>
+                </a>
+                <a href="#" className={`${styles.socialPill} ${styles.fbPill}`} aria-label="Facebook">
+                  <FaFacebookF size={15} />
+                  <span>Facebook</span>
+                </a>
+                <a href="#" className={`${styles.socialPill} ${styles.ttPill}`} aria-label="TikTok">
+                  <FaTiktok size={15} />
+                  <span>TikTok</span>
+                </a>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -305,6 +311,20 @@ function About() {
               >
                 ✕
               </button>
+
+              <div className={styles.lightboxOverlayContent} onClick={(e) => e.stopPropagation()}>
+                <h3 className={styles.lightboxTitle}>{lightbox.title || 'SERVICIO EXCLUSIVO'}</h3>
+                <p className={styles.lightboxSubtitle}>{lightbox.subtitle || lightbox.alt}</p>
+
+                <a 
+                  href="/reservar" 
+                  className={styles.lightboxCtaButton}
+                  onClick={() => setLightbox(null)}
+                >
+                  <Calendar size={18} />
+                  <span>{lightbox.cta || 'AGENDAR SERVICIO'}</span>
+                </a>
+              </div>
             </div>
           </motion.div>
         )}

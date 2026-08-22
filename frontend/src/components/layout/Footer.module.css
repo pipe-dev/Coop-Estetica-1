@@ -217,14 +217,18 @@
   background-color: transparent; /* Assuming shop is already black */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .shopFooterContainer {
-  padding: 8rem 0;
+  padding: 6rem 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .sponsorFooterContainer {
@@ -234,13 +238,13 @@
 
 .shopFooterTitle {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 11vw, 10rem);
+  font-size: clamp(2.2rem, 10vw, 9.5rem);
   font-weight: 800; /* Bold/mucho peso */
   color: var(--color-gold); /* Dorado */
   margin: 0;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: -2px;
+  letter-spacing: -1px;
   opacity: 0.9;
   text-align: center;
   max-width: 100%;
@@ -248,4 +252,9 @@
 
 .sponsorFooterTitle {
   font-size: clamp(1.58rem, 6.9vw, 6.3rem);
+}
+
+.aboutFooterTitle {
+  font-size: clamp(1.6rem, 8.2vw, 7.2rem);
+  letter-spacing: 0px;
 }

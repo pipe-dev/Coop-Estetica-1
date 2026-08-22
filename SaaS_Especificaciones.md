@@ -27,20 +27,49 @@ Este documento centraliza todas las funcionalidades, lógicas de negocio y decis
 - **Ficha Simple:** Seguimiento básico de clientes y sus citas. (No se incluirá historial médico avanzado o fotos de antes y después para mantener simplicidad y fluidez).
 - **Programa de Lealtad (Puntos):** Los clientes acumulan puntos que podrán ser redimidos después. La gestión y asignación de estos puntos la controla el administrador.
 
-## 4. Panel de Administración, Staff y Caja Central (POS)
-- **Gestión de Staff (Hasta 15 personas):** El sistema tendrá dos roles principales:
-  - *Admin:* Acceso total a finanzas, configuración, reportes y caja.
-  - *Colaboradora:* Interfaz limpia para ver sus citas asignadas y funciones limitadas.
-- **Login por Turnos:** Al ingresar, se selecciona qué integrante del staff está abriendo el turno para tomar responsabilidad operativa del día.
-- **Caja y Control Financiero Diario:**
-  - Registro de **Ingresos** (servicios prestados o productos vendidos).
-  - Botón para registrar **Egresos/Gastos** diarios (insumos, café, etc.).
-  - Fórmula de la Caja: `(Total Ingresos - Total Egresos = Efectivo Neto en Caja)`.
-- **Cálculo de Nómina:** El sistema no dividirá comisiones matemáticamente; en su lugar, entregará el "Total Generado" agrupado por colaboradora para que el administrador decida la distribución y pague por fuera del sistema.
-- **Reportes (Excel):** Exportación con un clic de gráficas de ingresos, citas y el servicio más vendido.
-- **Backups Manuales Inteligentes:** Al hacer clic en "Cerrar Caja" al final del día, el sistema forzará la descarga automática de la base de datos (formato `.sql` o `.csv`) al computador local, cumpliendo la regla de cero costos de nube.
+## 4. Panel de Administración, Roles & Seguridad Anti-Fraude (RBAC & PIN Maestro)
+- **Jerarquía de 3 Roles de Acceso (Validado 100% en Backend):**
+  1. 👑 **Rol Propietaria / Dueña (Catheryne):** 
+     - Acceso total sin restricciones a todos los módulos.
+     - Administración y cambio del **PIN Maestro de Propietaria**.
+     - Configuración y modificación de porcentajes de comisión de especialistas.
+     - Modificación de precios oficiales del catálogo de servicios y productos.
+     - Autorización y liquidación de pagos de nómina.
+     - Visualización del balance financiero neto acumulado y auditoría completa.
+  2. 🛡️ **Rol Administradora / Recepcionista Encargada:**
+     - Operación diaria del spa: apertura y cierre de turnos con **Arqueo Ciego**.
+     - Gestión de la agenda completa (crear, mover y cobrar citas con recibos WhatsApp).
+     - Cobro y registro de ingresos/egresos en caja.
+     - Directorio de clientas y venta directa de productos.
+     - *Bloqueos de Seguridad:* No puede cambiar comisiones, modificar precios oficiales, alterar inventarios manualmente, borrar clientas ni liquidar nóminas sin el **PIN Maestro de la Propietaria**.
+  3. 👥 **Rol Especialista / Colaboradora:**
+     - Interfaz simplificada y restringida.
+     - Visualización exclusiva de sus **propias citas asignadas**.
+     - Marcado de servicios como atendidos.
+     - Consulta de su acumulado de comisiones generadas.
+     - *Bloqueo Total:* Espacios financieros, caja general, directorio global de clientas y ajustes del sistema completamente inaccesibles.
+
+- **Mecanismo de Seguridad Anti-Fraude (Protegido en Backend - Anti-DevTools):**
+  - **Validación del Lado del Servidor:** Todas las rutas y mutaciones críticas (`PATCH /services/:id/price`, `PATCH /team/:id/commission`, `POST /payroll/liquidate`, `DELETE /clients/:id`) estarán protegidas por NestJS Guards (`@UseGuards(OwnerPinGuard)`).
+  - **PIN Maestro Hasheado:** El PIN se almacena con hash criptográfico (bcrypt/argon2) en PostgreSQL y se valida únicamente en el backend, imposibilitando que alguien con conocimientos básicos de DevTools o consola del navegador pueda evadir la seguridad.
+  - **Protección Anti-Fuerza Bruta:** Máximo 3 intentos fallidos de PIN consecutivos antes de un bloqueo temporal (15 minutos) con alerta de seguridad al email de la dueña.
+  - **Auditoría Inmutable (`SecurityAuditLog`):** Cada acción sensible o autorizada por PIN queda registrada en base de datos con: IP del cliente, timestamp, ID del usuario, acción ejecutada y valores anteriores vs. nuevos.
+
+- **Caja, Arqueo Ciego y Control Financiero:**
+  - **Apertura y Cierre por Turnos:** Responsable asignado al inicio del turno con base inicial.
+  - **Arqueo Ciego:** Al cerrar el turno, la colaboradora ingresa el efectivo contado sin ver el saldo esperado del sistema. Si hay descuadre (faltante/sobrante), el backend exige obligatoriamente justificación y método de resolución.
+  - **Comprobantes WhatsApp:** Envío de recibo digital oficial en un clic a la clienta para evitar sobreprecios o cobros no reportados.
+
+- **Cálculo de Nómina & Comisiones:**
+  - Cálculo automático basado estrictamente en **citas pagadas** multiplicadas por el % de comisión de cada especialista.
+  - Generación de desembolso a caja solo bajo autorización de la dueña.
+
+- **Reportes y Respaldos:**
+  - Exportación en un clic a Excel / CSV de caja, movimientos de auditoría y directorio de clientas.
+  - Descarga manual de base de datos (`.sql` / `.csv`) al cerrar la caja del día.
 
 ## 5. Arquitectura Técnica (Backend y DB)
-- **Frontend:** React + Vite, animaciones Framer Motion, diseño responsive, tipografía Syne.
-- **Backend:** Node.js (NestJS) estructurado bajo principios S.O.L.I.D.
-- **Base de Datos:** PostgreSQL (Relacional) para proteger la integridad de las citas y la caja financiera. Manejado a través de Prisma ORM.
+- **Frontend:** React + Vite, animaciones Framer Motion, diseño responsive luxury, tipografía Syne y HSL tailored design system.
+- **Backend:** Node.js con NestJS estructurado bajo arquitectura hexagonal y principios S.O.L.I.D.
+- **Seguridad Backend:** JWT con refresh tokens, RBAC Decorators, Argon2/Bcrypt para PINs y contraseñas, Throttler / Rate-limiting.
+- **Base de Datos:** PostgreSQL (Relacional) para garantizar integridad transaccional (ACID) en finanzas, citas e inventario. Manejado a través de Prisma ORM.

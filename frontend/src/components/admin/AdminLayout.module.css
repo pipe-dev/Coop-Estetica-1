@@ -1,0 +1,246 @@
+.adminWrapper {
+  min-height: 100vh;
+  background: #090909;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP HEADER */
+.topHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 64px;
+  background: rgba(14, 14, 14, 0.95);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 999px;
+  color: #CCCCCC;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.backBtn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--color-gold);
+}
+
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.adminShieldIcon {
+  color: var(--color-gold);
+}
+
+.routeTitle {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dateBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: rgba(212, 175, 55, 0.12);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.dateBadge svg {
+  color: var(--color-gold);
+}
+
+.cashBoxPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.greenDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10B981;
+}
+
+.closedCashPill {
+  color: #EF4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.redDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #EF4444;
+}
+
+/* BODY & SIDEBAR */
+.adminBody {
+  flex: 1;
+  display: flex;
+}
+
+.sidebar {
+  width: 240px;
+  background: #0E0E0E;
+  border-right: 1px solid rgba(212, 175, 55, 0.15);
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebarBrand {
+  display: flex;
+  flex-direction: column;
+}
+
+.brandSubtitle {
+  font-size: 0.62rem;
+  letter-spacing: 1.5px;
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.brandTitle {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  color: #FFFFFF;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebarLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #A3A3A3;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.sidebarLink:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.04);
+}
+.linkActive {
+  color: #000000 !important;
+  background: var(--color-gold) !important;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+/* MAIN CONTENT CONTAINER */
+.mainContent {
+  flex: 1;
+  padding: 28px;
+  overflow-y: auto;
+}
+
+/* MOBILE BOTTOM NAV */
+.mobileBottomNav {
+  display: none;
+}
+
+/* RESPONSIVE MEDIA QUERIES */
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+
+  .mainContent {
+    padding: 16px 16px 90px;
+  }
+
+  .mobileBottomNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(14, 14, 14, 0.95);
+    border-top: 1px solid rgba(212, 175, 55, 0.25);
+    backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 1000;
+    padding: 0 8px;
+  }
+
+  .mobileNavItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #8E8E93;
+    text-decoration: none;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 10px;
+    transition: color 0.2s ease;
+  }
+
+  .mobileActive {
+    color: var(--color-gold);
+  }
+
+  .backLabel {
+    display: none;
+  }
+}

@@ -57,16 +57,58 @@ function Home() {
     }
     
     // Constant slow beat for the "Agendar Cita" button (Returning User Hero)
-    gsap.to('#beat-btn', {
-      scale: 1.15,
-      "--glass-bg-color": "rgba(255, 255, 255, 0.05)",
-      duration: 1.5,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut"
-    })
+    const beatTarget = document.getElementById('beat-btn');
+    if (beatTarget) {
+      gsap.to(beatTarget, {
+        scale: 1.05,
+        duration: 1.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      })
+    }
   }, [])
+
+  // Throttled Ping-pong video reverse loop (forward -> backward -> forward...)
+  useEffect(() => {
+    if (!isReturningUser || !videoRef.current) return;
+
+    const video = videoRef.current;
+    let animId;
+    let playingForward = true;
+    let lastTime = 0;
+
+    const handleEnded = () => {
+      playingForward = false;
+    };
+
+    const reverseStep = (timestamp) => {
+      if (!playingForward && video) {
+        if (timestamp - lastTime >= 33) { // Throttled to 30fps for hardware decoding stability
+          lastTime = timestamp;
+          if (video.currentTime > 0.08) {
+            video.currentTime = Math.max(0, video.currentTime - 0.04);
+          } else {
+            video.currentTime = 0;
+            playingForward = true;
+            video.play().catch(() => {});
+          }
+        }
+      }
+      animId = requestAnimationFrame(reverseStep);
+    };
+
+    video.addEventListener('ended', handleEnded);
+    animId = requestAnimationFrame(reverseStep);
+
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isReturningUser]);
   
+
+
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end']
@@ -83,11 +125,15 @@ function Home() {
       videoRef.current.currentTime = latest * videoRef.current.duration;
     }
 
-    if (latest < 0.25) {
+    if (latest < 0.08) {
+      setActiveScene(-1) // Pitch black cover screen
+      setStoryWord("")
+      setShowCtas(false)
+    } else if (latest < 0.30) {
       setActiveScene(0)
       setStoryWord("")
       setShowCtas(false)
-    } else if (latest < 0.50) {
+    } else if (latest < 0.55) {
       setActiveScene(1)
       setStoryWord("")
       setShowCtas(false)
@@ -107,8 +153,10 @@ function Home() {
   })
 
   const heroOpacity = useTransform(scrollYProgress, [0.9, 1], [1, 0])
-  
-  const overlayOpacity = useTransform(scrollYProgress, [0.49, 0.50], [1, 0])
+
+  const introCoverY = useTransform(scrollYProgress, [0, 0.08], ['0%', '100%'])
+  const introCoverOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
+  const introTextScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.9])
 
   return (
     <main className={styles.home}>
@@ -124,10 +172,29 @@ function Home() {
               playsInline
               preload="auto"
               autoPlay={isReturningUser}
-              loop={isReturningUser}
+              loop={false}
             />
           </div>
-          <motion.div className={styles.heroOverlay} style={isReturningUser ? { opacity: 0.5 } : { opacity: overlayOpacity }} />
+
+          {!isReturningUser && (
+            <motion.div 
+              className={styles.introCoverScreen}
+              style={{ y: introCoverY, opacity: introCoverOpacity }}
+            >
+              <motion.div 
+                className={styles.introCoverContent}
+                style={{ scale: introTextScale }}
+              >
+                <h1 className={styles.introCoverTitle}>
+                  Desliza hacia abajo <br />
+                  <span className={styles.introCoverTitleAccent}>para comenzar</span>
+                </h1>
+                <div className={styles.scrollInstructionIcon}>
+                  <div className={styles.scrollInstructionDot} />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
 
           {isReturningUser ? (
             <motion.div
@@ -197,7 +264,7 @@ function Home() {
               </motion.div>
             )}
             {activeScene === 3 && (
-              <div className={styles.heroContentStory} style={{ top: '30%', transform: 'none' }}>
+              <div className={styles.heroEndContainer}>
                 {/* Single animating word */}
                 <AnimatePresence mode="wait">
                   {storyWord && (
@@ -222,48 +289,59 @@ function Home() {
                   )}
                 </AnimatePresence>
 
-                {/* Staggered vertical buttons (appears only after text disappears) */}
+                {/* Staggered horizontal 3 buttons */}
                 <AnimatePresence>
                   {showCtas && (
                     <motion.div
-                      key="hero-ctas-vertical"
-                      className={styles.heroCtasVertical}
+                      key="hero-ctas-horizontal"
+                      className={styles.heroEndCtas}
                       initial="hidden"
                       animate="visible"
                       exit="hidden"
                       variants={{
-                        hidden: { opacity: 0, y: 80 },
+                        hidden: { opacity: 0, y: 40 },
                         visible: {
                           opacity: 1,
                           y: 0,
                           transition: {
                             duration: 0.6,
                             ease: [0.25, 1, 0.5, 1],
-                            staggerChildren: 0.2
+                            staggerChildren: 0.15
                           }
                         }
                       }}
                     >
                       <motion.div
                         variants={{
-                          hidden: { opacity: 0, y: 30 },
-                          visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                          hidden: { opacity: 0, y: 25, scale: 0.9 },
+                          visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4 } }
                         }}
                       >
                         <Button variant="primary" shape="square" href="/reservar">
-                          <Calendar size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                          <Calendar size={36} strokeWidth={1.5} className={styles.heroSquareIcon} />
                           <span className={styles.heroSquareText}>Agendar Cita</span>
                         </Button>
                       </motion.div>
                       <motion.div
                         variants={{
-                          hidden: { opacity: 0, y: 30 },
-                          visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                          hidden: { opacity: 0, y: 25, scale: 0.9 },
+                          visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4 } }
                         }}
                       >
                         <Button variant="outline" shape="square" href="/tienda">
-                          <ShoppingBag size={40} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                          <ShoppingBag size={36} strokeWidth={1.5} className={styles.heroSquareIcon} />
                           <span className={styles.heroSquareText}>Ver Tienda</span>
+                        </Button>
+                      </motion.div>
+                      <motion.div
+                        variants={{
+                          hidden: { opacity: 0, y: 25, scale: 0.9 },
+                          visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.4 } }
+                        }}
+                      >
+                        <Button variant="outline" shape="square" href="/servicios">
+                          <Gem size={36} strokeWidth={1.5} className={styles.heroSquareIcon} />
+                          <span className={styles.heroSquareText}>Ver Servicios</span>
                         </Button>
                       </motion.div>
                     </motion.div>

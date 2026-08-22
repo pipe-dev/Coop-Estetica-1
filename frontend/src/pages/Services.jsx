@@ -6,6 +6,13 @@ import { memberships } from '../data/memberships'
 import styles from './Services.module.css'
 import LiquidGlassIos26 from '../components/ui/LiquidGlassIos26'
 import InteractiveBackground from '../components/ui/InteractiveBackground'
+import ProgressiveImage from '../components/ui/ProgressiveImage'
+import DetailModal from '../components/ui/DetailModal'
+
+const getPlaceholderUrl = (url) => {
+  if (!url || !url.includes('unsplash.com')) return url;
+  return url.replace('w=600', 'w=20').replace('q=80', 'q=10');
+}
 
 // Flatten all services into a single array with category info
 const allServices = serviceCategories.flatMap(cat =>
@@ -20,6 +27,8 @@ const filterCategories = serviceCategories.map(cat => ({
 
 function Services() {
   const [activeCategory, setActiveCategory] = useState('all')
+  const [hideUi, setHideUi] = useState(false)
+  const [selectedService, setSelectedService] = useState(null)
 
   // Make the entire browser body black for this page
   useEffect(() => {
@@ -27,6 +36,29 @@ function Services() {
     document.body.style.backgroundColor = '#000000'
     return () => {
       document.body.style.backgroundColor = originalBackground
+    }
+  }, [])
+
+  // Auto-hide Filter Bar & Navbar on scroll down, re-reveal on scroll up
+  useEffect(() => {
+    let lastScrollY = window.scrollY
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHideUi(true)
+        window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: true } }))
+      } else if (currentScrollY < lastScrollY || currentScrollY <= 100) {
+        setHideUi(false)
+        window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: false } }))
+      }
+      lastScrollY = currentScrollY
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.dispatchEvent(new CustomEvent('toggleNavbarModal', { detail: { hide: false } }))
     }
   }, [])
 
@@ -43,31 +75,23 @@ function Services() {
       transition={{ duration: 0.8 }}
     >
       <InteractiveBackground variant="blue" />
+      <div className={styles.servicesOverlay} />
       
-      {/* HORIZONTAL PILL FILTERS - GLASS DESIGN (identical to Shop) */}
-      <nav className={styles.filterContainer}>
-        <ul className={styles.filterList}>
-          <li onClick={() => setActiveCategory('all')}>
-            <LiquidGlassIos26 
-              scale={0.03}
-              baseFrequency={0.1}
-              numOctaves={3}
-              centerBlur={16}
-              bevelBlur={32}
-              bevelWidth={16}
-              saturate={150}
-              brightness={1.5}
-              glassTintOpacity={0.3}
-              tint="light"
-              borderRadius={9999}
-              disableContentFilter={true}
-              className={`${styles.filterPill} ${activeCategory === 'all' ? styles.active : ''}`}
-            >
-              Todos
-            </LiquidGlassIos26>
-          </li>
-          {filterCategories.map(cat => (
-            <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
+      {/* HORIZONTAL PILL FILTERS - SMART AUTO HIDE */}
+      <motion.nav 
+        className={styles.filterContainer}
+        initial={{ opacity: 1, y: 0 }}
+        animate={{ 
+          opacity: hideUi ? 0 : 1, 
+          y: hideUi ? -90 : 0 
+        }}
+        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{ pointerEvents: hideUi ? 'none' : 'auto' }}
+      >
+        <div className={styles.filterWrapper}>
+          {/* Top Row: 5 Filters */}
+          <ul className={styles.filterRow}>
+            <li onClick={() => setActiveCategory('all')}>
               <LiquidGlassIos26 
                 scale={0.03}
                 baseFrequency={0.1}
@@ -81,14 +105,63 @@ function Services() {
                 tint="light"
                 borderRadius={9999}
                 disableContentFilter={true}
-                className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
+                className={`${styles.filterPill} ${activeCategory === 'all' ? styles.active : ''}`}
               >
-                {cat.name}
+                {activeCategory === 'all' && <span className={styles.activeDot}>•</span>}
+                <span>Todos</span>
               </LiquidGlassIos26>
             </li>
-          ))}
-        </ul>
-      </nav>
+            {filterCategories.slice(0, 4).map(cat => (
+              <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
+                <LiquidGlassIos26 
+                  scale={0.03}
+                  baseFrequency={0.1}
+                  numOctaves={3}
+                  centerBlur={16}
+                  bevelBlur={32}
+                  bevelWidth={16}
+                  saturate={150}
+                  brightness={1.5}
+                  glassTintOpacity={0.3}
+                  tint="light"
+                  borderRadius={9999}
+                  disableContentFilter={true}
+                  className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
+                >
+                  {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
+                  <span>{cat.name}</span>
+                </LiquidGlassIos26>
+              </li>
+            ))}
+          </ul>
+
+          {/* Bottom Row: 2 Filters Centered */}
+          <ul className={styles.filterRow}>
+            {filterCategories.slice(4).map(cat => (
+              <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
+                <LiquidGlassIos26 
+                  scale={0.03}
+                  baseFrequency={0.1}
+                  numOctaves={3}
+                  centerBlur={16}
+                  bevelBlur={32}
+                  bevelWidth={16}
+                  saturate={150}
+                  brightness={1.5}
+                  glassTintOpacity={0.3}
+                  tint="light"
+                  borderRadius={9999}
+                  disableContentFilter={true}
+                  className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
+                >
+                  {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
+                  <span>{cat.name}</span>
+                </LiquidGlassIos26>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </motion.nav>
 
       {/* EDITORIAL SERVICE GRID (same structure as Shop product grid) */}
       <main className={styles.mainContent}>
@@ -108,6 +181,8 @@ function Services() {
                   ease: [0.25, 0.46, 0.45, 0.94] 
                 }}
                 className={styles.productCardWrapper}
+                onClick={() => setSelectedService(service)}
+                style={{ cursor: 'pointer' }}
               >
                 <LiquidGlassIos26 
                   className={styles.productCardGlass} 
@@ -121,22 +196,37 @@ function Services() {
                   brightness={0.8}
                   glassBg="rgba(0, 0, 0, 0.7)"
                 >
-                  <div className={styles.productCard}>
-                    {/* No image — info-only card for services */}
-                    <div className={styles.productInfo}>
-                      <span className={styles.productBrand}>{service.categoryName}</span>
-                      <h4 className={styles.productName}>{service.name}</h4>
-                      <p className={styles.serviceDescription}>{service.description}</p>
-                      <span className={styles.serviceDuration}>{service.duration}</span>
-                      <span className={styles.productPrice}>${service.price.toLocaleString()}</span>
-                      
-                      <a href="/reservar" className={styles.addToCartBtn} aria-label="Reservar servicio">
-                        <span className={styles.btnLabel}>Reservar</span>
-                        <div className={styles.btnIconWrapper}>
-                           <ArrowRight size={16} strokeWidth={1} />
-                        </div>
-                      </a>
+                  {service.image && (
+                    <div className={styles.imageContainer}>
+                      <ProgressiveImage 
+                        src={service.image}
+                        placeholderSrc={getPlaceholderUrl(service.image)}
+                        alt={service.name} 
+                        className={styles.productImage}
+                      />
                     </div>
+                  )}
+
+                  <div className={styles.productInfo}>
+                    <span className={styles.productBrand}>{service.categoryName}</span>
+                    <h4 className={styles.productName}>{service.name}</h4>
+                    <p className={styles.serviceDescription}>{service.description}</p>
+                    <span className={styles.serviceDuration}>{service.duration}</span>
+                    <span className={styles.productPrice}>{service.price.toLocaleString()}</span>
+                    
+                    <button 
+                      className={styles.addToCartBtn} 
+                      aria-label="Reservar servicio"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setSelectedService(service)
+                      }}
+                    >
+                      <span className={styles.btnLabel}>Reservar</span>
+                      <div className={styles.btnIconWrapper}>
+                         <ArrowRight size={16} strokeWidth={1} />
+                      </div>
+                    </button>
                   </div>
                 </LiquidGlassIos26>
               </motion.article>
@@ -144,6 +234,18 @@ function Services() {
           </AnimatePresence>
         </motion.div>
       </main>
+
+      {/* DETAILED QUICK VIEW MODAL */}
+      {selectedService && (
+        <DetailModal
+          item={selectedService}
+          type="service"
+          onClose={() => setSelectedService(null)}
+          onAction={(serv) => {
+            alert(`¡Reserva iniciada para ${serv.name}! Redirigiendo...`)
+          }}
+        />
+      )}
 
       {/* VIP MEMBERSHIPS SECTION */}
       <section className={styles.membershipsSection}>

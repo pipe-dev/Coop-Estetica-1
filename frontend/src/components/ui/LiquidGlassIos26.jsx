@@ -32,7 +32,7 @@ export const LiquidGlassIos26 = ({
       style={{ 
         position: 'relative',
         borderRadius,
-        overflow: 'visible',
+        overflow: 'hidden',
         transform: 'translateZ(0)', // Force GPU layering
         willChange: 'transform',
       }}
@@ -104,7 +104,7 @@ export const LiquidGlassIos26 = ({
         .glass-bevel-${filterId} {
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          z-index: 1;
+          z-index: 15;
           pointer-events: none;
           
           /* Two fading gradients composited to create a smooth transition from edge to center */
@@ -129,7 +129,7 @@ export const LiquidGlassIos26 = ({
         .glass-lighting-${filterId} {
           position: absolute;
           top: 0; left: 0; right: 0; bottom: 0;
-          z-index: 2;
+          z-index: 20;
           pointer-events: none;
           
           /* Softer 3D specularity borders */
@@ -144,7 +144,7 @@ export const LiquidGlassIos26 = ({
 
         .glass-content-${filterId} {
           position: relative;
-          z-index: 10;
+          z-index: 5;
           width: 100%;
           height: 100%;
           padding: ${contentPadding}px;

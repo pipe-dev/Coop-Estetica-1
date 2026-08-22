@@ -35,13 +35,8 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-}
-
-.heroOverlay {
-  position: absolute;
-  inset: 0;
-  background: var(--gradient-hero-overlay);
-  z-index: 1;
+  filter: brightness(1) contrast(1);
+  opacity: 1;
 }
 
 .heroContent {
@@ -56,9 +51,9 @@
   position: absolute;
   z-index: 2;
   text-align: left;
-  max-width: 650px;
+  max-width: 680px;
   width: 100%;
-  left: 10%;
+  left: 8%;
   padding: 0 var(--container-padding);
   display: flex;
   flex-direction: column;
@@ -102,9 +97,38 @@
   color: var(--color-white);
   text-transform: uppercase;
   letter-spacing: var(--ls-widest);
-  opacity: 0.65;
+  opacity: 1;
   font-weight: var(--fw-bold);
   line-height: 1.15;
+  text-shadow: 0 2px 5px #000000, 0 4px 16px #000000, 0 0 25px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 0, 0, 0.9);
+}
+
+.heroEndContainer {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 var(--container-padding);
+}
+
+.heroEndCtas {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-top: var(--space-2xl);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .heroEndCtas {
+    gap: var(--space-xs);
+  }
 }
 
 .heroCtasVertical {
@@ -113,7 +137,7 @@
   align-items: flex-start !important;
   gap: var(--space-md);
   width: 100%;
-  margin-top: 75px; /* Shunted down by one slot to align top button in blue slot and bottom in red slot */
+  margin-top: 75px;
 }
 
 /* Force both buttons to have identical, proportional horizontal widths */
@@ -206,27 +230,38 @@
 .heroSubtitle {
   font-family: var(--font-heading);
   font-size: var(--fs-md);
-  font-weight: var(--fw-light);
+  font-weight: 600;
   letter-spacing: var(--ls-widest);
   text-transform: uppercase;
-  color: var(--color-gold-light);
+  color: #FFF0B8;
   margin-bottom: var(--space-md);
+  text-shadow: 
+    0 2px 4px #000000,
+    0 -1px 2px #000000,
+    1px 0 2px #000000,
+    -1px 0 2px #000000,
+    0 4px 12px #000000,
+    0 0 24px #000000;
 }
 
 .heroTitle {
   font-family: var(--font-heading);
   font-size: var(--fs-hero);
   font-weight: var(--fw-bold);
-  color: var(--color-white);
+  color: #FFFFFF;
   line-height: var(--lh-tight);
   margin-bottom: var(--space-lg);
+  text-shadow: 0 2px 5px #000000, 0 4px 16px #000000, 0 0 25px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 0, 0, 0.9);
 }
 
 .heroTitleAccent {
-  background: var(--gradient-gold-horizontal);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #F5D061;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #F5D061;
+  background-clip: unset;
+  text-shadow: 0 2px 5px #000000, 0 4px 16px #000000, 0 0 25px rgba(0, 0, 0, 0.95), 0 0 45px rgba(0, 0, 0, 0.9);
+  filter: none;
 }
 
 .heroDescription {
@@ -557,6 +592,8 @@
   flex-direction: column;
   gap: 1.5rem;
   z-index: 20;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 @media (max-width: 768px) {
@@ -570,9 +607,108 @@
     gap: 1rem;
     width: auto;
   }
-  
-  .sideDockContainer > * {
-    transform: scale(0.8);
-    transform-origin: left center;
+}
+
+/* ===== SCROLL INSTRUCTION ===== */
+.scrollInstruction {
+  position: absolute;
+  bottom: var(--space-2xl);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  pointer-events: none;
+}
+
+.scrollInstructionText {
+  font-family: var(--font-heading);
+  font-size: var(--fs-xs);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.scrollInstructionIcon {
+  width: 20px;
+  height: 32px;
+  border: 2px solid rgba(212, 175, 55, 0.7);
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.scrollInstructionDot {
+  width: 4px;
+  height: 8px;
+  background: var(--color-gold-light);
+  border-radius: 2px;
+  animation: scrollDotPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes scrollDotPulse {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
   }
+  70% {
+    transform: translateY(10px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===== INTRO COVER SCREEN (SCROLLTRIGGER) ===== */
+.introCoverScreen {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--container-padding);
+}
+
+.introCoverContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  max-width: 750px;
+}
+
+.introCoverTag {
+  font-family: var(--font-heading);
+  font-size: var(--fs-xs);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+}
+
+.introCoverTitle {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.introCoverTitleAccent {
+  color: var(--color-gold-light);
+  font-style: italic;
 }

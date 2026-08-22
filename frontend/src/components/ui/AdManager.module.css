@@ -77,23 +77,25 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: var(--color-white);
+  background: #e5484d;
+  border: none;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
 }
 
 .closeBtn:hover {
-  background: rgba(255,255,255,0.2);
-  transform: scale(1.1);
+  background: #e5484d;
+  color: #ffffff;
+  transform: scale(1.06);
 }
 
 .floatingGiftBtn {

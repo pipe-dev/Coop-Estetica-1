@@ -1,13 +1,14 @@
-.booking { padding-top: var(--navbar-height); }
+.booking { padding-top: 0; }
 
 .hero {
   position: relative;
-  height: 35vh;
-  min-height: 280px;
+  height: auto;
+  min-height: 110px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--color-black);
+  padding: 24px 16px 20px;
 }
 .heroOverlay {
   position: absolute;
@@ -17,8 +18,9 @@
 .heroContent { position: relative; text-align: center; z-index: 1; }
 .heroTitle {
   font-family: var(--font-heading);
-  font-size: var(--fs-4xl);
+  font-size: clamp(1.35rem, 3.5vw, 2.1rem);
   color: var(--color-white);
+  margin: 0;
 }
 .accent {
   background: var(--gradient-gold-horizontal);
@@ -27,7 +29,7 @@
   background-clip: text;
 }
 
-.bookingSection { padding: var(--space-3xl) 0 var(--space-section); background: var(--color-cream); }
+.bookingSection { padding: var(--space-xl) 0 var(--space-section); background: var(--color-cream); }
 
 /* Progress */
 .progress {
@@ -119,7 +121,10 @@
   padding-top: var(--space-xl);
   border-top: 1px solid var(--color-gray-100);
 }
-.disabled { opacity: 0.5; pointer-events: none; }
+.disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+}
 
 /* Category Cards */
 .categoriesGrid {
@@ -202,43 +207,305 @@
 .specialistRole { font-size: var(--fs-xs); color: var(--color-gold-dark); margin-top: 2px; }
 .specialistExp { font-size: var(--fs-xs); color: var(--color-gray-400); margin-top: 2px; }
 
-/* Date/Time */
+/* ==========================================================================
+   DATE & TIME STEP (Full-Sized Luxury Calendar + Time Slots)
+   ========================================================================== */
 .dateTimeGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.2fr 1fr;
   gap: var(--space-2xl);
+  align-items: flex-start;
 }
-.fieldLabel {
-  display: block;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  margin-bottom: var(--space-sm);
-  color: var(--color-gray-600);
-}
-.dateInput {
-  width: 100%;
-  padding: var(--space-md);
+
+/* Calendar Container */
+.calendarContainer {
+  background: var(--color-white);
   border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-md);
-  font-size: var(--fs-base);
-  transition: border-color var(--transition-base);
+  border-radius: var(--radius-xl);
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
-.dateInput:focus { outline: none; border-color: var(--color-gold); }
+
+.calHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.calMonthYearGroup {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.calMonthName {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+.calYearName {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--color-gold-dark);
+}
+
+.calNavControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calTodayBtn {
+  padding: 5px 12px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 4px;
+}
+.calTodayBtn:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold-dark);
+  background: var(--color-white);
+}
+
+.calNavBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.calNavBtn:hover {
+  background: var(--color-white);
+  border-color: var(--color-gold);
+  color: var(--color-gold-dark);
+  transform: scale(1.06);
+}
+
+/* Weekday Row */
+.calWeekdaysRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.calWeekdayCell {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-gray-400);
+  padding: 4px 0;
+}
+
+/* Days Grid */
+.calDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.calDayEmpty {
+  height: 44px;
+}
+
+.calDayBtn {
+  position: relative;
+  height: 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cream);
+  border: 1.5px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--color-black);
+}
+
+.calDayNum {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.calTodayDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  margin-top: 3px;
+}
+
+/* Hover Available */
+.calDayBtn:hover:not(:disabled) {
+  border-color: var(--color-gold);
+  background: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+}
+
+/* Selected Day */
+.calDaySelected {
+  background: var(--color-black) !important;
+  color: var(--color-white) !important;
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 10px rgba(212, 175, 55, 0.3) !important;
+  transform: translateY(-2px) !important;
+}
+.calDaySelected .calDayNum {
+  font-weight: 800;
+}
+.calDaySelected .calTodayDot {
+  background: var(--color-gold-light);
+}
+
+/* Past / Disabled Day */
+.calDayPast {
+  opacity: 0.25;
+  background: transparent;
+  border-color: transparent;
+  cursor: not-allowed;
+  color: var(--color-gray-400);
+}
+
+/* Time Section Container */
+.timeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  padding: 22px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  min-height: 380px;
+}
+
+.timeSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.fieldLabel {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin: 0;
+}
+
+.selectedDateBadge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.5px;
+}
+
+.selectDatePrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-gray-500);
+  gap: 12px;
+  margin: auto 0;
+}
+.promptIcon {
+  color: var(--color-gold);
+  opacity: 0.8;
+}
+.selectDatePrompt p {
+  font-size: 0.9rem;
+  max-width: 260px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .timeGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-sm);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 4px;
 }
+
 .timeSlot {
-  padding: var(--space-sm);
+  padding: 12px 8px;
+  background: var(--color-cream);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--radius-md);
-  font-size: var(--fs-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-gray-800);
   text-align: center;
-  transition: all var(--transition-fast);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.timeSlot:hover { border-color: var(--color-gold); color: var(--color-gold-dark); }
-.timeSelected { background: var(--color-gold); border-color: var(--color-gold); color: var(--color-white); font-weight: var(--fw-semibold); }
+.timeSlot:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold-dark);
+  background: var(--color-white);
+  transform: translateY(-1px);
+}
+.timeSelected {
+  background: var(--color-black) !important;
+  border-color: var(--color-gold) !important;
+  color: var(--color-white) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 8px rgba(212, 175, 55, 0.25) !important;
+}
+
+@media (max-width: 860px) {
+  .dateTimeGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  .timeSection {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendarContainer {
+    padding: 16px 14px;
+  }
+  .calDayBtn {
+    height: 40px;
+  }
+  .calDayNum {
+    font-size: 0.85rem;
+  }
+  .timeGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 
 /* Summary */
 .summary {
@@ -259,6 +526,61 @@
 .summaryTotal { border-bottom: none; padding-top: var(--space-md); margin-top: var(--space-sm); border-top: 2px solid var(--color-gold); }
 .summaryPrice { font-family: var(--font-heading); font-size: var(--fs-xl); color: var(--color-gold-dark); font-weight: var(--fw-bold); }
 
+/* CALENDAR INTEGRATION STYLES */
+.calendarButtonsBox {
+  margin-top: var(--space-xl);
+  padding: var(--space-md);
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.calendarBoxTitle {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  color: var(--color-gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+.calendarBtnGroup {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.googleCalBtn, .iCalBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.googleCalBtn {
+  background: #4285F4;
+  color: #FFFFFF;
+  border: none;
+}
+.googleCalBtn:hover {
+  background: #3367D6;
+  color: #FFFFFF;
+}
+.iCalBtn {
+  background: var(--color-white);
+  color: var(--color-black);
+  border: 1px solid var(--color-gray-300);
+}
+.iCalBtn:hover {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-400);
+}
+
 @media (max-width: 768px) {
   .categoriesGrid { grid-template-columns: repeat(2, 1fr); }
   .specialistsGrid { grid-template-columns: repeat(2, 1fr); }
@@ -272,4 +594,6 @@
   .categoriesGrid { grid-template-columns: 1fr; }
   .specialistsGrid { grid-template-columns: 1fr; }
   .stepContainer { padding: var(--space-lg); }
+  .calendarBtnGroup { flex-direction: column; }
+  .googleCalBtn, .iCalBtn { width: 100%; box-sizing: border-box; }
 }

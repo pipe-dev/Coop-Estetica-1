@@ -525,7 +525,7 @@
 /* ===== 4. FOOTER & CONTACT BAR ===== */
 .footerSection {
   background: #050814;
-  padding: var(--space-3xl) 0 var(--space-4xl);
+  padding: var(--space-3xl) 0 200px;
   border-top: 1px solid rgba(212, 175, 55, 0.2);
   text-align: center;
 }
@@ -537,7 +537,18 @@
   color: #FFFFFF;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin-bottom: var(--space-2xl);
+  margin: 0 auto var(--space-2xl);
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  box-sizing: border-box;
+}
+
+.titlePhrase {
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .goldText {
@@ -651,21 +662,24 @@
   position: absolute;
   top: var(--space-xl);
   right: var(--space-xl);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  color: #FFFFFF;
+  background: #e5484d;
+  border: none;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
 }
+
 .modalCloseBtn:hover {
-  background: #D4AF37;
-  color: #070C1E;
+  background: #e5484d;
+  color: #ffffff;
+  transform: scale(1.06);
 }
 
 .modalHeader {
@@ -787,8 +801,13 @@
   font-size: var(--fs-sm);
 }
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
+/* ===== RESPONSIVE BREAKPOINTS (Mobile-First approach) ===== */
+
+/* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
+  .heroSection {
+    padding: var(--space-2xl) var(--space-lg) var(--space-3xl);
+  }
   .heroGrid {
     grid-template-columns: 1fr;
     gap: var(--space-2xl);
@@ -799,43 +818,208 @@
   .curvedGoldDivider {
     display: none;
   }
+  .imageContainer {
+    max-width: 100%;
+  }
+  .buildingImage {
+    height: 380px;
+  }
   .servicesGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
   .pillarsGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
   }
 }
 
+/* Mobile Devices (<= 768px) */
 @media (max-width: 768px) {
-  .familyCard {
-    width: 85%;
-    height: 200px;
-    bottom: -15px;
-    right: -10px;
+  .introOverlay {
+    padding: 1rem;
   }
+  .introLogoFrame {
+    width: 240px;
+    height: 240px;
+    margin-bottom: 1rem;
+  }
+  .introTitle {
+    font-size: 1.8rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .introSubtitle {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+  }
+
+  .heroSection {
+    padding: 2.2rem 1rem 2.8rem;
+  }
+  .logoWrapper {
+    gap: 12px;
+  }
+  .sunLogo {
+    width: 85px;
+    height: 85px;
+  }
+  .grupoText {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+  }
+  .solDelRioLogo {
+    font-size: 1.7rem;
+  }
+  .taglineBar {
+    font-size: 0.52rem;
+    letter-spacing: 1.2px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .mainTitle {
+    font-size: clamp(1.75rem, 6.5vw, 2.6rem);
+  }
+  .scriptAccent {
+    font-size: clamp(2.2rem, 8vw, 3.4rem);
+    margin-top: -6px;
+  }
+  .heroDescription {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+  .heroCtaRow {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .primaryCtaBtn,
+  .whatsappCtaBtn {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 20px;
+    font-size: 0.82rem;
+    box-sizing: border-box;
+  }
+
   .buildingImage {
-    height: 360px;
+    height: 260px;
+    border-radius: 20px;
   }
-  .formRow {
-    grid-template-columns: 1fr;
+
+  .servicesSection {
+    padding: 2.5rem 0.5rem;
+  }
+  .sectionPill {
+    padding: 6px 20px;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+  }
+  .goldBoxContainer {
+    padding: 2.2rem 1.2rem 1.5rem;
+    border-radius: 20px;
+  }
+  .serviceCard {
+    padding: 18px 14px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pillarsSection {
+    padding: 1.5rem 0.5rem 3rem;
+  }
+  .goldBoxContainerSlim {
+    padding: 1.5rem 1rem;
+    border-radius: 20px;
+  }
+
+  .footerSection {
+    padding: 3rem 1rem 9rem;
+  }
+  .footerCallout {
+    font-size: clamp(1.15rem, 4.8vw, 1.8rem);
+    line-height: 1.45;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.5rem;
   }
   .contactInfoBar {
     flex-direction: column;
-    gap: var(--space-sm);
+    align-items: stretch;
+    gap: 10px;
+    padding: 16px 14px;
     border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+  }
+  .contactItem {
+    justify-content: center;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 9999px;
+    background: rgba(7, 12, 30, 0.6);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    box-sizing: border-box;
   }
   .divider {
     display: none;
   }
+
+  .floatingWhatsapp {
+    bottom: 110px;
+    right: 16px;
+    width: 48px;
+    height: 48px;
+  }
+  .whatsappTooltip {
+    display: none;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .modalCard {
+    width: 92%;
+    max-width: 440px;
+    padding: 22px 16px;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 24px;
+  }
 }
 
+/* Small Mobile Screens (<= 480px) */
 @media (max-width: 480px) {
   .servicesGrid,
   .pillarsGrid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  .modalCard {
-    padding: var(--space-xl);
+  .pillarCard {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+  .pillarIconWrapper {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .pillarTitle {
+    font-size: 0.95rem;
+  }
+  .pillarText {
+    font-size: 0.8rem;
+  }
+  .modalHeader {
+    margin-bottom: 1rem;
+  }
+  .modalTitle {
+    font-size: 1.5rem;
   }
 }

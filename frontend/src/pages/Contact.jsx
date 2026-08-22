@@ -33,6 +33,113 @@ const stagger = {
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 }
 
+const TypewriterTitle = () => {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  const textSegments = [
+    { text: "HAZ REALIDAD", isGold: false },
+    { text: "TU PROYECTO", isGold: true },
+    { text: "CON NOSOTROS", isGold: false }
+  ];
+
+  const totalChars = textSegments.reduce((acc, seg, idx) => {
+    return acc + seg.text.length + (idx < textSegments.length - 1 ? 1 : 0);
+  }, 0);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    if (visibleCount < totalChars) {
+      const timer = setTimeout(() => {
+        setVisibleCount(prev => prev + 1);
+      }, 55);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setShowCursor(false);
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [visibleCount, hasStarted, totalChars]);
+
+  let globalCharIndex = 0;
+
+  return (
+    <motion.h2 
+      className={styles.footerCallout}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      onViewportEnter={() => setHasStarted(true)}
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {textSegments.map((segment, segIdx) => {
+        return (
+          <span key={segIdx} className={styles.titlePhrase}>
+            {segment.text.split('').map((char, charIdx) => {
+              const charGlobalIdx = globalCharIndex++;
+              const isVisible = charGlobalIdx < visibleCount;
+              const isCurrentCursorPos = isVisible && (charGlobalIdx === visibleCount - 1);
+
+              return (
+                <span
+                  key={`${segIdx}-${charIdx}`}
+                  className={segment.isGold ? styles.goldText : undefined}
+                  style={{ opacity: isVisible ? 1 : 0 }}
+                >
+                  {char}
+                  {isCurrentCursorPos && showCursor && visibleCount < totalChars && (
+                    <motion.span
+                      animate={{ opacity: [1, 0, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.6 }}
+                      className={styles.goldText}
+                      style={{ marginLeft: '1px', fontWeight: 300, display: 'inline' }}
+                    >
+                      |
+                    </motion.span>
+                  )}
+                </span>
+              );
+            })}
+            {segIdx < textSegments.length - 1 && (() => {
+              const spaceGlobalIdx = globalCharIndex++;
+              const isSpaceVisible = spaceGlobalIdx < visibleCount;
+              const isCurrentCursorPos = isSpaceVisible && (spaceGlobalIdx === visibleCount - 1);
+              return (
+                <span key={`space-${segIdx}`} style={{ opacity: isSpaceVisible ? 1 : 0 }}>
+                  {'\u00A0'}
+                  {isCurrentCursorPos && showCursor && visibleCount < totalChars && (
+                    <motion.span
+                      animate={{ opacity: [1, 0, 1] }}
+                      transition={{ repeat: Infinity, duration: 0.6 }}
+                      className={styles.goldText}
+                      style={{ marginLeft: '1px', fontWeight: 300, display: 'inline' }}
+                    >
+                      |
+                    </motion.span>
+                  )}
+                </span>
+              );
+            })()}
+          </span>
+        );
+      })}
+
+      {showCursor && (visibleCount >= totalChars || visibleCount === 0) && (
+        <motion.span
+          animate={{ opacity: [1, 0, 1] }}
+          transition={{ repeat: Infinity, duration: 0.7 }}
+          className={styles.goldText}
+          style={{ marginLeft: '2px', fontWeight: 300, display: 'inline' }}
+        >
+          |
+        </motion.span>
+      )}
+    </motion.h2>
+  );
+};
+
 function Contact() {
   const [introPhase, setIntroPhase] = useState('CENTER') // 'CENTER' | 'MOVING' | 'DONE'
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -69,11 +176,30 @@ function Contact() {
   const handleSubmit = (e) => {
     e.preventDefault()
     setFormSent(true)
+
+    const sponsorPhone = '573006269056'
+    const messageLines = [
+      '*SOLICITUD DE COTIZACIÓN - GRUPO SOL DEL RÍO*',
+      '════════════════════════════',
+      '',
+      `► *Nombre:* ${formData.name}`,
+      `► *Teléfono:* ${formData.phone}`,
+      `► *Email:* ${formData.email}`,
+      `► *Tipo de Proyecto:* ${formData.projectType}`,
+      formData.message ? `► *Detalles / Mensaje:* ${formData.message}` : '',
+      '',
+      '════════════════════════════',
+      '✦ _Enviado desde el portal web de Grupo Sol del Río_'
+    ].filter(Boolean).join('\n')
+
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${sponsorPhone}&text=${encodeURIComponent(messageLines)}`
+
     setTimeout(() => {
+      window.open(whatsappUrl, '_blank')
       setFormSent(false)
       setIsModalOpen(false)
       setFormData({ name: '', phone: '', email: '', projectType: 'Residencial', message: '' })
-    }, 2500)
+    }, 1200)
   }
 
   return (
@@ -191,7 +317,7 @@ function Contact() {
               </button>
 
               <a
-                href="https://wa.me/573001234567?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20sus%20proyectos%20de%20construcci%C3%B3n"
+                href="https://wa.me/573006269056?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20sus%20proyectos%20de%20construcci%C3%B3n"
                 target="_blank"
                 rel="noreferrer"
                 className={styles.whatsappCtaBtn}
@@ -352,14 +478,12 @@ function Contact() {
       <footer className={styles.footerSection}>
         <div className={styles.container}>
           
-          <h2 className={styles.footerCallout}>
-            HAZ REALIDAD <span className={styles.goldText}>TU PROYECTO</span> CON NOSOTROS
-          </h2>
+          <TypewriterTitle />
 
           <div className={styles.contactInfoBar}>
-            <a href="tel:3001234567" className={styles.contactItem}>
+            <a href="tel:573006269056" className={styles.contactItem}>
               <Phone size={18} className={styles.contactIcon} />
-              <span>300 123 4567</span>
+              <span>300 626 9056</span>
             </a>
 
             <span className={styles.divider}>|</span>
@@ -396,7 +520,7 @@ function Contact() {
 
       {/* ── FLOATING WHATSAPP BUTTON ── */}
       <a
-        href="https://wa.me/573001234567?text=Hola,%20quisiera%20cotizar%20un%20proyecto%20con%20Grupo%20Sol%20del%20R%C3%ADo"
+        href="https://wa.me/573006269056?text=Hola,%20quisiera%20cotizar%20un%20proyecto%20con%20Grupo%20Sol%20del%20R%C3%ADo"
         target="_blank"
         rel="noreferrer"
         className={styles.floatingWhatsapp}

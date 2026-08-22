@@ -52,7 +52,7 @@ const Footer = () => {
         {/* Línea decorativa dorada */}
         <div className={styles.topLine} />
         <div className={`${styles.shopFooterContainer} ${isContact ? styles.sponsorFooterContainer : ''}`}>
-          <h2 className={`${styles.shopFooterTitle} ${isContact ? styles.sponsorFooterTitle : ''}`}>
+          <h2 className={`${styles.shopFooterTitle} ${isContact ? styles.sponsorFooterTitle : ''} ${isAbout ? styles.aboutFooterTitle : ''}`}>
             {footerTitle}
           </h2>
         </div>

@@ -1,0 +1,703 @@
+.customizerWrapper {
+  width: 100%;
+}
+
+.customizerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: var(--space-3xl);
+  align-items: flex-start;
+  margin-top: var(--space-2xl);
+}
+
+/* ==========================================================================
+   LIGHT & GRAY SKEUOMORPHIC PRESENTATION CASING (CHASSIS & WELL)
+   ========================================================================== */
+.cardPreviewContainer {
+  position: sticky;
+  top: 100px;
+  perspective: 1400px;
+  cursor: grab;
+}
+.cardPreviewContainer:active {
+  cursor: grabbing;
+}
+
+/* Outer physical pedestal / Luxury chassis in light warm satin tones */
+.recessedSlotCasing {
+  background: linear-gradient(145deg, #FAF8F5 0%, #EDE9E1 50%, #DDD8CE 100%);
+  border-radius: 28px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 25px 50px -10px rgba(0, 0, 0, 0.12),
+    0 12px 24px -5px rgba(0, 0, 0, 0.08),
+    -10px -10px 25px rgba(255, 255, 255, 0.95),
+    inset 1px 1px 0 rgba(255, 255, 255, 1),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* Deep carved recessed velvet/suede bed where the card is seated */
+.slotInteriorBed {
+  background: linear-gradient(135deg, #D6D2C8 0%, #E4E0D6 50%, #ECE8DF 100%);
+  border-radius: 22px;
+  padding: 14px;
+  box-shadow:
+    inset 0 6px 14px rgba(0, 0, 0, 0.22),
+    inset 0 2px 4px rgba(0, 0, 0, 0.18),
+    inset 0 -2px 6px rgba(255, 255, 255, 0.8),
+    0 1px 3px rgba(255, 255, 255, 0.95);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+}
+
+/* Dynamic soft cast shadow under the physical card */
+.cardCastShadow {
+  position: absolute;
+  width: 92%;
+  height: 88%;
+  border-radius: 20px;
+  background: radial-gradient(ellipse at center, rgba(45, 38, 30, 0.35) 0%, rgba(45, 38, 30, 0.15) 50%, transparent 75%);
+  filter: blur(14px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+/* ==========================================================================
+   THE 0.76mm PHYSICAL SKEUOMORPHIC CARD (LIGHT LUXURY SURFACE)
+   ========================================================================== */
+.metallicCard {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.58 / 1;
+  min-height: 230px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F3EF 50%, #ECE8E1 100%);
+  border-radius: 18px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow:
+    0 20px 40px -10px rgba(0, 0, 0, 0.18),
+    0 8px 16px -4px rgba(0, 0, 0, 0.12),
+    0 0 1px rgba(0, 0, 0, 0.2);
+  color: #1A1816;
+  transform-style: preserve-3d;
+  z-index: 2;
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* 3D Chamfered Bevel Edge (Highlights on top/left, Shadow on bottom/right) */
+.cardBevelEdge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1.8px 0.5px rgba(255, 255, 255, 0.95),
+    inset 1.8px 0 0.5px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 1px rgba(0, 0, 0, 0.18),
+    inset -1.8px 0 1px rgba(0, 0, 0, 0.12);
+  z-index: 6;
+}
+
+/* Tactile Fine Satin Grain Overlay */
+.cardSurfaceTexture {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.012) 0px,
+    rgba(0, 0, 0, 0.012) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.8;
+}
+
+/* Subtle Security Guilloché Seal / Watermark in light tones */
+.securityWatermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 0 0 15px rgba(0, 0, 0, 0.02),
+    0 0 0 30px rgba(0, 0, 0, 0.015),
+    0 0 0 45px rgba(0, 0, 0, 0.01);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Dynamic Interactive Specular Light Sheen */
+.dynamicGlare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.25s ease;
+}
+
+/* Ambient Shimmer Sweep */
+.cardShimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    45deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 65%
+  );
+  background-size: 200% 200%;
+  pointer-events: none;
+  animation: shimmerSweep 5s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes shimmerSweep {
+  0% { background-position: -100% -100%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: -100% -100%; }
+}
+
+
+/* ==========================================================================
+   SKEUOMORPHIC LETTERPRESS & HOT-FOIL TYPOGRAPHY
+   ========================================================================== */
+
+/* Header: Stamped Luxury Brand Name */
+.cardHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+}
+
+.brandName {
+  font-family: var(--font-heading);
+  font-size: 0.76rem;
+  letter-spacing: 3.5px;
+  color: #7A6328;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 -1px 0 rgba(0, 0, 0, 0.2);
+  transition: color 0.4s ease;
+}
+
+/* Center: Sculpted Embossed Numerals */
+.cardCenterBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+  position: relative;
+  z-index: 5;
+}
+
+.amountDisplay {
+  font-family: var(--font-heading);
+  font-size: clamp(2.2rem, 3.8vw, 3rem);
+  font-weight: 800;
+  color: #1A1714;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  text-shadow:
+    0 1.5px 0 rgba(255, 255, 255, 1),
+    0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Details: Para / De y Placa Dedicatoria */
+.cardDetailsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 5;
+}
+
+.namesBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+.nameLabel {
+  color: #7A756E;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+.nameValue {
+  color: #1A1815;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Skeuomorphic Engraved Dedication Plaque / Pressed Pocket */
+.messageBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.08),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+.heartIcon {
+  color: #9A7B32;
+  flex-shrink: 0;
+  margin-top: 2px;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.8));
+  transition: color 0.4s ease;
+}
+.messageText {
+  font-size: 0.78rem;
+  color: #38342E;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.35;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+
+/* ==========================================================================
+   TIER: DORADA (Champagne Gold / Satin Brushed Gold)
+   ========================================================================== */
+.tierDorada {
+  background: linear-gradient(135deg, #FFFDF8 0%, #F7EED9 40%, #ECE0C2 80%, #F5EBD4 100%);
+  border: 1.5px solid #D6BE88;
+  box-shadow:
+    0 20px 45px -10px rgba(120, 95, 35, 0.16),
+    0 8px 18px -4px rgba(0, 0, 0, 0.1),
+    0 0 1px rgba(180, 150, 70, 0.4);
+}
+.tierDorada .brandName {
+  color: #8C6D28;
+}
+.tierDorada .heartIcon {
+  color: #8C6D28;
+}
+.tierDorada .messageBox {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(214, 190, 136, 0.35);
+}
+
+
+/* ==========================================================================
+   TIER: PLATINO (Polished Platinum / Titanium Silver)
+   ========================================================================== */
+.tierPlatino {
+  background: linear-gradient(135deg, #FFFFFF 0%, #EDEFF3 40%, #DCE1E8 80%, #F4F6F9 100%);
+  border: 1.5px solid #B8BDC7;
+  box-shadow:
+    0 20px 45px -10px rgba(70, 80, 95, 0.16),
+    0 8px 18px -4px rgba(0, 0, 0, 0.1),
+    0 0 1px rgba(160, 170, 185, 0.4);
+}
+.tierPlatino .brandName {
+  color: #4B5563;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+.tierPlatino .heartIcon {
+  color: #4B5563;
+}
+.tierPlatino .messageBox {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(184, 189, 199, 0.35);
+}
+
+.platinoShimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    -35deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 65%
+  );
+  background-size: 200% 200%;
+  pointer-events: none;
+  animation: platinoGleam 5s ease-in-out infinite 1s;
+  z-index: 2;
+}
+
+@keyframes platinoGleam {
+  0% { background-position: -100% -100%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: -100% -100%; }
+}
+
+
+/* ==========================================================================
+   TIER: SUPREMA (Rose Titanium / Pearl Quartz Haute Joaillerie)
+   ========================================================================== */
+.tierSuprema {
+  background: linear-gradient(135deg, #FFFDFD 0%, #F9ECEE 40%, #ECD3D8 80%, #F9EDEF 100%);
+  border: 1.5px solid #D8A5AE;
+  box-shadow:
+    0 22px 50px -10px rgba(140, 70, 85, 0.16),
+    0 8px 18px -4px rgba(0, 0, 0, 0.1),
+    0 0 1px rgba(216, 165, 174, 0.4);
+}
+.tierSuprema::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(216, 165, 174, 0.9) 30%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(216, 165, 174, 0.9) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 4;
+}
+
+.tierSuprema .brandName {
+  color: #8C4855;
+  letter-spacing: 3.5px;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95),
+    0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+.tierSuprema .heartIcon {
+  color: #8C4855;
+}
+.tierSuprema .nameLabel {
+  color: #7E6C70;
+}
+.tierSuprema .messageBox {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(216, 165, 174, 0.35);
+}
+
+.supremaGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 80%,
+    rgba(216, 165, 174, 0.18) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+  animation: supremaPulse 6s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes supremaPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.sparkleParticle {
+  position: absolute;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 4px 1px rgba(216, 165, 174, 0.6);
+  pointer-events: none;
+  opacity: 0;
+  animation: sparkleFloat 4s ease-in-out infinite;
+  z-index: 3;
+}
+
+.sp1 { top: 18%; right: 15%; animation-delay: 0s; }
+.sp2 { top: 35%; left: 10%; animation-delay: 1.2s; }
+.sp3 { bottom: 35%; right: 20%; animation-delay: 2.4s; }
+.sp4 { bottom: 20%; left: 18%; animation-delay: 0.8s; }
+.sp5 { top: 55%; right: 8%; animation-delay: 2s; }
+
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  30% { opacity: 0.9; transform: scale(1); }
+  70% { opacity: 0.7; transform: scale(1); }
+}
+
+
+/* ==========================================================================
+   TIER: CUSTOM (Textured Fine Linen Cardstock)
+   ========================================================================== */
+.tierCustom {
+  background: linear-gradient(145deg, #FCFCFA 0%, #F2F0EB 50%, #E8E5DC 100%);
+  border: 1.5px solid #CCC8BE;
+  box-shadow:
+    0 18px 38px -8px rgba(0, 0, 0, 0.14),
+    0 8px 16px -4px rgba(0, 0, 0, 0.08);
+}
+.tierCustom .brandName {
+  color: #57534E;
+}
+.tierCustom .heartIcon {
+  color: #57534E;
+}
+.tierCustom .messageBox {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.tierCustom .cardShimmer {
+  display: none;
+}
+
+
+/* ==========================================================================
+   RIGHT: FORM CONTROLS
+   ========================================================================== */
+.controlsPanel {
+  background: var(--color-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow:
+    0 15px 35px -5px rgba(0, 0, 0, 0.07),
+    0 0 1px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.customizerForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inputLabel {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--color-gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.presetsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.presetBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.presetBtn:hover {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.05);
+}
+.presetActive {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: var(--color-gold);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+}
+
+.presetName {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+}
+.presetPrice {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  margin-top: 2px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.textInput, .textArea {
+  padding: 12px 14px;
+  background: var(--color-cream);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 12px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  color: var(--color-black);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.textInput:focus, .textArea:focus {
+  border-color: var(--color-gold);
+  background: var(--color-white);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.submitBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.35);
+  margin-top: 6px;
+}
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+}
+
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+  .customizerGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+  .cardPreviewContainer {
+    position: static;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+  .controlsPanel {
+    padding: var(--space-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .customizerGrid {
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+  }
+  .cardPreviewContainer {
+    max-width: 100%;
+  }
+  .recessedSlotCasing {
+    padding: 12px;
+    border-radius: 22px;
+  }
+  .slotInteriorBed {
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .presetsGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .presetBtn {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 14px 16px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  .controlsPanel {
+    padding: var(--space-md) var(--space-sm);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .submitBtn {
+    padding: 16px;
+    font-size: 0.95rem;
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metallicCard {
+    padding: 16px 18px;
+    border-radius: 14px;
+    aspect-ratio: 1.52 / 1;
+    min-height: auto;
+  }
+  .brandName {
+    font-size: 0.66rem;
+    letter-spacing: 2.5px;
+  }
+  .amountDisplay {
+    font-size: clamp(1.7rem, 7vw, 2.2rem);
+  }
+  .nameRow {
+    font-size: 0.78rem;
+  }
+  .nameLabel {
+    font-size: 0.72rem;
+  }
+  .messageText {
+    font-size: 0.72rem;
+  }
+  .textInput, .textArea {
+    padding: 11px 12px;
+    font-size: 16px;
+  }
+  .inputLabel {
+    font-size: 0.7rem;
+  }
+  .sparkleParticle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardShimmer,
+  .platinoShimmer,
+  .supremaGlow,
+  .sparkleParticle {
+    animation: none;
+  }
+}

@@ -24,7 +24,7 @@ const getTabIcon = (path, isActive, isHovered) => {
   }
 };
 
-export const SlideTabs = ({ tabs = [] }) => {
+export const SlideTabs = ({ tabs = [], isLightBackground = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +43,7 @@ export const SlideTabs = ({ tabs = [] }) => {
   return (
     <ul
       onMouseLeave={() => setHoveredIndex(null)}
-      className={styles.tabsContainer}
+      className={`${styles.tabsContainer} ${isLightBackground ? styles.darkTabs : styles.lightTabs}`}
     >
       {tabs.map((tab, i) => {
         const isActive = selected === i;
@@ -55,6 +55,7 @@ export const SlideTabs = ({ tabs = [] }) => {
             icon={icon}
             isActive={isActive}
             isHovered={hoveredIndex === i}
+            isLightBackground={isLightBackground}
             onMouseEnter={() => setHoveredIndex(i)}
             onClick={() => {
               setSelected(i);
@@ -70,9 +71,13 @@ export const SlideTabs = ({ tabs = [] }) => {
   );
 };
 
-const Tab = ({ children, icon, isActive, isHovered, onMouseEnter, onClick }) => {
-  // Active text styling for color contrast (dark text on white pill, light text on glass)
-  const textColor = isActive ? "var(--color-black)" : isHovered ? "var(--color-white)" : "rgba(255, 255, 255, 0.65)";
+const Tab = ({ children, icon, isActive, isHovered, isLightBackground, onMouseEnter, onClick }) => {
+  // High contrast text/icon styling depending on liquid glass mode
+  const textColor = isActive
+    ? "var(--color-black)"
+    : isHovered
+      ? (isLightBackground ? "var(--color-gold-light)" : "var(--color-white)")
+      : (isLightBackground ? "rgba(255, 255, 255, 0.90)" : "rgba(255, 255, 255, 0.75)");
 
   return (
     <li
