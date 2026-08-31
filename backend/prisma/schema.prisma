@@ -1,0 +1,292 @@
+// Prisma Schema - Catheryne Ríos Estética
+// Compatible con PostgreSQL (Oracle Always Free, Neon, Supabase)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------
+// 1. ROLES & USUARIOS DEL SISTEMA
+// ----------------------------------------------------
+enum Role {
+  OWNER       // Dueña: Acceso total y autorización de cambios críticos
+  ADMIN       // Administradora: Operación diaria completa, sin cambios críticos
+  SPECIALIST  // Especialista: Visualización exclusiva de su agenda y monto neto
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  role         Role        @default(SPECIALIST)
+  active       Boolean     @default(true)
+  
+  // Enlace opcional si el usuario es una especialista del equipo
+  teamMemberId String?     @unique
+  teamMember   TeamMember? @relation(fields: [teamMemberId], references: [id])
+
+  auditLogs    SecurityAuditLog[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+// ----------------------------------------------------
+// 2. CONFIGURACIÓN GLOBAL DEL NEGOCIO & PIN MAESTRO
+// ----------------------------------------------------
+model BusinessConfig {
+  id             String    @id @default("singleton")
+  businessName   String    @default("Catheryne Ríos Estética")
+  whatsappNumber String    @default("3006269056")
+  phone          String?   @default("3006269056")
+  address        String?   @default("Calle 123 #45-67, Barrio El Prado")
+  openingHours   String?   @default("Lunes a Sábado: 8:00 AM - 7:00 PM")
+  instagramUrl   String?   @default("https://instagram.com")
+  tiktokUrl      String?   @default("https://tiktok.com")
+  facebookUrl    String?   @default("https://facebook.com")
+  promoBanner    String?   @default("Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.")
+  ownerEmail     String?   @default("duena@catherynerios.com")
+  adminEmail     String?   @default("admin@catherynerios.com")
+  masterPinHash  String?   // Hash Bcrypt/Argon2 del PIN de 4-6 dígitos de la dueña
+  updatedAt      DateTime  @updatedAt
+}
+
+// ----------------------------------------------------
+// 3. EQUIPO DE ESPECIALISTAS
+// ----------------------------------------------------
+model TeamMember {
+  id             String        @id @default(uuid())
+  name           String
+  role           String        // Ej: Especialista en Uñas, Cosmiatra
+  phone          String?
+  email          String?       // Correo de la especialista para notificaciones de citas
+  avatar         String?
+  bio            String?
+  experience     String?       // Ej: "6 años"
+  color          String?       @default("#D4AF37")
+  commissionRate Float         @default(45) // Porcentaje de comisión neta (Ej: 40%, 45%, 50%)
+  active         Boolean       @default(true)
+  
+  user           User?
+  appointments   Appointment[]
+  payrollRecords PayrollRecord[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// ----------------------------------------------------
+// 4. CATEGORÍAS & SERVICIOS DE LA ESTÉTICA
+// ----------------------------------------------------
+model ServiceCategory {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  order       Int       @default(0)
+  active      Boolean   @default(true)
+
+  services    Service[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Service {
+  id          String          @id @default(uuid())
+  categoryId  String
+  category    ServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        String
+  price       Float           // En Pesos Colombianos (COP)
+  duration    Int             // Duración en minutos
+  description String?
+  includes    String?         // Texto o JSON de beneficios incluidos
+  image       String?
+  active      Boolean         @default(true)
+
+  appointments Appointment[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+// ----------------------------------------------------
+// 5. PRODUCTOS & TIENDA E-COMMERCE
+// ----------------------------------------------------
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  brand       String?   @default("Catheryne Ríos Luxury")
+  category    String    // Ej: facial, corporal, unas, cabello
+  price       Float     // Precio regular en COP
+  salePrice   Float?    // Precio de oferta con descuento
+  stock       Int       @default(10)
+  description String?
+  image       String?
+  featured    Boolean   @default(false)
+  status      String    @default("Disponible") // Disponible, Agotado, Oculto
+  active      Boolean   @default(true)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ----------------------------------------------------
+// 6. CLIENTES (CRM) & PUNTOS DE LEALTAD
+// ----------------------------------------------------
+model Client {
+  id             String        @id @default(uuid())
+  name           String
+  phone          String        @unique
+  email          String?
+  notes          String?       // Preferencias, piel sensible, alergias
+  loyaltyPoints  Int           @default(0)
+  registeredAt   DateTime      @default(now())
+
+  appointments   Appointment[]
+}
+
+// ----------------------------------------------------
+// 7. CITAS & AGENDAMIENTO
+// ----------------------------------------------------
+model Appointment {
+  id               String      @id @default(uuid())
+  clientName       String
+  clientPhone      String
+  clientEmail      String?
+  
+  clientId         String?
+  client           Client?     @relation(fields: [clientId], references: [id])
+
+  serviceId        String
+  service          Service     @relation(fields: [serviceId], references: [id])
+  serviceName      String
+
+  specialistId     String
+  specialist       TeamMember  @relation(fields: [specialistId], references: [id])
+  specialistName   String
+
+  date             String      // YYYY-MM-DD
+  time             String      // HH:mm AM/PM
+  price            Float       // Valor bruto del servicio en COP
+  commissionAmount Float       // Monto NETO que le corresponde a la especialista
+  status           String      @default("Reservada") // Reservada, En Atención, Pagada, Cancelada
+  
+  // Auditoría de cancelación
+  cancelReason     String?
+  cancelDetails    String?
+  canceledBy       String?
+  canceledAt       DateTime?
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+// ----------------------------------------------------
+// 8. CAJA, ARQUEO CIEGO & TRANSACCIONES
+// ----------------------------------------------------
+model CashSession {
+  id                   String        @id @default(uuid())
+  responsibleId        String
+  responsibleName      String
+  initialBase          Float         @default(0)
+  actualCash           Float?        // Efectivo contado por la recepcionista en arqueo ciego
+  difference           Float?        // Faltante (-) o Sobrante (+)
+  status               String        @default("Abierta") // Abierta, Cerrada
+  isReconciled         Boolean       @default(false)
+  reconciliationStatus String?       // Cuadrada Perfecta, Pendiente Reconciliación, Reconciliada
+  reconciliationId     String?
+  closingNotes         String?
+  openedAt             DateTime      @default(now())
+  closedAt             DateTime?
+
+  transactions         Transaction[]
+}
+
+model Transaction {
+  id            String       @id @default(uuid())
+  sessionId     String?
+  session       CashSession? @relation(fields: [sessionId], references: [id])
+  type          String       // Ingreso, Egreso
+  amount        Float        // Monto en COP
+  description   String
+  category      String       // Servicios, Venta de Productos, Insumos, Ajuste de Caja
+  paymentMethod String       // Efectivo, Nequi, Daviplata, Tarjeta, Transferencia
+  date          DateTime     @default(now())
+}
+
+// ----------------------------------------------------
+// 9. LIQUIDACIÓN DE NÓMINA DE ESPECIALISTAS
+// ----------------------------------------------------
+model PayrollRecord {
+  id                  String     @id @default(uuid())
+  specialistId        String
+  specialist          TeamMember @relation(fields: [specialistId], references: [id])
+  specialistName      String
+  periodStart         DateTime
+  periodEnd           DateTime
+  totalServicesCount  Int
+  grossRevenue        Float      // Total bruto generado
+  netCommissionTotal  Float      // Total neto a pagar a la especialista
+  status              String     @default("Pagado")
+  authorizedBy        String     @default("Catheryne Ríos (Dueña)")
+  authorizedAt        DateTime   @default(now())
+}
+
+// ----------------------------------------------------
+// 10. TESTIMONIOS PÚBLICOS
+// ----------------------------------------------------
+model Testimonial {
+  id          String   @id @default(uuid())
+  name        String
+  rating      Int      @default(5)
+  text        String
+  serviceName String?
+  date        String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// 11. REGISTRO DE AUDITORÍA INMUTABLE ANTI-FRAUDE
+// ----------------------------------------------------
+model SecurityAuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  userRole    String?
+  action      String   // Ej: CHANGE_PRICE, CHANGE_COMMISSION, CASH_RECONCILIATION, MASTER_PIN_VERIFY
+  details     String   // JSON descriptivo con valor anterior y valor nuevo
+  ipAddress   String?
+  timestamp   DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// 12. PLANES DE MEMBRESÍA VIP
+// ----------------------------------------------------
+model Membership {
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  popular   Boolean  @default(false)
+  color     String?  @default("#D4AF37")
+  features  String[]
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ----------------------------------------------------
+// 13. DÍAS DE CIERRE, FESTIVOS & VACACIONES
+// ----------------------------------------------------
+model ClosedDate {
+  id        String   @id @default(uuid())
+  date      String   @unique
+  reason    String
+  type      String   @default("Festivo")
+  createdAt DateTime @default(now())
+}
+

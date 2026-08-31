@@ -1,25 +1,24 @@
 .adminWrapper {
   min-height: 100vh;
-  background: #090909;
-  color: #FFFFFF;
-  font-family: var(--font-body);
   display: flex;
   flex-direction: column;
+  background: var(--color-black);
+  color: #FFFFFF;
 }
 
 /* TOP HEADER */
 .topHeader {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
   height: 64px;
-  background: rgba(14, 14, 14, 0.95);
+  background: #0E0E0E;
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
 }
 
 .headerLeft {
@@ -32,19 +31,20 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 999px;
-  color: #CCCCCC;
-  font-size: 0.8rem;
+  padding: 6px 12px;
+  color: #D4D4D4;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .backBtn:hover {
-  background: rgba(212, 175, 55, 0.15);
-  color: var(--color-gold);
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  border-color: var(--color-gold);
 }
 
 .headerTitleGroup {
@@ -59,7 +59,7 @@
 
 .routeTitle {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   color: #FFFFFF;
   margin: 0;
 }
@@ -70,53 +70,99 @@
   gap: 12px;
 }
 
+/* ROLE BADGES IN HEADER */
+.roleHeaderBadgeOwner,
+.roleHeaderBadgeAdmin,
+.roleHeaderBadgeSpecialist {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.roleHeaderBadgeOwner {
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid #D4AF37;
+  color: #F0D78C;
+}
+
+.roleHeaderBadgeAdmin {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid #3B82F6;
+  color: #93C5FD;
+}
+
+.roleHeaderBadgeSpecialist {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid #8B5CF6;
+  color: #C4B5FD;
+}
+
+.logoutHeaderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutHeaderBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #FFFFFF;
+  border-color: #EF4444;
+}
+
 .dateBadge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  background: rgba(212, 175, 55, 0.12);
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-.dateBadge svg {
-  color: var(--color-gold);
+  font-size: 0.8rem;
+  color: #A3A3A3;
 }
 
 .cashBoxPill {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #10B981;
+  gap: 8px;
   background: rgba(16, 185, 129, 0.1);
-  padding: 4px 12px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.greenDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10B981;
+  font-size: 0.8rem;
+  color: #10B981;
 }
 
 .closedCashPill {
-  color: #EF4444 !important;
-  background: rgba(239, 68, 68, 0.1) !important;
-  border-color: rgba(239, 68, 68, 0.25) !important;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
 }
 
-.redDot {
-  width: 6px;
-  height: 6px;
+.greenDot, .redDot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+}
+.greenDot {
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+.redDot {
   background: #EF4444;
 }
 
@@ -200,47 +246,44 @@
   .sidebar {
     display: none;
   }
-
-  .mainContent {
-    padding: 16px 16px 90px;
+  .topHeader {
+    padding: 0 16px;
   }
-
+  .routeTitle {
+    font-size: 1.1rem;
+  }
+  .dateBadge, .cashBoxPill {
+    display: none;
+  }
+  .mainContent {
+    padding: 16px 16px 80px;
+  }
   .mobileBottomNav {
+    display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(14, 14, 14, 0.95);
-    border-top: 1px solid rgba(212, 175, 55, 0.25);
-    backdrop-filter: blur(16px);
-    display: flex;
+    background: #0E0E0E;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
     align-items: center;
     justify-content: space-around;
-    z-index: 1000;
+    z-index: 100;
     padding: 0 8px;
   }
-
   .mobileNavItem {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    color: #8E8E93;
+    gap: 4px;
+    color: #737373;
     text-decoration: none;
     font-size: 0.65rem;
     font-weight: 600;
-    padding: 6px 10px;
-    border-radius: 10px;
-    transition: color 0.2s ease;
   }
-
   .mobileActive {
     color: var(--color-gold);
-  }
-
-  .backLabel {
-    display: none;
   }
 }

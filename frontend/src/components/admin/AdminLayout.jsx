@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Calendar, Wallet, Users, Scissors, Bell, ArrowLeft, ShieldCheck, History, UserCheck, ShoppingBag } from 'lucide-react'
+import { LayoutDashboard, Calendar, Wallet, Users, Scissors, Bell, ArrowLeft, ShieldCheck, History, UserCheck, ShoppingBag, Settings, LogOut, Crown } from 'lucide-react'
 import AdminSecurityGate from './AdminSecurityGate'
 import { useAdmin } from '../../context/AdminContext'
 import styles from './AdminLayout.module.css'
@@ -15,7 +15,8 @@ const navItems = [
   { path: '/admin/equipo', label: 'Equipo & Nómina', icon: Users },
   { path: '/admin/servicios', label: 'Servicios', icon: Scissors },
   { path: '/admin/productos', label: 'Productos', icon: ShoppingBag },
-  { path: '/admin/notificaciones', label: 'Anuncios', icon: Bell }
+  { path: '/admin/notificaciones', label: 'Anuncios', icon: Bell },
+  { path: '/admin/configuracion', label: 'Configuración', icon: Settings }
 ]
 
 const getTitleForRoute = (pathname) => {
@@ -27,6 +28,7 @@ const getTitleForRoute = (pathname) => {
   if (pathname === '/admin/servicios') return 'Catálogo de Servicios'
   if (pathname === '/admin/productos') return 'Inventario & Tienda Online'
   if (pathname === '/admin/notificaciones') return 'Gestión de Anuncios'
+  if (pathname === '/admin/configuracion') return 'Configuración General del Negocio'
   return 'Dashboard General'
 }
 
@@ -35,7 +37,7 @@ export default function AdminLayout() {
   const location = useLocation()
   const mainContentRef = React.useRef(null)
 
-  const { activeCashSession } = useAdmin()
+  const { activeCashSession, currentUserRole } = useAdmin()
 
   // Reset scroll to top on route change
   React.useEffect(() => {
@@ -45,6 +47,25 @@ export default function AdminLayout() {
       mainContentRef.current.scrollTop = 0
     }
   }, [location.pathname])
+
+  const handleLogout = () => {
+    try {
+      sessionStorage.removeItem('spa_admin_authed')
+      sessionStorage.removeItem('spa_admin_role')
+    } catch (e) {}
+    window.location.reload()
+  }
+
+  // Filtrado estricto de navegación según el rol autenticado
+  const visibleNavItems = navItems.filter(item => {
+    if (currentUserRole === 'SPECIALIST') {
+      return item.path === '/admin/agenda' || item.path === '/admin/servicios' || item.path === '/admin/historial'
+    }
+    if (currentUserRole === 'ADMIN') {
+      return item.path !== '/admin/configuracion'
+    }
+    return true
+  })
 
   const currentTitle = getTitleForRoute(location.pathname)
   const todayFormatted = new Date().toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
@@ -73,22 +94,54 @@ export default function AdminLayout() {
         </div>
 
         <div className={styles.headerRight}>
+          {/* BADGE DE ROL AUTENTICADO */}
+          {currentUserRole === 'OWNER' && (
+            <div className={styles.roleHeaderBadgeOwner}>
+              <Crown size={14} />
+              <span>Dueña (Acceso Total)</span>
+            </div>
+          )}
+          {currentUserRole === 'ADMIN' && (
+            <div className={styles.roleHeaderBadgeAdmin}>
+              <UserCheck size={14} />
+              <span>Administradora</span>
+            </div>
+          )}
+          {currentUserRole === 'SPECIALIST' && (
+            <div className={styles.roleHeaderBadgeSpecialist}>
+              <Scissors size={14} />
+              <span>Especialista</span>
+            </div>
+          )}
+
           <div className={styles.dateBadge}>
             <Calendar size={16} />
             <span>{todayFormatted}</span>
           </div>
           
-          {activeCashSession ? (
-            <div className={styles.cashBoxPill}>
-              <span className={styles.greenDot} />
-              <span>Caja Abierta: <strong>{activeCashSession.responsibleName}</strong></span>
-            </div>
-          ) : (
-            <div className={`${styles.cashBoxPill} ${styles.closedCashPill}`}>
-              <span className={styles.redDot} />
-              <span>Caja Cerrada</span>
-            </div>
+          {currentUserRole !== 'SPECIALIST' && (
+            activeCashSession ? (
+              <div className={styles.cashBoxPill}>
+                <span className={styles.greenDot} />
+                <span>Caja Abierta: <strong>{activeCashSession.responsibleName}</strong></span>
+              </div>
+            ) : (
+              <div className={`${styles.cashBoxPill} ${styles.closedCashPill}`}>
+                <span className={styles.redDot} />
+                <span>Caja Cerrada</span>
+              </div>
+            )
           )}
+
+          <button 
+            type="button" 
+            className={styles.logoutHeaderBtn} 
+            onClick={handleLogout}
+            title="Cambiar de clave o salir"
+          >
+            <LogOut size={15} />
+            <span>Salir</span>
+          </button>
         </div>
       </header>
 
@@ -101,7 +154,7 @@ export default function AdminLayout() {
           </div>
 
           <nav className={styles.sidebarNav}>
-            {navItems.map(item => (
+            {visibleNavItems.map(item => (
               <NavLink
                 key={item.path}
                 to={item.path}
@@ -123,7 +176,7 @@ export default function AdminLayout() {
 
       {/* MOBILE BOTTOM NAVIGATION BAR */}
       <nav className={styles.mobileBottomNav}>
-        {navItems.map(item => (
+        {visibleNavItems.map(item => (
           <NavLink
             key={item.path}
             to={item.path}

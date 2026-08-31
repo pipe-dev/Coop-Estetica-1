@@ -18,9 +18,33 @@ const TIME_SLOTS = [
 ]
 
 export default function AdminAgenda() {
-  const { appointments, teamMembers, servicesList, addAppointment, updateAppointmentStatus, updateAppointment, deleteAppointment, cancelAppointment, reactivateAppointment, addTransaction } = useAdmin()
+  const { 
+    appointments, 
+    teamMembers, 
+    servicesList, 
+    addAppointment, 
+    updateAppointmentStatus, 
+    updateAppointment, 
+    deleteAppointment, 
+    cancelAppointment, 
+    reactivateAppointment, 
+    addTransaction,
+    currentUserRole,
+    currentSpecialistId
+  } = useAdmin()
+
+  const isSpecialist = currentUserRole === 'SPECIALIST'
+  const activeSpecialistObj = teamMembers.find(m => m.id === (currentSpecialistId || '2'))
+
   const [selectedDate, setSelectedDate] = useState(getLocalDateString())
-  const [selectedSpecialist, setSelectedSpecialist] = useState('all')
+  const [selectedSpecialist, setSelectedSpecialist] = useState(isSpecialist ? (currentSpecialistId || '2') : 'all')
+
+  // Auto-sync filter if specialist role is active
+  React.useEffect(() => {
+    if (isSpecialist) {
+      setSelectedSpecialist(currentSpecialistId || '2')
+    }
+  }, [isSpecialist, currentSpecialistId])
 
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState(null)
 
@@ -322,9 +346,36 @@ export default function AdminAgenda() {
     setSelectedAppointmentForSale(null)
   }
 
+  const specialistNetToday = React.useMemo(() => {
+    if (!isSpecialist) return 0
+    const specApps = appointments.filter(a => a.specialistId === (currentSpecialistId || '2') && a.date === selectedDate && a.status !== 'Cancelada')
+    const specRate = activeSpecialistObj?.commissionRate || 45
+    return specApps.reduce((sum, a) => {
+      const net = a.commissionAmount !== undefined ? a.commissionAmount : (a.price * specRate) / 100
+      return sum + net
+    }, 0)
+  }, [isSpecialist, appointments, currentSpecialistId, selectedDate, activeSpecialistObj])
+
   return (
     <div className={styles.agendaContainer}>
       
+      {/* SPECIALIST NET EARNINGS BANNER */}
+      {isSpecialist && (
+        <div className={styles.specialistBanner}>
+          <div className={styles.specialistBannerInfo}>
+            <span className={styles.specialistBadge}>Agenda de Especialista: {activeSpecialistObj?.name || 'Especialista'}</span>
+            <p className={styles.specialistBannerSub}>
+              Consulta tu horario asignado y el cálculo automático de tus honorarios netos correspondientes a los servicios del día.
+            </p>
+          </div>
+          <div className={styles.specialistNetCard}>
+            <span className={styles.specialistNetLabel}>Acumulado Neto Hoy</span>
+            <span className={styles.specialistNetValue}>${specialistNetToday.toLocaleString()} COP</span>
+            <small className={styles.specialistRateLabel}>Comisión: {activeSpecialistObj?.commissionRate || 45}%</small>
+          </div>
+        </div>
+      )}
+
       {/* FILTER BAR */}
       <div className={styles.filterBar}>
         <div className={styles.filterGroup}>
@@ -347,11 +398,14 @@ export default function AdminAgenda() {
               className={styles.selectInput}
               value={selectedSpecialist}
               onChange={e => setSelectedSpecialist(e.target.value)}
+              disabled={isSpecialist}
             >
-              <option value="all">Todas las Especialistas</option>
-              {teamMembers.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
+              {!isSpecialist && <option value="all">Todas las Especialistas</option>}
+              {teamMembers
+                .filter(m => !isSpecialist || m.id === (currentSpecialistId || '2'))
+                .map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
             </select>
           </div>
 
@@ -519,8 +573,13 @@ export default function AdminAgenda() {
                           </div>
 
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>Valor:</span>
-                            <span className={styles.priceValue}>${app.price.toLocaleString()} COP</span>
+                            <span className={styles.label}>{isSpecialist ? 'Tu Monto Neto:' : 'Valor Oficial:'}</span>
+                            <span className={styles.priceValue}>
+                              ${(isSpecialist 
+                                  ? (app.commissionAmount !== undefined ? app.commissionAmount : (app.price * (activeSpecialistObj?.commissionRate || 45)) / 100) 
+                                  : app.price
+                                ).toLocaleString()} COP
+                            </span>
                           </div>
                         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Star, Check } from 'lucide-react'
-import { serviceCategories } from '../data/services'
+import { useAdmin } from '../context/AdminContext'
 import { memberships } from '../data/memberships'
 import styles from './Services.module.css'
 import LiquidGlassIos26 from '../components/ui/LiquidGlassIos26'
@@ -14,21 +14,29 @@ const getPlaceholderUrl = (url) => {
   return url.replace('w=600', 'w=20').replace('q=80', 'q=10');
 }
 
-// Flatten all services into a single array with category info
-const allServices = serviceCategories.flatMap(cat =>
-  cat.services.map(s => ({ ...s, category: cat.id, categoryName: cat.name }))
-)
-
-// Build filter categories from serviceCategories
-const filterCategories = serviceCategories.map(cat => ({
-  id: cat.id,
-  name: cat.name,
-}))
-
 function Services() {
+  const { serviceCategories, memberships: adminMemberships } = useAdmin()
+  const currentMemberships = adminMemberships || memberships
   const [activeCategory, setActiveCategory] = useState('all')
   const [hideUi, setHideUi] = useState(false)
   const [selectedService, setSelectedService] = useState(null)
+
+  // Flatten active services dynamically from AdminContext
+  const allServices = useMemo(() => {
+    return (serviceCategories || []).flatMap(cat =>
+      (cat.services || [])
+        .filter(s => s.active !== false)
+        .map(s => ({ ...s, category: cat.id, categoryName: cat.name }))
+    )
+  }, [serviceCategories])
+
+  // Build filter categories dynamically
+  const filterCategories = useMemo(() => {
+    return (serviceCategories || []).map(cat => ({
+      id: cat.id,
+      name: cat.name,
+    }))
+  }, [serviceCategories])
 
   // Make the entire browser body black for this page
   useEffect(() => {
@@ -256,7 +264,7 @@ function Services() {
           </div>
 
           <div className={styles.membershipsGrid}>
-            {memberships.map((plan) => (
+            {currentMemberships.map((plan) => (
               <motion.div
                 key={plan.id}
                 className={`${styles.vipCard} ${plan.popular ? styles.vipCardPopular : ''}`}

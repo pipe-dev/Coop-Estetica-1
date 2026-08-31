@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------
+  # Base de Datos PostgreSQL 16
+  # ----------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: catheryne_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_secure_pass
+      POSTGRES_DB: catheryne_spa_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d catheryne_spa_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------
+  # PgBouncer: Connection Pooler para Miles de Conexiones
+  # ----------------------------------------------------
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: catheryne_pgbouncer
+    restart: always
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: postgres_secure_pass
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: catheryne_spa_db
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 25
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 5
+      LISTEN_PORT: 6432
+      AUTH_TYPE: md5
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ----------------------------------------------------
+  # Backend NestJS API
+  # ----------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: catheryne_api
+    restart: always
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres_secure_pass@pgbouncer:6432/catheryne_spa_db?schema=public"
+      JWT_SECRET: "catheryne_rios_estetica_jwt_master_secret_key_2026"
+    ports:
+      - "4000:4000"
+    depends_on:
+      - pgbouncer
+
+volumes:
+  postgres_data:
+    driver: local

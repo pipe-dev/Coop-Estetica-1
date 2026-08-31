@@ -4,6 +4,7 @@ import { Plus, Search, Filter, Edit2, Trash2, Eye, EyeOff, Package, DollarSign, 
 import { useAdmin } from '../../context/AdminContext'
 import { formatCOP, formatCOPInput, parseCOPInput } from '../../utils/currencyUtils'
 import { exportProductsInventory } from '../../utils/exportUtils'
+import ImageUploader from '../../components/admin/ImageUploader'
 import styles from './AdminProductos.module.css'
 
 const PRESET_IMAGES = [
@@ -417,7 +418,15 @@ export default function AdminProductos() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Seleccionar Imagen de Ejemplo / Presets</label>
+                <ImageUploader 
+                  value={image} 
+                  onChange={setImage} 
+                  label="Foto del Producto (Subir a CDN ImgBB)" 
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>O elegir una imagen predefinida</label>
                 <div className={styles.presetsGrid}>
                   {PRESET_IMAGES.map((preset, idx) => (
                     <div 
@@ -430,16 +439,6 @@ export default function AdminProductos() {
                     </div>
                   ))}
                 </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>O ingresar URL de Imagen Personalizada</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={image}
-                  onChange={e => setImage(e.target.value)}
-                />
               </div>
 
               <div className={styles.modalBtnGroup}>

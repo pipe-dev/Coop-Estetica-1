@@ -27,6 +27,7 @@ import AdminNotificaciones from './pages/admin/AdminNotificaciones'
 import AdminHistorial from './pages/admin/AdminHistorial'
 import AdminClientes from './pages/admin/AdminClientes'
 import AdminProductos from './pages/admin/AdminProductos'
+import AdminConfiguracion from './pages/admin/AdminConfiguracion'
 
 function App() {
   const location = useLocation()
@@ -83,6 +84,7 @@ function App() {
             <Route path="servicios" element={<AdminServicios />} />
             <Route path="productos" element={<AdminProductos />} />
             <Route path="notificaciones" element={<AdminNotificaciones />} />
+            <Route path="configuracion" element={<AdminConfiguracion />} />
           </Route>
         </Routes>
       </AnimatePresence>
