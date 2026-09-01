@@ -7,6 +7,7 @@ import { memberships as initialMembershipsData } from '../data/memberships'
 import { api } from '../services/api'
 import { mutationQueue } from '../utils/securityService'
 import { runSilentAutoBackup } from '../utils/autoBackupService'
+import { clearCopilotCache } from '../services/aiCopilotService'
 
 const AdminContext = createContext()
 
@@ -315,6 +316,11 @@ export function AdminProvider({ children }) {
   useEffect(() => {
     try { localStorage.setItem('spa_admin_reconciliations', JSON.stringify(reconciliations)) } catch (e) {}
   }, [reconciliations])
+
+  // S.H.I.E.L.D. Copilot Real-Time Cache Invalidation
+  useEffect(() => {
+    clearCopilotCache()
+  }, [appointments, transactions, cashSessions, products, clients, serviceCategories, teamMembers, businessConfig, closedDates])
 
   // ----------------------------------------------------
   // GESTIÓN DE CONFIGURACIÓN & PIN MAESTRO

@@ -8,9 +8,33 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const PRIMARY_MODEL = 'llama-3.3-70b-versatile'
 const FAST_BACKUP_MODEL = 'llama-3.1-8b-instant'
 
-// Memoria caché semántica con TTL de 30s para evitar llamadas redundantes a la API
+// Memoria caché semántica ultra-estricta con invalidación instantánea
 const queryCache = new Map()
-const CACHE_TTL_MS = 30000
+const CACHE_TTL_MS = 15000 // Máximo 15 segundos solo para consultas puramente estáticas
+
+/**
+ * Invalidador Atómico de Caché
+ * Se ejecuta cada vez que ocurre una mutación de citas, caja, clientes o inventario.
+ */
+export function clearCopilotCache() {
+  queryCache.clear()
+  console.log('[AI COPILOT] Caché invalidado por mutación de datos en tiempo real.')
+}
+
+/**
+ * Detector de Consultas en Tiempo Real
+ * Las preguntas de finanzas, caja, citas, especialistas o acciones NUNCA se cachean.
+ */
+function isRealtimeQuery(query) {
+  const q = query.toLowerCase()
+  const realtimeKeywords = [
+    'caja', 'plata', 'dinero', 'ingreso', 'egreso', 'gasto', 'balance',
+    'pagar', 'pago', 'comisi', 'cuanto', 'cuánto', 'liquidacion', 'liquidación',
+    'cita', 'agenda', 'hoy', 'mañana', 'turno', 'reserv',
+    'crea', 'agrega', 'bloquea', 'cliente', 'clienta'
+  ]
+  return realtimeKeywords.some(kw => q.includes(kw))
+}
 
 /**
  * 1. Extractor y Balanceador de Claves API (Multi-Key Pool)
@@ -112,14 +136,17 @@ REGLAS DE CONDUCTA:
  */
 export async function sendChatMessageToCopilot(messages, spaState, customApiKey = '') {
   const lastUserMessage = messages[messages.length - 1]?.content || ''
-  const cacheKey = `${lastUserMessage.toLowerCase().trim()}_${spaState.appointments?.length || 0}_${spaState.transactions?.length || 0}`
+  const isDynamic = isRealtimeQuery(lastUserMessage)
 
-  // 1. Verificar Caché en Memoria
-  if (queryCache.has(cacheKey)) {
-    const cached = queryCache.get(cacheKey)
-    if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
-      console.log('[AI COPILOT] Respuesta servida desde Caché Inteligente (0 tokens consumidos)')
-      return cached.data
+  // 1. Verificar Caché solo si es una consulta puramente estática
+  if (!isDynamic) {
+    const cacheKey = `${lastUserMessage.toLowerCase().trim()}_${spaState.serviceCategories?.length || 0}_${spaState.businessConfig?.businessName || ''}`
+    if (queryCache.has(cacheKey)) {
+      const cached = queryCache.get(cacheKey)
+      if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        console.log('[AI COPILOT] Consulta estática servida desde memoria')
+        return cached.data
+      }
     }
   }
 
