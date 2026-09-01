@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { LayoutDashboard, Calendar, Wallet, Users, Scissors, Bell, ArrowLeft, ShieldCheck, History, UserCheck, ShoppingBag, Settings, LogOut, Crown } from 'lucide-react'
 import AdminSecurityGate from './AdminSecurityGate'
+import AdminAiCopilot from './AdminAiCopilot'
 import { useAdmin } from '../../context/AdminContext'
 import styles from './AdminLayout.module.css'
 
@@ -188,6 +189,9 @@ export default function AdminLayout() {
           </NavLink>
         ))}
       </nav>
+
+      {/* S.H.I.E.L.D. Copiloto Ejecutivo Inteligente con Llama 3 */}
+      <AdminAiCopilot />
     </div>
   </AdminSecurityGate>
 )
