@@ -7,7 +7,6 @@ import {
   X, 
   RotateCcw, 
   CheckCircle2, 
-  Key, 
   Bot, 
   User, 
   Calendar, 
@@ -52,8 +51,6 @@ export default function AdminAiCopilot() {
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
-  const [showKeyConfig, setShowKeyConfig] = useState(false)
-  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem('spa_groq_api_key') || '')
   const [lastActionExecuted, setLastActionExecuted] = useState(null)
 
   const messagesEndRef = useRef(null)
@@ -100,8 +97,7 @@ export default function AdminAiCopilot() {
     try {
       const response = await sendChatMessageToCopilot(
         [...messages, userMsg],
-        adminState,
-        apiKeyInput
+        adminState
       )
 
       const botMsg = {
@@ -296,15 +292,6 @@ export default function AdminAiCopilot() {
                   <button 
                     type="button" 
                     className={styles.iconBtn} 
-                    onClick={() => setShowKeyConfig(prev => !prev)}
-                    title="Configurar Clave Groq API"
-                  >
-                    <Key size={16} />
-                  </button>
-
-                  <button 
-                    type="button" 
-                    className={styles.iconBtn} 
                     onClick={handleResetChat}
                     title="Reiniciar Conversación"
                   >
@@ -321,25 +308,6 @@ export default function AdminAiCopilot() {
                   </button>
                 </div>
               </div>
-
-              {/* BANNER OPCIONAL DE CONFIGURACIÓN DE CLAVE GROQ */}
-              {showKeyConfig && (
-                <div className={styles.apiKeyBanner}>
-                  <div style={{ color: '#D4AF37', fontWeight: 600 }}>Clave de Groq Cloud API (Llama 3 Gratuita)</div>
-                  <div style={{ color: '#888', marginTop: 2 }}>
-                    Obtén tu clave $0 USD en <code>console.groq.com/keys</code> para respuestas con máxima inteligencia.
-                  </div>
-                  <div className={styles.apiKeyInputGroup}>
-                    <input 
-                      type="password" 
-                      value={apiKeyInput}
-                      onChange={e => setApiKeyInput(e.target.value)}
-                      placeholder="gsk_..."
-                    />
-                    <button type="button" onClick={handleSaveApiKey}>Guardar</button>
-                  </div>
-                </div>
-              )}
 
               {/* FEED DE MENSAJES */}
               <div className={styles.messagesContainer}>

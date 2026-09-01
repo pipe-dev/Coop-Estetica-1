@@ -22,9 +22,7 @@ import {
   Plus,
   Trash2,
   Edit2,
-  Mail,
-  Bot,
-  Key
+  Mail
 } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { formatCOP, formatCOPInput, parseCOPInput } from '../../utils/currencyUtils'
@@ -55,7 +53,6 @@ export default function AdminConfiguracion() {
   const [phone, setPhone] = useState(businessConfig?.phone || '3006269056')
   const [ownerEmail, setOwnerEmail] = useState(businessConfig?.ownerEmail || 'duena@catherynerios.com')
   const [adminEmail, setAdminEmail] = useState(businessConfig?.adminEmail || 'admin@catherynerios.com')
-  const [groqApiKey, setGroqApiKey] = useState(() => localStorage.getItem('spa_groq_api_key') || '')
   const [address, setAddress] = useState(businessConfig?.address || 'Calle 123 #45-67, Barrio El Prado')
   const [openingHours, setOpeningHours] = useState(businessConfig?.openingHours || 'Lunes a Sábado: 8:00 AM - 7:00 PM')
   const [instagramUrl, setInstagramUrl] = useState(businessConfig?.instagramUrl || 'https://instagram.com')
@@ -106,7 +103,6 @@ export default function AdminConfiguracion() {
       facebookUrl,
       promoBanner
     })
-    localStorage.setItem('spa_groq_api_key', groqApiKey.trim())
     setSavedSuccess(true)
     setTimeout(() => setSavedSuccess(false), 3500)
   }
@@ -435,36 +431,7 @@ export default function AdminConfiguracion() {
             </div>
           </div>
 
-          {/* CARD 3: INTELIGENCIA ARTIFICIAL & COPILOTO LLAMA 3 */}
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div className={`${styles.iconCircle} ${styles.goldIconCircle}`}>
-                <Bot size={18} />
-              </div>
-              <div>
-                <h3>Copiloto Inteligente Catheryne AI (Meta Llama 3)</h3>
-                <p>Configuración del motor de Inteligencia Artificial para el control ejecutivo del spa.</p>
-              </div>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Clave de Groq Cloud API (Gratuita $0 USD de por vida)</label>
-              <div className={styles.inputWithIcon}>
-                <Key size={16} />
-                <input 
-                  type="password" 
-                  value={groqApiKey} 
-                  onChange={e => setGroqApiKey(e.target.value)} 
-                  placeholder="gsk_..." 
-                />
-              </div>
-              <small className={styles.hint}>
-                Obtén tu clave gratuita en <strong>console.groq.com/keys</strong> para activar Llama 3.3 con razonamiento avanzado de comisiones y agendamiento.
-              </small>
-            </div>
-          </div>
-
-          {/* CARD 4: SEGURIDAD, PIN MAESTRO & ROLES */}
+          {/* CARD 3: SEGURIDAD, PIN MAESTRO & ROLES */}
           <div className={`${styles.card} ${styles.fullWidthCard}`}>
             <div className={styles.cardHeader}>
               <div className={`${styles.iconCircle} ${styles.goldIconCircle}`}>
