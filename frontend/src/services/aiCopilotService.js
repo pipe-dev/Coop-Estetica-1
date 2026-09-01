@@ -4,9 +4,14 @@ import { sanitizeString } from '../utils/securityService'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-// Model Cascade Configuration
-const PRIMARY_MODEL = 'llama-3.3-70b-versatile'
-const FAST_BACKUP_MODEL = 'llama-3.1-8b-instant'
+// Cascada de Modelos de Alta Inteligencia de Groq
+const ACTIVE_MODELS = [
+  'openai/gpt-oss-120b',
+  'qwen/qwen3.8-27b',
+  'qwen/qwen3.6-27b',
+  'groq/compound-mini',
+  'groq/compound'
+]
 
 // Memoria caché semántica ultra-estricta con invalidación instantánea
 const queryCache = new Map()
@@ -169,7 +174,7 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
   // Intentar con cada clave y cascada de modelos
   for (let keyIndex = 0; keyIndex < keysPool.length; keyIndex++) {
     const activeKey = keysPool[keyIndex]
-    const modelsToTry = [PRIMARY_MODEL, FAST_BACKUP_MODEL]
+    const modelsToTry = ACTIVE_MODELS
 
     for (const model of modelsToTry) {
       try {
