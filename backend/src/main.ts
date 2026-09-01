@@ -1,31 +1,40 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // S.H.I.E.L.D. Pillar 21 & 22: Security Headers Middleware
+  // Security & Hardening: Límite estricto de payload para evitar DoS / Memory Exhaustion
+  app.use(json({ limit: '2mb' }));
+  app.use(urlencoded({ extended: true, limit: '2mb' }));
+
+  // Security & Hardening: Cabeceras de protección HTTP (OWASP A05)
   app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
     next();
   });
 
-  // S.H.I.E.L.D. Pillar 2: CORS & Origin Hardening
+  // CORS Hardening
   app.enableCors({
     origin: (origin, callback) => {
-      // Permite solicitudes locales y dominios autorizados de producción
       callback(null, true);
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
-  // S.H.I.E.L.D. Pillar 3 & 4: Validación y Sanitización Estricta de DTOs
+  // Filtro Global de Excepciones Sanitizadas (Previene fuga de stack traces)
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Validación y Sanitización Estricta de DTOs
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
