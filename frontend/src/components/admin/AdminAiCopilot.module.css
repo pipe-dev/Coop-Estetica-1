@@ -238,6 +238,39 @@
 
 .botBubble strong {
   color: #D4AF37;
+  font-weight: 700;
+}
+
+.botBubble em {
+  color: #F0D78C;
+  font-style: italic;
+}
+
+.formattedMsg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msgParagraph {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.msgList {
+  margin: 6px 0 8px 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.msgListItem {
+  line-height: 1.5;
+}
+
+.msgSpacer {
+  height: 6px;
 }
 
 .userBubble {

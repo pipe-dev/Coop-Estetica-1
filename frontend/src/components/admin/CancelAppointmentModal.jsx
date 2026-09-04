@@ -95,7 +95,7 @@ export default function CancelAppointmentModal({ appointment, onClose }) {
                   <option value="Clienta canceló con anticipación">Clienta canceló con anticipación</option>
                   <option value="No asistió a la cita (No-Show / Inasistencia)">No asistió a la cita (No-Show / Inasistencia)</option>
                   <option value="Reprogramación de fecha y hora">Reprogramación de fecha y hora</option>
-                  <option value="Emergencia / Fuerza mayor del Spa">Emergencia / Fuerza mayor del Spa</option>
+                  <option value="Emergencia / Fuerza mayor de la Estética">Emergencia / Fuerza mayor de la Estética</option>
                   <option value="Error involuntario al agendar">Error involuntario al agendar</option>
                   <option value="Otro motivo justificado">Otro motivo justificado</option>
                 </select>

@@ -692,7 +692,7 @@ export default function AdminCaja() {
                     <div className={styles.diffHeroAmount}>
                       +${currentDiscrepancy.toLocaleString()} COP
                     </div>
-                    <span style={{ fontSize: '0.78rem' }}>Se registrará el sobrante a favor de la caja del spa.</span>
+                    <span style={{ fontSize: '0.78rem' }}>Se registrará el sobrante a favor de la caja de la estética.</span>
                   </div>
                 )}
 
@@ -703,10 +703,10 @@ export default function AdminCaja() {
                       <div className={styles.formGroup}>
                         <label>Solución / Método de Saneamiento del Descuadre *</label>
                         <select value={closeResolutionType} onChange={e => setCloseResolutionType(e.target.value)} required>
-                          <option value="Reposición Responsable">🙋 Reposición Directa por Trabajadora (Descuento de Nómina o Entrega)</option>
-                          <option value="Asumido por el Spa (Pérdida)">🏢 Asumido por el Spa como Pérdida Operativa</option>
-                          <option value="Error de Facturación / Digitador">📝 Ajuste por Error de Facturación o Vuelto Mal Entregado</option>
-                          <option value="Ajuste de Sobrante">💵 Registro de Sobrante Operativo en Caja</option>
+                          <option value="Reposición Responsable">Reposición Directa por Trabajadora (Descuento de Nómina o Entrega)</option>
+                          <option value="Asumido por la Estética (Pérdida)">Asumido por la Estética como Pérdida Operativa</option>
+                          <option value="Error de Facturación / Digitador">Ajuste por Error de Facturación o Vuelto Mal Entregado</option>
+                          <option value="Ajuste de Sobrante">Registro de Sobrante Operativo en Caja</option>
                         </select>
                       </div>
 

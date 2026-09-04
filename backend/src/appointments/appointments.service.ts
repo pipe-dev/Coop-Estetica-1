@@ -146,8 +146,8 @@ export class AppointmentsService {
 
     const ownerEmail = config?.ownerEmail || 'duena@catherynerios.com';
     const adminEmail = config?.adminEmail || 'admin@catherynerios.com';
-    const spaAddress = config?.address || 'Calle 123 #45-67, Barrio El Prado';
-    const spaPhone = config?.whatsappNumber || '3006269056';
+    const businessAddress = config?.address || 'Calle 123 #45-67, Barrio El Prado';
+    const businessPhone = config?.whatsappNumber || '3006269056';
 
     // Obtener correo de la especialista si no venía en el objeto
     let specialistEmail = details.specialistEmail;
@@ -165,8 +165,8 @@ export class AppointmentsService {
       mailPromises.push(
         this.sendClientConfirmationEmail(details.clientEmail, {
           ...details,
-          address: spaAddress,
-          phone: spaPhone,
+          address: businessAddress,
+          phone: businessPhone,
         })
       );
     }

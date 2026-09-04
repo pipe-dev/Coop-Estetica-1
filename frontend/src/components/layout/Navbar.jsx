@@ -5,7 +5,7 @@ import Button from '../ui/Button'
 import SlideTabs from '../ui/SlideTabs'
 import LiquidGlassIos26 from '../ui/LiquidGlassIos26'
 import styles from './Navbar.module.css'
-/* ⚠️ NOTA: "ÁUREA SPA" es placeholder. Cambiar cuando se defina el nombre real. */
+/* Catheryne Ríos Estética — Navbar Principal */
 
 const navLinks = [
   { name: 'Inicio', path: '/' },

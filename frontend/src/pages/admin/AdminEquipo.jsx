@@ -196,7 +196,7 @@ export default function AdminEquipo() {
                 </div>
 
                 <div className={styles.salonRetentionRow}>
-                  <span>Retención Neta para el Spa:</span>
+                  <span>Retención Neta para la Estética:</span>
                   <span>${stats.salonRetention.toLocaleString()} COP</span>
                 </div>
               </div>

@@ -20,7 +20,7 @@ const fadeInUp = {
 }
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
-const getSpaStatus = () => {
+const getEsteticaStatus = () => {
   const now = new Date()
   const day = now.getDay()
   const hour = now.getHours()
@@ -35,7 +35,7 @@ const baseImages = [
   { id: 3, src: '/images/service_facial.png', category: 'rostro', alt: 'Tratamiento facial', title: 'TRATAMIENTOS FACIALES', subtitle: 'Rejuvenecimiento & Cuidado Facial', cta: 'AGENDAR FACIAL' },
   { id: 4, src: '/images/service_makeup.png', category: 'maquillaje', alt: 'Maquillaje profesional', title: 'MAQUILLAJE PROFESIONAL', subtitle: 'Maquillaje Social & Eventos', cta: 'AGENDAR MAQUILLAJE' },
   { id: 5, src: '/images/service_body.png', category: 'cuerpo', alt: 'Tratamiento corporal', title: 'TRATAMIENTOS CORPORALES', subtitle: 'Masajes & Terapias Corporales', cta: 'AGENDAR CORPORAL' },
-  { id: 6, src: '/images/hero_spa_interior.png', category: 'spa', alt: 'Interior del spa', title: 'EXPERIENCIA SPA', subtitle: 'Sanctuary & Relajación Total', cta: 'AGENDAR EXPERIENCIA' },
+  { id: 6, src: '/images/hero_spa_interior.png', category: 'estetica', alt: 'Interior de la estética', title: 'EXPERIENCIA ESTÉTICA', subtitle: 'Sanctuary & Relajación Total', cta: 'AGENDAR EXPERIENCIA' },
 ]
 
 // Duplicate images to create a fuller cylinder (12 images)
@@ -48,7 +48,7 @@ function About() {
   const [selectedMember, setSelectedMember] = useState(null)
   const [lightbox, setLightbox] = useState(null)
 
-  const spaStatus = getSpaStatus()
+  const esteticaStatus = getEsteticaStatus()
 
   // Close lightbox on scroll
   useEffect(() => {
@@ -176,9 +176,9 @@ function About() {
               <SectionTitle subtitle="Visítanos" title="Información de Contacto" align="center" />
               
               {/* Dynamic Status Pill */}
-              <div className={`${styles.statusBadge} ${spaStatus.isOpen ? styles.statusOpen : styles.statusClosed}`}>
+              <div className={`${styles.statusBadge} ${esteticaStatus.isOpen ? styles.statusOpen : styles.statusClosed}`}>
                 <span className={styles.statusDot} />
-                <span>{spaStatus.text}</span>
+                <span>{esteticaStatus.text}</span>
               </div>
             </motion.div>
 

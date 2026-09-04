@@ -17,7 +17,7 @@ function GiftCards() {
             Personaliza tu <span className={styles.accent}>Bono de Regalo</span>
           </motion.h1>
           <motion.p className={styles.heroDesc} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            Diseña una tarjeta digital dorada para regalar una experiencia inolvidable de spa y estética
+            Diseña una tarjeta digital dorada para regalar una experiencia inolvidable de belleza y estética integral
           </motion.p>
         </div>
       </section>

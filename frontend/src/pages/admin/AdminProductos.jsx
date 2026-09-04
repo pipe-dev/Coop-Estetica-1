@@ -10,7 +10,7 @@ import styles from './AdminProductos.module.css'
 const PRESET_IMAGES = [
   { name: 'Sérum / Elixir', url: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=600&auto=format&fit=crop' },
   { name: 'Crema Facial', url: 'https://images.unsplash.com/photo-1599305090598-fe179d501227?q=80&w=600&auto=format&fit=crop' },
-  { name: 'Exfoliante / Spa', url: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=600&auto=format&fit=crop' },
+  { name: 'Exfoliante / Corporal', url: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=600&auto=format&fit=crop' },
   { name: 'Aceite Corporal', url: 'https://images.unsplash.com/photo-1617897903246-719242758050?q=80&w=600&auto=format&fit=crop' },
   { name: 'Kit / Cuidado Uñas', url: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=600&auto=format&fit=crop' }
 ]

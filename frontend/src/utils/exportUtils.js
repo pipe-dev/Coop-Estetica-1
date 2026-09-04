@@ -181,7 +181,7 @@ export function exportPayrollReport(teamMembers, appointments = []) {
     'Citas Pagadas Atendidas',
     'Total Facturado Bruto ($ COP)',
     'Pago Neto Nómina ($ COP)',
-    'Retención Spa ($ COP)'
+    'Retención Estética ($ COP)'
   ]
 
   const rows = teamMembers.map(m => {

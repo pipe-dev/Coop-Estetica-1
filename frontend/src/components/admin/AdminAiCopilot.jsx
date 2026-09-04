@@ -19,20 +19,100 @@ import { useAdmin } from '../../context/AdminContext'
 import { sendChatMessageToCopilot } from '../../services/aiCopilotService'
 import styles from './AdminAiCopilot.module.css'
 
+function formatInline(text) {
+  if (!text) return ''
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    if ((part.startsWith('*') && part.endsWith('*')) || (part.startsWith('_') && part.endsWith('_'))) {
+      return <em key={i}>{part.slice(1, -1)}</em>
+    }
+    return part
+  })
+}
+
+function renderFormattedMessage(content) {
+  if (!content) return null
+
+  const lines = content.split('\n')
+  const elements = []
+  let currentList = []
+  let listType = null // 'ul' | 'ol'
+
+  const flushList = () => {
+    if (currentList.length > 0) {
+      if (listType === 'ol') {
+        elements.push(<ol key={`ol-${elements.length}`} className={styles.msgList}>{currentList}</ol>)
+      } else {
+        elements.push(<ul key={`ul-${elements.length}`} className={styles.msgList}>{currentList}</ul>)
+      }
+      currentList = []
+      listType = null
+    }
+  }
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim()
+
+    // Bullet list item
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      if (listType !== 'ul') flushList()
+      listType = 'ul'
+      const itemText = trimmed.slice(2)
+      currentList.push(
+        <li key={`li-${index}`} className={styles.msgListItem}>
+          {formatInline(itemText)}
+        </li>
+      )
+      return
+    }
+
+    // Numbered list item
+    const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/)
+    if (numMatch) {
+      if (listType !== 'ol') flushList()
+      listType = 'ol'
+      currentList.push(
+        <li key={`li-${index}`} className={styles.msgListItem}>
+          {formatInline(numMatch[2])}
+        </li>
+      )
+      return
+    }
+
+    flushList()
+
+    if (!trimmed) {
+      elements.push(<div key={`spacer-${index}`} className={styles.msgSpacer} />)
+    } else {
+      elements.push(
+        <p key={`p-${index}`} className={styles.msgParagraph}>
+          {formatInline(line)}
+        </p>
+      )
+    }
+  })
+
+  flushList()
+  return <div className={styles.formattedMsg}>{elements}</div>
+}
+
 const INITIAL_GREETING = {
   role: 'assistant',
   content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva de operaciones.\n\n` +
-           `Tengo acceso en tiempo real a tus citas de hoy, reportes de caja, comisiones de las especialistas, inventario y fichas de clientas.\n\n` +
+           `Tengo acceso en tiempo real a tus citas de hoy, reportes de caja, liquidación de especialistas, inventario y clientas de la estética.\n\n` +
            `¿En qué te ayudo hoy?`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
 const QUICK_SUGGESTIONS = [
-  '¿Cuánto le debo pagar a Valentina hoy?',
   '¿Cómo va el reporte de caja de hoy?',
-  '¿Qué notas tiene la clienta Mariana López?',
-  'Agendar una cita rápida',
-  'Bloquear un festivo o vacaciones'
+  '¿Qué citas tenemos programadas para hoy?',
+  '¿Cuánto se le debe pagar a las especialistas hoy?',
+  '¿Qué día es hoy?',
+  'Bloquear un festivo o cierre'
 ]
 
 export default function AdminAiCopilot() {
@@ -143,7 +223,7 @@ export default function AdminAiCopilot() {
         clientName: data.clientName || 'Clienta',
         clientPhone: data.clientPhone || '3000000000',
         serviceId: matchedSrv?.id || 'srv-1',
-        serviceName: data.serviceName || matchedSrv?.name || 'Servicio Spa',
+        serviceName: data.serviceName || matchedSrv?.name || 'Tratamiento Estética',
         specialistId: matchedSp?.id || 'team-1',
         specialistName: data.specialistName || matchedSp?.name || 'Catheryne Ríos',
         date: data.date || new Date().toISOString().split('T')[0],
@@ -277,8 +357,8 @@ export default function AdminAiCopilot() {
                   <div>
                     <h3 className={styles.headerTitle}>Catheryne AI</h3>
                     <p className={styles.headerSubtitle}>
-                      <span>Copiloto de Operaciones</span>
-                      <span className={styles.modelBadge}>Meta Llama 3.3</span>
+                      <span>Copiloto Ejecutiva</span>
+                      <span className={styles.modelBadge}>IA Estética</span>
                     </p>
                   </div>
                 </div>
@@ -314,7 +394,7 @@ export default function AdminAiCopilot() {
                       className={`${styles.messageRow} ${isUser ? styles.userRow : ''}`}
                     >
                       <div className={`${styles.bubble} ${isUser ? styles.userBubble : styles.botBubble}`}>
-                        <div>{msg.content}</div>
+                        {renderFormattedMessage(msg.content)}
 
                         {/* TARJETA VISUAL SI SE EJECUTÓ UNA ACCIÓN */}
                         {msg.action && (

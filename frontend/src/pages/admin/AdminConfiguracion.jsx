@@ -602,7 +602,7 @@ export default function AdminConfiguracion() {
                   <label>Motivo o Nota Explicativa</label>
                   <input
                     type="text"
-                    placeholder="Ej. Día de la Independencia / Mantenimiento de Spa"
+                    placeholder="Ej. Día de la Independencia / Mantenimiento de la Estética"
                     value={newCloseReason}
                     onChange={e => setNewCloseReason(e.target.value)}
                   />
