@@ -22,6 +22,21 @@ export const sanitizeString = (input, maxLength = 500) => {
 }
 
 /**
+ * Sanitización segura para Prompts y Mensajes de Chat / IA
+ * Elimina scripts y etiquetas maliciosas sin corromper comillas, apóstrofes o caracteres de formato
+ */
+export const sanitizeChatText = (input, maxLength = 2000) => {
+  if (typeof input !== 'string') return ''
+  const clean = input
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .trim()
+  return clean.length > maxLength ? clean.slice(0, maxLength) : clean
+}
+
+
+/**
  * 2. Rate Limiter en Cliente con Ventana Deslizante (Pillar 5)
  * Bloquea ráfagas de spam antes de que toquen la red.
  */

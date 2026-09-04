@@ -1,6 +1,4 @@
-// S.H.I.E.L.D. Compliant AI Copilot Engine - Free Tier Multiplier & Optimizer
-// Features: Multi-Key Load Balancer + Model Cascading + Dynamic Live Context + Semantic Cache
-import { sanitizeString } from '../utils/securityService'
+import { sanitizeChatText } from '../utils/securityService'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
@@ -183,7 +181,7 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
     { role: 'system', content: systemPrompt },
     ...messages.slice(-8).map(m => ({
       role: m.role === 'user' ? 'user' : 'assistant',
-      content: sanitizeString(m.content, 1500)
+      content: sanitizeChatText(m.content, 2000)
     }))
   ]
 

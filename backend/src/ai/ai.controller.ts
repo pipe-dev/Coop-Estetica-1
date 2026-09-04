@@ -8,8 +8,6 @@ import { Roles } from '../common/decorators/roles.decorator';
 export class AiController {
   constructor(private readonly aiService: AiService) {}
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('OWNER', 'ADMIN', 'SPECIALIST')
   @Post('chat')
   async chat(@Body() body: { messages: any[] }) {
     return this.aiService.generateChatCompletion(body.messages || []);
