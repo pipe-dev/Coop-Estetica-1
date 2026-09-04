@@ -48,17 +48,34 @@ export default function AdminConfiguracion() {
   const [activeTab, setActiveTab] = useState('general') // 'general' | 'membresias' | 'cierres'
 
   // General Form State
-  const [businessName, setBusinessName] = useState(businessConfig?.businessName || 'Catheryne Ríos Estética')
-  const [whatsappNumber, setWhatsappNumber] = useState(businessConfig?.whatsappNumber || '3006269056')
-  const [phone, setPhone] = useState(businessConfig?.phone || '3006269056')
-  const [ownerEmail, setOwnerEmail] = useState(businessConfig?.ownerEmail || 'duena@catherynerios.com')
-  const [adminEmail, setAdminEmail] = useState(businessConfig?.adminEmail || 'admin@catherynerios.com')
-  const [address, setAddress] = useState(businessConfig?.address || 'Calle 123 #45-67, Barrio El Prado')
-  const [openingHours, setOpeningHours] = useState(businessConfig?.openingHours || 'Lunes a Sábado: 8:00 AM - 7:00 PM')
-  const [instagramUrl, setInstagramUrl] = useState(businessConfig?.instagramUrl || 'https://instagram.com')
-  const [tiktokUrl, setTiktokUrl] = useState(businessConfig?.tiktokUrl || 'https://tiktok.com')
-  const [facebookUrl, setFacebookUrl] = useState(businessConfig?.facebookUrl || 'https://facebook.com')
-  const [promoBanner, setPromoBanner] = useState(businessConfig?.promoBanner || 'Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.')
+  const [businessName, setBusinessName] = useState(businessConfig?.businessName || '')
+  const [whatsappNumber, setWhatsappNumber] = useState(businessConfig?.whatsappNumber || '')
+  const [phone, setPhone] = useState(businessConfig?.phone || '')
+  const [ownerEmail, setOwnerEmail] = useState(businessConfig?.ownerEmail || '')
+  const [adminEmail, setAdminEmail] = useState(businessConfig?.adminEmail || '')
+  const [address, setAddress] = useState(businessConfig?.address || '')
+  const [openingHours, setOpeningHours] = useState(businessConfig?.openingHours || '')
+  const [instagramUrl, setInstagramUrl] = useState(businessConfig?.instagramUrl || '')
+  const [tiktokUrl, setTiktokUrl] = useState(businessConfig?.tiktokUrl || '')
+  const [facebookUrl, setFacebookUrl] = useState(businessConfig?.facebookUrl || '')
+  const [promoBanner, setPromoBanner] = useState(businessConfig?.promoBanner || '')
+
+  // Sync form state when businessConfig loads or updates
+  React.useEffect(() => {
+    if (businessConfig) {
+      setBusinessName(businessConfig.businessName || '')
+      setWhatsappNumber(businessConfig.whatsappNumber || '')
+      setPhone(businessConfig.phone || '')
+      setOwnerEmail(businessConfig.ownerEmail || '')
+      setAdminEmail(businessConfig.adminEmail || '')
+      setAddress(businessConfig.address || '')
+      setOpeningHours(businessConfig.openingHours || '')
+      setInstagramUrl(businessConfig.instagramUrl || '')
+      setTiktokUrl(businessConfig.tiktokUrl || '')
+      setFacebookUrl(businessConfig.facebookUrl || '')
+      setPromoBanner(businessConfig.promoBanner || '')
+    }
+  }, [businessConfig])
   
   // Status message
   const [savedSuccess, setSavedSuccess] = useState(false)
@@ -274,7 +291,7 @@ export default function AdminConfiguracion() {
                 type="text" 
                 value={businessName} 
                 onChange={e => setBusinessName(e.target.value)} 
-                placeholder="Catheryne Ríos Estética"
+                placeholder="Ej: Catheryne Ríos Estética"
                 required 
               />
             </div>
@@ -288,7 +305,7 @@ export default function AdminConfiguracion() {
                     type="text" 
                     value={whatsappNumber} 
                     onChange={e => setWhatsappNumber(e.target.value.replace(/\D/g, ''))} 
-                    placeholder="3006269056"
+                    placeholder="Ej: 3006269056"
                     required 
                   />
                 </div>
@@ -303,7 +320,7 @@ export default function AdminConfiguracion() {
                     type="text" 
                     value={phone} 
                     onChange={e => setPhone(e.target.value)} 
-                    placeholder="3006269056" 
+                    placeholder="Ej: 3006269056" 
                   />
                 </div>
               </div>
@@ -317,7 +334,7 @@ export default function AdminConfiguracion() {
                   type="text" 
                   value={address} 
                   onChange={e => setAddress(e.target.value)} 
-                  placeholder="Calle 123 #45-67, Barrio El Prado" 
+                  placeholder="Ej: Calle 123 #45-67, Barrio El Prado" 
                 />
               </div>
             </div>
@@ -330,7 +347,7 @@ export default function AdminConfiguracion() {
                   type="text" 
                   value={openingHours} 
                   onChange={e => setOpeningHours(e.target.value)} 
-                  placeholder="Lunes a Sábado: 8:00 AM - 7:00 PM" 
+                  placeholder="Ej: Lunes a Sábado: 8:00 AM - 7:00 PM" 
                 />
               </div>
             </div>
@@ -344,7 +361,7 @@ export default function AdminConfiguracion() {
                     type="email" 
                     value={ownerEmail} 
                     onChange={e => setOwnerEmail(e.target.value)} 
-                    placeholder="duena@catherynerios.com" 
+                    placeholder="Ej: duena@catherynerios.com" 
                   />
                 </div>
                 <small className={styles.hint}>Recibe el resumen ejecutivo de cada nueva cita.</small>
@@ -358,7 +375,7 @@ export default function AdminConfiguracion() {
                     type="email" 
                     value={adminEmail} 
                     onChange={e => setAdminEmail(e.target.value)} 
-                    placeholder="admin@catherynerios.com" 
+                    placeholder="Ej: admin@catherynerios.com" 
                   />
                 </div>
                 <small className={styles.hint}>Recibe la alerta para preparar cabina e insumos.</small>
@@ -386,7 +403,7 @@ export default function AdminConfiguracion() {
                   type="url" 
                   value={instagramUrl} 
                   onChange={e => setInstagramUrl(e.target.value)} 
-                  placeholder="https://instagram.com/tu_estetica" 
+                  placeholder="Ej: https://instagram.com/tu_estetica" 
                 />
               </div>
             </div>
@@ -400,7 +417,7 @@ export default function AdminConfiguracion() {
                     type="url" 
                     value={tiktokUrl} 
                     onChange={e => setTiktokUrl(e.target.value)} 
-                    placeholder="https://tiktok.com/@tu_estetica" 
+                    placeholder="Ej: https://tiktok.com/@tu_estetica" 
                   />
                 </div>
               </div>
@@ -413,7 +430,7 @@ export default function AdminConfiguracion() {
                     type="url" 
                     value={facebookUrl} 
                     onChange={e => setFacebookUrl(e.target.value)} 
-                    placeholder="https://facebook.com/tu_estetica" 
+                    placeholder="Ej: https://facebook.com/tu_estetica" 
                   />
                 </div>
               </div>

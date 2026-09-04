@@ -11,7 +11,7 @@ import { clearCopilotCache } from '../services/aiCopilotService'
 
 const AdminContext = createContext()
 
-const CURRENT_STORAGE_VERSION = '2026_VIRGIN_PURE_V1'
+const CURRENT_STORAGE_VERSION = '2026_VIRGIN_PURE_V2'
 try {
   if (typeof window !== 'undefined' && localStorage.getItem('spa_storage_version') !== CURRENT_STORAGE_VERSION) {
     const keysToPurge = [
@@ -39,15 +39,17 @@ const todayStr = getLocalDateString()
 const initialClosedDates = []
 
 const initialBusinessConfig = {
-  businessName: 'Catheryne Ríos Estética',
-  whatsappNumber: '3006269056',
-  phone: '3006269056',
-  address: 'Calle 123 #45-67, Barrio El Prado',
-  openingHours: 'Lunes a Sábado: 8:00 AM - 7:00 PM',
-  instagramUrl: 'https://instagram.com',
-  tiktokUrl: 'https://tiktok.com',
-  facebookUrl: 'https://facebook.com',
-  promoBanner: 'Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.',
+  businessName: '',
+  whatsappNumber: '',
+  phone: '',
+  address: '',
+  openingHours: '',
+  instagramUrl: '',
+  tiktokUrl: '',
+  facebookUrl: '',
+  promoBanner: '',
+  ownerEmail: '',
+  adminEmail: '',
   masterPin: '2026'
 }
 

@@ -4,9 +4,9 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Iniciando limpieza total del ecosistema (Modo Virgen)...');
+  console.log('Iniciando reseteo 100% Virgen (Campos en blanco)...');
 
-  // 1. Eliminar datos operativos en orden de dependencias
+  // 1. Eliminar datos operativos
   await prisma.transaction.deleteMany();
   await prisma.cashSession.deleteMany();
   await prisma.appointment.deleteMany();
@@ -20,51 +20,49 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.teamMember.deleteMany();
 
-  console.log('Tablas operativas vaciadas con éxito.');
-
   const defaultPasswordHash = await bcrypt.hash('admin123', 10);
   const defaultMasterPinHash = await bcrypt.hash('2026', 10);
 
-  // 2. Configuración Base del Negocio
+  // 2. Configuración Base 100% Virgen (Todo en blanco para llenado de la dueña)
   await prisma.businessConfig.upsert({
     where: { id: 'singleton' },
     update: {
-      businessName: 'Catheryne Ríos Estética',
-      whatsappNumber: '3006269056',
-      phone: '3006269056',
-      address: 'Calle 123 #45-67, Barrio El Prado',
-      openingHours: 'Lunes a Sábado: 8:00 AM - 7:00 PM',
-      instagramUrl: 'https://instagram.com',
-      tiktokUrl: 'https://tiktok.com',
-      facebookUrl: 'https://facebook.com',
-      promoBanner: 'Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.',
-      ownerEmail: 'duena@catherynerios.com',
-      adminEmail: 'admin@catherynerios.com',
+      businessName: '',
+      whatsappNumber: '',
+      phone: '',
+      address: '',
+      openingHours: '',
+      instagramUrl: '',
+      tiktokUrl: '',
+      facebookUrl: '',
+      promoBanner: '',
+      ownerEmail: '',
+      adminEmail: '',
       masterPinHash: defaultMasterPinHash,
     },
     create: {
       id: 'singleton',
-      businessName: 'Catheryne Ríos Estética',
-      whatsappNumber: '3006269056',
-      phone: '3006269056',
-      address: 'Calle 123 #45-67, Barrio El Prado',
-      openingHours: 'Lunes a Sábado: 8:00 AM - 7:00 PM',
-      instagramUrl: 'https://instagram.com',
-      tiktokUrl: 'https://tiktok.com',
-      facebookUrl: 'https://facebook.com',
-      promoBanner: 'Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.',
-      ownerEmail: 'duena@catherynerios.com',
-      adminEmail: 'admin@catherynerios.com',
+      businessName: '',
+      whatsappNumber: '',
+      phone: '',
+      address: '',
+      openingHours: '',
+      instagramUrl: '',
+      tiktokUrl: '',
+      facebookUrl: '',
+      promoBanner: '',
+      ownerEmail: '',
+      adminEmail: '',
       masterPinHash: defaultMasterPinHash,
     },
   });
 
-  // 3. Usuarios Administradores Base (Sin datos de prueba asociados)
+  // 3. Usuarios Administradores Base (Sin datos hardcodeados de prueba)
   await prisma.user.create({
     data: {
       email: 'duena@catherynerios.com',
       passwordHash: defaultPasswordHash,
-      name: 'Catheryne Ríos (Dueña)',
+      name: 'Dueña',
       role: Role.OWNER,
       active: true,
     },
@@ -74,13 +72,13 @@ async function main() {
     data: {
       email: 'admin@catherynerios.com',
       passwordHash: defaultPasswordHash,
-      name: 'Administración & Recepción',
+      name: 'Administración',
       role: Role.ADMIN,
       active: true,
     },
   });
 
-  console.log('Base de datos en Modo Virgen: Lista para ser alimentada desde el Panel de Administración.');
+  console.log('Base de datos 100% Virgen: Todos los campos en blanco.');
 }
 
 main()
