@@ -274,6 +274,20 @@ export function parseAgentResponse(rawText) {
     }
   }
 
+  // Si el modelo solo emitió el bloque de acción, generar confirmación clara y cálida
+  if (!cleanText && action) {
+    if (action.action === 'CREATE_APPOINTMENT') {
+      const data = action.data || {}
+      cleanText = `¡Listo! He procesado y agendado la cita para **${data.clientName || 'la clienta'}** (*${data.serviceName || 'Tratamiento'}*) para el día **${data.date}** a las **${data.time}** con **${data.specialistName || 'Catheryne Ríos'}**.`
+    } else if (action.action === 'CREATE_PRODUCT') {
+      const data = action.data || {}
+      cleanText = `¡Hecho! He dado de alta el producto **${data.name}** en la boutique con un precio de **$${(data.price || 0).toLocaleString()} COP** y stock de **${data.stock || 1}** unidades.`
+    } else if (action.action === 'BLOCK_DATE') {
+      const data = action.data || {}
+      cleanText = `¡Entendido! He bloqueado la fecha **${data.date}** en el calendario de reservas (*${data.reason || 'Cierre Administrativo'}*).`
+    }
+  }
+
   return {
     text: cleanText,
     action: action
