@@ -24,18 +24,29 @@ import { sendChatMessageToCopilot, cleanAndNormalizeVoiceText } from '../../serv
 import styles from './AdminAiCopilot.module.css'
 
 /**
- * Limpia etiquetas Markdown y bloques de código para una locución fluida y natural
+ * Limpia etiquetas Markdown, emojis y bloques técnicos para una locución fluida,
+ * humana y natural, pronunciando precios y números en pesos colombianos.
  */
 function extractPlainTextForSpeech(content) {
   if (!content) return ''
   return content
+    // Eliminar bloques de acción y código
     .replace(/```action[\s\S]*?```/gi, '')
     .replace(/```[\s\S]*?```/g, '')
+    // Eliminar etiquetas HTML
     .replace(/<[^>]*>/g, '')
+    // Convertir enlaces markdown en texto normal
     .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    // Pronunciación natural de precios colombianos ($150.000 COP -> 150.000 pesos)
+    .replace(/\$\s*([\d.]+)\s*(?:COP|cop)?/gi, '$1 pesos')
+    .replace(/\bCOP\b/gi, 'pesos')
+    // Eliminar símbolos de markdown
     .replace(/[*_~`#|>]/g, '')
-    .replace(/👉|🎉|💡|⚠️|✨|🚀|📊/g, '')
-    .replace(/•|-|\+/g, '')
+    // Eliminar todos los emojis Unicode para que el lector no pronuncie descripciones extrañas
+    .replace(/\p{Extended_Pictographic}/gu, '')
+    // Viñetas a pausas naturales
+    .replace(/^[ \t]*[•\-+*]\s+/gm, '')
+    // Saltos de línea a pausas suaves con punto
     .replace(/\n+/g, '. ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -453,6 +464,7 @@ export default function AdminAiCopilot() {
   const latestAssistantMsgRef = useRef(null)
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
+  const activeUtteranceRef = useRef(null)
 
   // Carga y ordenamiento de voces ultra-humanas del navegador
   useEffect(() => {
@@ -500,6 +512,7 @@ export default function AdminAiCopilot() {
         synthRef.current.cancel()
       } catch (e) {}
     }
+    activeUtteranceRef.current = null
     setSpeakingMessageIndex(null)
   }
 
@@ -519,7 +532,13 @@ export default function AdminAiCopilot() {
     if (!textToSpeak) return
 
     try {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume()
+      }
+
       const utterance = new SpeechSynthesisUtterance(textToSpeak)
+      activeUtteranceRef.current = utterance // Blindaje crítico: Evita que el Garbage Collector de Chromium corte el audio
+
       const voice = getBestSpanishFemaleVoice(selectedVoiceURI)
       if (voice) {
         utterance.voice = voice
@@ -539,16 +558,25 @@ export default function AdminAiCopilot() {
       }
       utterance.onend = () => {
         setSpeakingMessageIndex(null)
+        activeUtteranceRef.current = null
       }
       utterance.onerror = (e) => {
         console.warn('Error en síntesis de voz:', e)
         setSpeakingMessageIndex(null)
+        activeUtteranceRef.current = null
       }
 
-      synthRef.current.speak(utterance)
+      // En navegadores Chromium, un retraso de 35ms tras cancel() garantiza inicio fluido
+      setTimeout(() => {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume()
+        }
+        synthRef.current?.speak(utterance)
+      }, 35)
     } catch (err) {
       console.warn('No se pudo reproducir audio:', err)
       setSpeakingMessageIndex(null)
+      activeUtteranceRef.current = null
     }
   }
 
@@ -634,16 +662,15 @@ export default function AdminAiCopilot() {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
 
-      setMessages(prev => {
-        const nextMsgs = [...prev, botMsg]
-        // Si la voz está activada, iniciar locución automática
-        if (isVoiceEnabled && botMsg.content) {
-          setTimeout(() => {
-            speakMessage(botMsg.content, nextMsgs.length - 1)
-          }, 250)
-        }
-        return nextMsgs
-      })
+      const targetIndex = messages.length + 1
+      setMessages(prev => [...prev, botMsg])
+
+      // Si la voz está activada, iniciar locución automática de Catheryne AI
+      if (isVoiceEnabled && botMsg.content) {
+        setTimeout(() => {
+          speakMessage(botMsg.content, targetIndex)
+        }, 150)
+      }
 
       // Si el modelo emitió una acción, ejecutarla en el sistema
       if (response.action) {
