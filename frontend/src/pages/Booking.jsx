@@ -339,19 +339,59 @@ function Booking() {
                     <p className={styles.stepSubtitle}>Selecciona el área que deseas consentir hoy</p>
                   </div>
 
-                  <div className={styles.categoriesGrid}>
-                    {currentCategories.map(cat => (
-                      <div
-                        key={cat.id}
-                        className={`${styles.categoryCard} ${booking.category === cat.id ? styles.categorySelected : ''}`}
-                        onClick={() => handleCategorySelect(cat.id)}
+                  {currentCategories.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '40px 20px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(212,175,55,0.2)',
+                      borderRadius: 16,
+                      maxWidth: 600,
+                      margin: '20px auto'
+                    }}>
+                      <Sparkles size={32} style={{ color: '#D4AF37', marginBottom: 12 }} />
+                      <h3 style={{ color: '#FEFEFE', fontFamily: 'var(--font-heading)', fontSize: 20, marginBottom: 8 }}>
+                        Agenda Digital en Actualización
+                      </h3>
+                      <p style={{ color: '#A3A3A3', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
+                        Estamos configurando nuevos servicios y horarios de atención. Puedes reservar tu cita prioritaria directamente comunicándote a nuestra línea oficial de WhatsApp.
+                      </p>
+                      <a
+                        href="https://wa.me/573006269056"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 10,
+                          background: 'linear-gradient(135deg, #D4AF37 0%, #AA820A 100%)',
+                          color: '#0D0D0D',
+                          padding: '12px 24px',
+                          borderRadius: 9999,
+                          fontWeight: 700,
+                          fontSize: 14,
+                          textDecoration: 'none'
+                        }}
                       >
-                        <img src={cat.image} alt={cat.name} className={styles.categoryImg} />
-                        <div className={styles.categoryOverlay} />
-                        <span className={styles.categoryName}>{cat.name}</span>
-                      </div>
-                    ))}
-                  </div>
+                        <MessageSquare size={18} />
+                        <span>Agendar por WhatsApp</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <div className={styles.categoriesGrid}>
+                      {currentCategories.map(cat => (
+                        <div
+                          key={cat.id}
+                          className={`${styles.categoryCard} ${booking.category === cat.id ? styles.categorySelected : ''}`}
+                          onClick={() => handleCategorySelect(cat.id)}
+                        >
+                          <img src={cat.image} alt={cat.name} className={styles.categoryImg} />
+                          <div className={styles.categoryOverlay} />
+                          <span className={styles.categoryName}>{cat.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               )}
 

@@ -6,6 +6,7 @@ import SectionTitle from '../components/ui/SectionTitle'
 import Button from '../components/ui/Button'
 import { CylinderCarousel } from '../components/ui/CylinderCarousel'
 import GiftCardCustomizer from '../components/ui/GiftCardCustomizer'
+import { useAdmin } from '../context/AdminContext'
 import { team } from '../data/team'
 import { FaWhatsapp, FaInstagram, FaFacebookF, FaTiktok } from 'react-icons/fa6'
 import styles from './About.module.css'
@@ -41,6 +42,9 @@ const baseImages = [
 const galleryImages = [...baseImages, ...baseImages.map(img => ({ ...img, id: img.id + 6 }))]
 
 function About() {
+  const { teamMembers, businessConfig } = useAdmin()
+  const currentTeam = teamMembers && teamMembers.length > 0 ? teamMembers : team
+
   const [selectedMember, setSelectedMember] = useState(null)
   const [lightbox, setLightbox] = useState(null)
 
@@ -77,7 +81,6 @@ function About() {
   return (
     <main className={styles.about}>
 
-
       {/* TEAM SECTION */}
       <section className={styles.teamSection}>
         <div className="container">
@@ -86,36 +89,52 @@ function About() {
             title="Expertos a tu disposición"
             description="Conoce a los profesionales encargados de resaltar tu belleza."
           />
-          <motion.div
-            className={styles.teamGrid}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-60px' }}
-            variants={stagger}
-          >
-            {team.map((member, i) => (
-              <motion.div
-                key={member.id}
-                className={styles.memberCard}
-                variants={fadeInUp}
-                custom={i}
-                whileHover={{ y: -8 }}
-                onClick={() => setSelectedMember(member)}
-              >
-                <div className={styles.memberImageWrapper}>
-                  <img src={member.avatar} alt={member.name} className={styles.memberImage} />
-                  <div className={styles.memberOverlay}>
-                    <span className={styles.viewMore}>Ver perfil</span>
+          {currentTeam.length === 0 ? (
+            <div style={{
+              textAlign: 'center',
+              padding: '30px 20px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(212,175,55,0.15)',
+              borderRadius: 16,
+              maxWidth: 550,
+              margin: '0 auto'
+            }}>
+              <p style={{ color: '#A3A3A3', fontSize: 14, lineHeight: 1.6 }}>
+                En {businessConfig?.businessName || 'Catheryne Ríos Estética'} contamos con un equipo altamente calificado y en constante actualización para brindarte la mejor experiencia de cuidado y bienestar.
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              className={styles.teamGrid}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-60px' }}
+              variants={stagger}
+            >
+              {currentTeam.map((member, i) => (
+                <motion.div
+                  key={member.id}
+                  className={styles.memberCard}
+                  variants={fadeInUp}
+                  custom={i}
+                  whileHover={{ y: -8 }}
+                  onClick={() => setSelectedMember(member)}
+                >
+                  <div className={styles.memberImageWrapper}>
+                    <img src={member.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop'} alt={member.name} className={styles.memberImage} />
+                    <div className={styles.memberOverlay}>
+                      <span className={styles.viewMore}>Ver perfil</span>
+                    </div>
                   </div>
-                </div>
-                <div className={styles.memberInfo}>
-                  <h3 className={styles.memberName}>{member.name}</h3>
-                  <p className={styles.memberRole}>{member.role}</p>
-                  <p className={styles.memberExp}>{member.experience} de experiencia</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                  <div className={styles.memberInfo}>
+                    <h3 className={styles.memberName}>{member.name}</h3>
+                    <p className={styles.memberRole}>{member.role}</p>
+                    <p className={styles.memberExp}>{member.experience || 'Especialista'} de experiencia</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </section>
 
@@ -171,9 +190,9 @@ function About() {
                   <span className={styles.cardBadge}>Nuestra Sede</span>
                 </div>
                 <h3 className={styles.cardTitle}>Ubicación</h3>
-                <p className={styles.cardDesc}>Av. Elegancia #1234, Col. Premium<br />Ciudad, CP 00000</p>
+                <p className={styles.cardDesc}>{businessConfig?.address || 'Calle 123 #45-67, Barrio El Prado'}</p>
                 <a
-                  href="https://maps.google.com/?q=Av.+Elegancia+1234"
+                  href={`https://maps.google.com/?q=${encodeURIComponent(businessConfig?.address || 'Catheryne Rios Estetica')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.actionBtnPrimary}
@@ -190,14 +209,14 @@ function About() {
                   <span className={styles.cardBadge}>Atención Inmediata</span>
                 </div>
                 <h3 className={styles.cardTitle}>Teléfono & WhatsApp</h3>
-                <p className={styles.cardDesc}>+52 (55) 1234-5678</p>
+                <p className={styles.cardDesc}>+57 {businessConfig?.phone || '300 626 9056'}</p>
                 <div className={styles.btnGroup}>
-                  <a href="tel:+525512345678" className={styles.actionBtnSecondary}>
+                  <a href={`tel:${businessConfig?.phone || '3006269056'}`} className={styles.actionBtnSecondary}>
                     <Phone size={14} />
                     <span>Llamar</span>
                   </a>
                   <a
-                    href="https://wa.me/525512345678?text=Hola!%20Me%20gustaría%20solicitar%20información%20o%20reservar%20una%20cita%20en%20Catheryne%20Ríos%20Estética."
+                    href={`https://wa.me/57${businessConfig?.whatsappNumber || '3006269056'}?text=${encodeURIComponent('Hola! Me gustaría solicitar información o reservar una cita en ' + (businessConfig?.businessName || 'Catheryne Ríos Estética'))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.actionBtnGold}
@@ -215,7 +234,7 @@ function About() {
                   <span className={styles.cardBadge}>Horarios</span>
                 </div>
                 <h3 className={styles.cardTitle}>Horario de Atención</h3>
-                <p className={styles.cardDesc}>Lun - Sáb: 9:00 AM - 7:00 PM<br />Domingos: Cerrado</p>
+                <p className={styles.cardDesc}>{businessConfig?.openingHours || 'Lun - Sáb: 8:00 AM - 7:00 PM'}</p>
                 <Link to="/servicios" className={styles.actionBtnPrimary}>
                   <Calendar size={14} />
                   <span>Agendar solo con cita</span>
@@ -227,15 +246,15 @@ function About() {
             <div className={styles.socialHub}>
               <span className={styles.socialHubTitle}>Síguenos en Redes Sociales</span>
               <div className={styles.socialButtonsGroup}>
-                <a href="#" className={`${styles.socialPill} ${styles.igPill}`} aria-label="Instagram">
+                <a href={businessConfig?.instagramUrl || 'https://instagram.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.igPill}`} aria-label="Instagram">
                   <FaInstagram size={16} />
                   <span>Instagram</span>
                 </a>
-                <a href="#" className={`${styles.socialPill} ${styles.fbPill}`} aria-label="Facebook">
+                <a href={businessConfig?.facebookUrl || 'https://facebook.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.fbPill}`} aria-label="Facebook">
                   <FaFacebookF size={15} />
                   <span>Facebook</span>
                 </a>
-                <a href="#" className={`${styles.socialPill} ${styles.ttPill}`} aria-label="TikTok">
+                <a href={businessConfig?.tiktokUrl || 'https://tiktok.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.ttPill}`} aria-label="TikTok">
                   <FaTiktok size={15} />
                   <span>TikTok</span>
                 </a>

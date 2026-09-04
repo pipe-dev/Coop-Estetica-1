@@ -13,10 +13,7 @@ const AdminContext = createContext()
 
 const todayStr = getLocalDateString()
 
-const initialClosedDates = [
-  { id: 'close-1', date: '2026-12-25', reason: 'Navidad (Festivo Nacional)', type: 'Festivo' },
-  { id: 'close-2', date: '2027-01-01', reason: 'Año Nuevo (Festivo Nacional)', type: 'Festivo' }
-]
+const initialClosedDates = []
 
 const initialBusinessConfig = {
   businessName: 'Catheryne Ríos Estética',
@@ -31,65 +28,12 @@ const initialBusinessConfig = {
   masterPin: '2026'
 }
 
-const initialTeam = [
-  { id: '1', name: 'Catheryne Ríos', role: 'Directora & Esteticista Máster', phone: '3006269056', active: true, color: '#D4AF37', commissionRate: 50, avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop', experience: '10 años', bio: 'Especialista en dermocosmética y estética avanzada con más de 10 años de experiencia.' },
-  { id: '2', name: 'Valentina Silva', role: 'Especialista en Uñas & Manicura Rusa', phone: '3012345678', active: true, color: '#EC4899', commissionRate: 40, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop', experience: '6 años', bio: 'Máster en técnicas rusas, nivelación con rubber y diseño de autor.' },
-  { id: '3', name: 'Camila Torres', role: 'Cosmiatra & Masajista Spa', phone: '3029876543', active: true, color: '#8B5CF6', commissionRate: 45, avatar: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=400&auto=format&fit=crop', experience: '5 años', bio: 'Experta en masajes relajantes, drenaje linfático y aparatología estética.' }
-]
-
-const tomorrowObj = new Date()
-tomorrowObj.setDate(tomorrowObj.getDate() + 1)
-const tomorrowStr = getLocalDateString(tomorrowObj)
-
-const inTwoDaysObj = new Date()
-inTwoDaysObj.setDate(inTwoDaysObj.getDate() + 2)
-const inTwoDaysStr = getLocalDateString(inTwoDaysObj)
-
-const inThreeDaysObj = new Date()
-inThreeDaysObj.setDate(inThreeDaysObj.getDate() + 3)
-const inThreeDaysStr = getLocalDateString(inThreeDaysObj)
-
-const initialAppointments = [
-  { id: 'app-1', clientName: 'Sofía Martínez', clientPhone: '3001234567', serviceId: 'manicura-rusa', serviceName: 'Manicura Rusa VIP', specialistId: '2', specialistName: 'Valentina Silva', date: todayStr, time: '10:00 AM', price: 120000, commissionAmount: 48000, status: 'Reservada' },
-  { id: 'app-2', clientName: 'Lucía Gómez', clientPhone: '3109876543', serviceId: 'limpieza-profunda', serviceName: 'Limpieza Facial Profunda', specialistId: '3', specialistName: 'Camila Torres', date: todayStr, time: '02:00 PM', price: 180000, commissionAmount: 81000, status: 'Pagada' },
-  { id: 'app-3', clientName: 'Mariana López', clientPhone: '3205554433', serviceId: 'masaje-relajante', serviceName: 'Masaje Relajante de Spa', specialistId: '1', specialistName: 'Catheryne Ríos', date: todayStr, time: '04:30 PM', price: 220000, commissionAmount: 110000, status: 'En Atención' },
-  { id: 'app-4', clientName: 'Andrea Benítez', clientPhone: '3009871234', serviceId: 'maquillaje-social', serviceName: 'Maquillaje Profesional Social', specialistId: '1', specialistName: 'Catheryne Ríos', date: tomorrowStr, time: '09:00 AM', price: 150000, commissionAmount: 75000, status: 'Reservada' },
-  { id: 'app-5', clientName: '🚫 Espacio Bloqueado (Almuerzo)', clientPhone: '', serviceId: 'block', serviceName: '[Almuerzo] Bloqueo de Horario', specialistId: '2', specialistName: 'Valentina Silva', date: tomorrowStr, time: '01:00 PM - 02:00 PM', price: 0, commissionAmount: 0, status: 'Reservada' },
-  { id: 'app-6', clientName: 'Carolina Mendoza', clientPhone: '3157778899', serviceId: 'botox-capilar', serviceName: 'Tratamiento Capilar Botox', specialistId: '3', specialistName: 'Camila Torres', date: tomorrowStr, time: '03:30 PM', price: 250000, commissionAmount: 112500, status: 'Reservada' },
-  { id: 'app-7', clientName: 'Daniela Ospina', clientPhone: '3124445566', serviceId: 'manicura-rusa', serviceName: 'Manicura Rusa VIP', specialistId: '2', specialistName: 'Valentina Silva', date: inTwoDaysStr, time: '11:00 AM', price: 120000, commissionAmount: 48000, status: 'Reservada' },
-  { id: 'app-8', clientName: 'Gabriela Vargas', clientPhone: '3189990011', serviceId: 'limpieza-profunda', serviceName: 'Limpieza Facial Profunda', specialistId: '1', specialistName: 'Catheryne Ríos', date: inTwoDaysStr, time: '02:30 PM', price: 180000, commissionAmount: 90000, status: 'Reservada' },
-  { id: 'app-9', clientName: 'Paula Andrea Jaramillo', clientPhone: '3016667788', serviceId: 'masaje-relajante', serviceName: 'Masaje Relajante de Spa', specialistId: '3', specialistName: 'Camila Torres', date: inThreeDaysStr, time: '10:00 AM', price: 220000, commissionAmount: 99000, status: 'Reservada' }
-]
-
-const initialTransactions = [
-  { id: 'tx-1', type: 'Ingreso', amount: 180000, description: 'Pago Limpieza Facial - Lucía Gómez', category: 'Servicios', paymentMethod: 'Nequi', date: todayStr },
-  { id: 'tx-2', type: 'Egreso', amount: 45000, description: 'Compra de Insumos de Uñas', category: 'Insumos', paymentMethod: 'Efectivo', date: todayStr }
-]
-
-const initialNotifications = [
-  { id: 'notif-1', title: 'Promoción 2x1 en Limpieza Facial', description: 'Por este mes de Agosto, agendando tu cita recibes hidratación gratis.', active: true, date: '2026-08-10' },
-  { id: 'notif-2', title: 'Nuevos Tonos de Esmaltes Rusos', description: 'Llegó la colección Primavera a Catheryne Ríos Estética', active: true, date: '2026-08-08' }
-]
-
-const initialCashSessions = [
-  {
-    id: 'session-1',
-    responsibleId: '1',
-    responsibleName: 'Catheryne Ríos',
-    initialBase: 100000,
-    openedAt: `${todayStr} 08:30 AM`,
-    closedAt: null,
-    status: 'Abierta',
-    notes: 'Apertura de turno de la mañana'
-  }
-]
-
-const initialClients = [
-  { id: 'client-1', name: 'Sofía Martínez', phone: '3001234567', email: 'sofia.martinez@email.com', notes: 'Prefiere tonos pastel para uñas. Alérgica al látex.', registeredAt: '2026-07-15' },
-  { id: 'client-2', name: 'Lucía Gómez', phone: '3109876543', email: 'lucia.gomez@email.com', notes: 'Piel sensible. Recomendada masoterapia facial.', registeredAt: '2026-06-20' },
-  { id: 'client-3', name: 'Mariana López', phone: '3205554433', email: 'mariana.lopez@email.com', notes: 'Cliente VIP. Asiste cada 15 días.', registeredAt: '2026-05-10' },
-  { id: 'client-4', name: 'Andrea Benítez', phone: '3009871234', email: 'andrea.b@email.com', notes: 'Tratamiento Botox Capilar realizado.', registeredAt: '2026-08-01' }
-]
+const initialTeam = []
+const initialAppointments = []
+const initialTransactions = []
+const initialNotifications = []
+const initialCashSessions = []
+const initialClients = []
 
 export function AdminProvider({ children }) {
   // 1. Configuración del Negocio
@@ -108,7 +52,7 @@ export function AdminProvider({ children }) {
     } catch (e) { return 'OWNER' }
   })
 
-  const [currentSpecialistId, setCurrentSpecialistId] = useState('2') // Valentina Silva por defecto
+  const [currentSpecialistId, setCurrentSpecialistId] = useState('')
 
   // 3. Categorías y Servicios
   const [serviceCategories, setServiceCategories] = useState(() => {
@@ -130,11 +74,7 @@ export function AdminProvider({ children }) {
   const [appointments, setAppointments] = useState(() => {
     try {
       const saved = localStorage.getItem('spa_admin_appointments')
-      if (!saved) return initialAppointments
-      const parsed = JSON.parse(saved)
-      const existingIds = new Set(parsed.map(a => a.id))
-      const missingInitial = initialAppointments.filter(a => !existingIds.has(a.id))
-      return [...parsed, ...missingInitial]
+      return saved ? JSON.parse(saved) : initialAppointments
     } catch (e) { return initialAppointments }
   })
 
@@ -232,16 +172,16 @@ export function AdminProvider({ children }) {
 
         if (!isMounted) return
 
-        if (liveConfig) setBusinessConfig(prev => ({ ...prev, ...liveConfig }))
-        if (liveMemberships && liveMemberships.length > 0) setMemberships(liveMemberships)
-        if (liveClosedDates && liveClosedDates.length > 0) setClosedDates(liveClosedDates)
-        if (liveCategories && liveCategories.length > 0) setServiceCategories(liveCategories)
-        if (liveProducts && liveProducts.length > 0) setProducts(liveProducts)
-        if (liveTeam && liveTeam.length > 0) setTeamMembers(liveTeam)
-        if (liveClients && liveClients.length > 0) setClients(liveClients)
-        if (liveSessions && liveSessions.length > 0) setCashSessions(liveSessions)
-        if (liveTxs && liveTxs.length > 0) setTransactions(liveTxs)
-        if (liveApps && liveApps.appointments && liveApps.appointments.length > 0) setAppointments(liveApps.appointments)
+        setBusinessConfig(liveConfig || initialBusinessConfig)
+        setServiceCategories(liveCategories || [])
+        setMemberships(liveMemberships || [])
+        setClosedDates(liveClosedDates || [])
+        setProducts(liveProducts || [])
+        setTeamMembers(liveTeam || [])
+        setClients(liveClients || [])
+        setCashSessions(liveSessions || [])
+        setTransactions(liveTxs || [])
+        setAppointments((liveApps && liveApps.appointments) || [])
 
         // S.H.I.E.L.D. Pillar 20: Auto-Backup silencioso
         runSilentAutoBackup({
