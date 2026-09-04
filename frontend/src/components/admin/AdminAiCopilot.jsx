@@ -332,7 +332,8 @@ export default function AdminAiCopilot() {
     addClosedDate,
     updateClient,
     teamMembers = [],
-    serviceCategories = []
+    serviceCategories = [],
+    refreshData
   } = adminState
 
   const [isOpen, setIsOpen] = useState(false)
@@ -578,6 +579,11 @@ export default function AdminAiCopilot() {
       // Si el modelo emitió una acción, ejecutarla en el sistema
       if (response.action) {
         executeAction(response.action)
+      }
+
+      // Si el backend ejecutó una mutación en PostgreSQL, refrescar datos en vivo
+      if (response.didMutate && refreshData) {
+        refreshData()
       }
     } catch (error) {
       setMessages(prev => [

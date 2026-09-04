@@ -261,7 +261,7 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
 
     if (localRes.ok) {
       const data = await localRes.json()
-      if (data && (data.text || data.action)) {
+      if (data && (data.text || data.action || data.didMutate !== undefined)) {
         return data
       }
     }
@@ -285,7 +285,7 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
 
     if (backendRes.ok) {
       const data = await backendRes.json()
-      if (data && (data.text || data.action)) {
+      if (data && (data.text || data.action || data.didMutate !== undefined)) {
         return data
       }
     }

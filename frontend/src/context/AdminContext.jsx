@@ -166,67 +166,67 @@ export function AdminProvider({ children }) {
     } catch (e) { return initialClosedDates }
   })
 
-  // Sincronización Viva con PostgreSQL en Supabase al cargar la aplicación
-  useEffect(() => {
-    let isMounted = true
-    async function loadLiveDatabase() {
-      try {
-        const [
-          liveConfig, 
-          liveMemberships, 
-          liveClosedDates, 
-          liveCategories, 
-          liveProducts, 
-          liveTeam,
-          liveClients,
-          liveSessions,
-          liveTxs,
-          liveApps
-        ] = await Promise.all([
-          api.getConfig(),
-          api.getMemberships(),
-          api.getClosedDates(),
-          api.getCategories(),
-          api.getProducts(),
-          api.getTeam(),
-          api.getClients(),
-          api.getCashSessions(),
-          api.getCashTransactions(),
-          api.getAppointments()
-        ])
+  // Sincronización Viva con PostgreSQL en Supabase
+  const refreshData = async () => {
+    try {
+      const [
+        liveConfig, 
+        liveMemberships, 
+        liveClosedDates, 
+        liveCategories, 
+        liveProducts, 
+        liveTeam,
+        liveClients,
+        liveSessions,
+        liveTxs,
+        liveApps
+      ] = await Promise.all([
+        api.getConfig(),
+        api.getMemberships(),
+        api.getClosedDates(),
+        api.getCategories(),
+        api.getProducts(),
+        api.getTeam(),
+        api.getClients(),
+        api.getCashSessions(),
+        api.getCashTransactions(),
+        api.getAppointments()
+      ])
 
-        if (!isMounted) return
+      if (liveConfig) setBusinessConfig(liveConfig)
+      if (liveCategories) setServiceCategories(liveCategories)
+      if (liveMemberships) setMemberships(liveMemberships)
+      if (liveClosedDates) setClosedDates(liveClosedDates)
+      if (liveProducts) setProducts(liveProducts)
+      if (liveTeam) setTeamMembers(liveTeam)
+      if (liveClients) setClients(liveClients)
+      if (liveSessions) setCashSessions(liveSessions)
+      if (liveTxs) setTransactions(liveTxs)
+      if (liveApps && liveApps.appointments) setAppointments(liveApps.appointments)
 
-        setBusinessConfig(liveConfig || initialBusinessConfig)
-        setServiceCategories(liveCategories || [])
-        setMemberships(liveMemberships || [])
-        setClosedDates(liveClosedDates || [])
-        setProducts(liveProducts || [])
-        setTeamMembers(liveTeam || [])
-        setClients(liveClients || [])
-        setCashSessions(liveSessions || [])
-        setTransactions(liveTxs || [])
-        setAppointments((liveApps && liveApps.appointments) || [])
-
-        // S.H.I.E.L.D. Pillar 20: Auto-Backup silencioso
-        runSilentAutoBackup({
-          businessConfig: liveConfig || businessConfig,
-          serviceCategories: liveCategories || serviceCategories,
-          memberships: liveMemberships || memberships,
-          closedDates: liveClosedDates || closedDates,
-          teamMembers: liveTeam || teamMembers,
-          products: liveProducts || products,
-          clients: liveClients || clients,
-          appointments: (liveApps && liveApps.appointments) || appointments,
-          cashSessions: liveSessions || cashSessions,
-          transactions: liveTxs || transactions,
-        })
-      } catch (e) {
-        console.warn('Conexión a PostgreSQL en segundo plano:', e)
-      }
+      // S.H.I.E.L.D. Pillar 20: Auto-Backup silencioso
+      runSilentAutoBackup({
+        businessConfig: liveConfig || businessConfig,
+        serviceCategories: liveCategories || serviceCategories,
+        memberships: liveMemberships || memberships,
+        closedDates: liveClosedDates || closedDates,
+        teamMembers: liveTeam || teamMembers,
+        products: liveProducts || products,
+        clients: liveClients || clients,
+        appointments: (liveApps && liveApps.appointments) || appointments,
+        cashSessions: liveSessions || cashSessions,
+        transactions: liveTxs || transactions,
+      })
+    } catch (e) {
+      console.warn('Conexión a PostgreSQL en segundo plano:', e)
     }
-    loadLiveDatabase()
-    return () => { isMounted = false }
+  }
+
+  useEffect(() => {
+    refreshData()
+    const handleFocus = () => refreshData()
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [])
 
   // Sincronización automática con localStorage
@@ -553,12 +553,28 @@ export function AdminProvider({ children }) {
   // ----------------------------------------------------
   // CITAS & AGENDAMIENTO
   // ----------------------------------------------------
-  const addAppointment = (app) => {
+  const addAppointment = async (app) => {
     const specialist = teamMembers.find(t => t.id === app.specialistId)
     const rate = specialist?.commissionRate || 45
     const netCommission = ((app.price || 0) * rate) / 100
 
     setAppointments(prev => [{ ...app, commissionAmount: netCommission }, ...prev])
+
+    try {
+      await api.bookAppointment({
+        clientName: app.clientName,
+        clientPhone: app.clientPhone || '3000000000',
+        clientEmail: app.clientEmail,
+        serviceId: app.serviceId,
+        specialistId: app.specialistId,
+        date: app.date,
+        time: app.time,
+        notes: app.notes
+      })
+      refreshData()
+    } catch (err) {
+      console.warn('Fallo al sincronizar cita con PostgreSQL:', err)
+    }
   }
 
   const updateAppointmentStatus = (id, newStatus) => {
@@ -744,7 +760,10 @@ export function AdminProvider({ children }) {
       deleteNotification,
       clients,
       addClient,
-      updateClient
+      updateClient,
+
+      // Refresco de Base de Datos
+      refreshData
     }}>
       {children}
     </AdminContext.Provider>
