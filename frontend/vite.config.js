@@ -132,7 +132,8 @@ export default defineConfig({
       '/api/clients': 'http://localhost:4000',
       '/api/config': 'http://localhost:4000',
       '/api/memberships': 'http://localhost:4000',
-      '/api/closed-dates': 'http://localhost:4000'
+      '/api/closed-dates': 'http://localhost:4000',
+      '/api/ai': 'http://localhost:4000'
     }
   },
   build: {

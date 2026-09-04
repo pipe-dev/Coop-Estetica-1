@@ -478,6 +478,7 @@ export default function AdminAiCopilot() {
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
   const activeUtteranceRef = useRef(null)
+  const audioRef = useRef(null)
 
   // Carga y ordenamiento de voces disponibles en el navegador (Safari, Edge, Chrome)
   useEffect(() => {
@@ -487,10 +488,15 @@ export default function AdminAiCopilot() {
         const all = window.speechSynthesis.getVoices() || []
         const ranked = rankSpanishVoices(all)
         setAvailableVoices(ranked)
-        // Si no hay voz elegida aún, asignar automáticamente la preferida
-        if (!selectedVoiceURI && ranked.length > 0) {
-          const catalina = ranked.find(v => v.name.toLowerCase().includes('catalina'))
-          setSelectedVoiceURI(catalina ? catalina.voiceURI : ranked[0].voiceURI)
+        // Si no hay voz elegida aún, verificar si el navegador tiene Catalina nativa (Edge)
+        // o si debe activar automáticamente la voz HD Cloud de Catalina (Safari / Chrome)
+        if (!selectedVoiceURI) {
+          const nativeCatalina = ranked.find(v => v.name.toLowerCase().includes('catalina'))
+          if (nativeCatalina) {
+            setSelectedVoiceURI(nativeCatalina.voiceURI)
+          } else {
+            setSelectedVoiceURI('cloud_catalina')
+          }
         }
       }
       updateVoices()
@@ -501,6 +507,8 @@ export default function AdminAiCopilot() {
           window.speechSynthesis.cancel()
         }
       }
+    } else if (!selectedVoiceURI) {
+      setSelectedVoiceURI('cloud_catalina')
     }
   }, [selectedVoiceURI])
 
@@ -511,16 +519,21 @@ export default function AdminAiCopilot() {
       try {
         localStorage.setItem('spa_copilot_voice_enabled', next ? 'true' : 'false')
       } catch (e) {}
-      if (!next && synthRef.current) {
-        synthRef.current.cancel()
-        setSpeakingMessageIndex(null)
+      if (!next) {
+        stopSpeaking()
       }
       return next
     })
   }
 
-  // Detener locución
+  // Detener locución (tanto audio streaming como speech synthesis local)
   const stopSpeaking = () => {
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause()
+        audioRef.current.currentTime = 0
+      } catch (e) {}
+    }
     if (synthRef.current) {
       try {
         synthRef.current.cancel()
@@ -530,12 +543,10 @@ export default function AdminAiCopilot() {
     setSpeakingMessageIndex(null)
   }
 
-  // Reproducir mensaje con la voz seleccionada (o Catalina por defecto)
+  // Reproducir mensaje con la voz seleccionada (Streaming HD de Catalina en Safari/iPhone o nativa en Edge)
   const speakMessage = (content, index) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return
-
     // Si ya está hablando este mensaje específico, alternar (detener)
-    if (synthRef.current && synthRef.current.speaking && speakingMessageIndex === index) {
+    if (speakingMessageIndex === index) {
       stopSpeaking()
       return
     }
@@ -545,13 +556,44 @@ export default function AdminAiCopilot() {
     const textToSpeak = extractPlainTextForSpeech(content)
     if (!textToSpeak) return
 
+    // ¿Se debe usar el streaming HD de Catalina (Safari en iPhone, Chrome, o selección manual)?
+    const isCloudCatalina = selectedVoiceURI === 'cloud_catalina' || 
+      (!selectedVoiceURI && !availableVoices.some(v => v.name.toLowerCase().includes('catalina')))
+
+    if (isCloudCatalina) {
+      try {
+        if (!audioRef.current) {
+          audioRef.current = new Audio()
+        }
+        const audio = audioRef.current
+        audio.src = `/api/ai/tts?text=${encodeURIComponent(textToSpeak)}&voice=es-CL-CatalinaNeural`
+        audio.playbackRate = voiceRate || 1.0
+        audio.onplay = () => setSpeakingMessageIndex(index)
+        audio.onended = () => setSpeakingMessageIndex(null)
+        audio.onerror = (e) => {
+          console.warn('Error en streaming cloud TTS:', e)
+          setSpeakingMessageIndex(null)
+        }
+        audio.play().catch(err => {
+          console.warn('Autoplay pendiente de interacción:', err)
+          setSpeakingMessageIndex(null)
+        })
+        return
+      } catch (e) {
+        console.warn('Error iniciando streaming audio:', e)
+      }
+    }
+
+    // Síntesis local del navegador (para Edge u otras voces seleccionadas)
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+
     try {
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume()
       }
 
       const utterance = new SpeechSynthesisUtterance(textToSpeak)
-      activeUtteranceRef.current = utterance // Blindaje crítico: Evita que el Garbage Collector de Chromium corte el audio
+      activeUtteranceRef.current = utterance
 
       const voice = getBestSpanishFemaleVoice(selectedVoiceURI)
       if (voice) {
@@ -561,7 +603,6 @@ export default function AdminAiCopilot() {
         utterance.lang = 'es-CL'
       }
 
-      // Parámetros acústicos ultra-humanos:
       utterance.pitch = 1.0
       utterance.rate = voiceRate || 1.0
 
@@ -578,7 +619,6 @@ export default function AdminAiCopilot() {
         activeUtteranceRef.current = null
       }
 
-      // En navegadores Chromium, un retraso de 35ms tras cancel() garantiza inicio fluido
       setTimeout(() => {
         if (window.speechSynthesis.paused) {
           window.speechSynthesis.resume()
@@ -812,7 +852,7 @@ export default function AdminAiCopilot() {
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
-      alert('Tu navegador no soporta reconocimiento de voz nativo. Te recomendamos usar Google Chrome o Microsoft Edge.')
+      alert('🎙️ En iPhone / Safari por red local (HTTP), Apple restringe el micrófono web directo por seguridad.\n\n💡 Tip Pro: Toca el campo de texto y pulsa el botón de micrófono del teclado de tu iPhone para dictarle a Catheryne en tiempo real.')
       return
     }
 
@@ -1016,13 +1056,16 @@ export default function AdminAiCopilot() {
                       <label className={styles.voiceLabel}>Voz seleccionada:</label>
                       <select 
                         className={styles.voiceSelect}
-                        value={selectedVoiceURI || (availableVoices[0]?.voiceURI || '')}
+                        value={selectedVoiceURI || 'cloud_catalina'}
                         onChange={(e) => {
                           const uri = e.target.value
                           setSelectedVoiceURI(uri)
                           localStorage.setItem('spa_copilot_voice_uri', uri)
                         }}
                       >
+                        <option value="cloud_catalina">
+                          ✨ [Ultra-Humana HD] Microsoft Catalina Online (Natural) - Spanish (Chile)
+                        </option>
                         {availableVoices.map((v, i) => {
                           const isSpecial = v.name.toLowerCase().includes('catalina') || v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural')
                           return (

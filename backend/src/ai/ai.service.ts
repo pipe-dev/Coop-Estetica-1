@@ -137,4 +137,30 @@ export class AiService implements OnModuleInit {
       action
     };
   }
+
+  async streamSpeech(text: string, voiceName: string, res: any): Promise<void> {
+    const cleanText = (text || '').trim();
+    if (!cleanText) {
+      res.status(400).send('Text is required');
+      return;
+    }
+
+    try {
+      const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
+      const tts = new MsEdgeTTS();
+      const voice = voiceName || 'es-CL-CatalinaNeural';
+      await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+      const { audioStream } = tts.toStream(cleanText);
+
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      audioStream.pipe(res);
+    } catch (err: any) {
+      this.logger.error('Error generando TTS en streaming: ' + (err?.message || err));
+      if (!res.headersSent) {
+        res.status(500).send('Error generando audio TTS');
+      }
+    }
+  }
 }
+
