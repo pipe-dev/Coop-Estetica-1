@@ -12,6 +12,7 @@ import { TeamModule } from './team/team.module';
 import { CashModule } from './cash/cash.module';
 import { ConfigNegocioModule } from './config-negocio/config-negocio.module';
 import { ClientsModule } from './clients/clients.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ClientsModule } from './clients/clients.module';
     CashModule,
     ConfigNegocioModule,
     ClientsModule,
+    AiModule,
   ],
   providers: [
     {
