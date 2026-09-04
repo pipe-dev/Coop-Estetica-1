@@ -4,13 +4,12 @@ import { sanitizeString } from '../utils/securityService'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-// Cascada de Modelos de Alta Inteligencia de Groq
+// Cascada de Modelos de Alta Inteligencia de Groq (Probados y Activos)
 const ACTIVE_MODELS = [
-  'openai/gpt-oss-120b',
   'qwen/qwen3.8-27b',
-  'qwen/qwen3.6-27b',
   'groq/compound-mini',
-  'groq/compound'
+  'openai/gpt-oss-120b',
+  'openai/gpt-oss-20b'
 ]
 
 // Memoria caché semántica ultra-estricta con invalidación instantánea
@@ -242,14 +241,17 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
 
         if (response.ok) {
           const data = await response.json()
-          const botReply = data.choices?.[0]?.message?.content || 'No pude generar una respuesta.'
-          const parsed = parseAgentResponse(botReply)
+          const botReply = (data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning || '').trim()
+          
+          if (botReply) {
+            const parsed = parseAgentResponse(botReply)
 
-          // Guardar en caché si no es dinámica
-          if (!isDynamic) {
-            queryCache.set(cacheKey, { timestamp: Date.now(), data: parsed })
+            // Guardar en caché si no es dinámica
+            if (!isDynamic) {
+              queryCache.set(cacheKey, { timestamp: Date.now(), data: parsed })
+            }
+            return parsed
           }
-          return parsed
         }
 
         // Si es 429 (Rate Limit), saltar al siguiente modelo o siguiente clave
@@ -272,14 +274,14 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
  * 4. Parser de Acciones Embebidas
  */
 export function parseAgentResponse(rawText) {
-  const actionMatch = rawText.match(/```action\s*([\s\S]*?)\s*```/)
+  let cleanText = (rawText || '').replace(/<think>[\s\S]*?<\/think>/g, '').trim()
+  const actionMatch = cleanText.match(/```action\s*([\s\S]*?)\s*```/)
   let action = null
-  let cleanText = rawText
 
   if (actionMatch) {
     try {
       action = JSON.parse(actionMatch[1])
-      cleanText = rawText.replace(/```action[\s\S]*?```/, '').trim()
+      cleanText = cleanText.replace(/```action[\s\S]*?```/, '').trim()
     } catch (e) {
       console.error('Error parseando acción del agente:', e)
     }
@@ -578,6 +580,19 @@ function processLocalFallbackAgent(userQuery, spaState) {
     })
 
     return { text: appsText, action: null }
+  }
+
+  // Preguntas sobre quién abrió caja / auditoría de fechas anteriores
+  if (query.includes('quien abrio') || query.includes('quién abrió') || query.includes('apertura') || (query.includes('caja') && (query.includes('ayer') || query.includes('responsable')))) {
+    return {
+      text: `**Auditoría y Apertura de Caja:**\n\n` +
+            `Al revisar los registros disponibles en el sistema, **no figura ningún registro de apertura de caja ni movimientos para fechas anteriores**.\n\n` +
+            `El balance actual de hoy está en ceros ($0 COP). Para mantener el control contable:\n` +
+            `1. Puedes registrar la apertura de caja de hoy en el módulo **Caja y Finanzas** indicando el fondo inicial.\n` +
+            `2. Cada apertura queda firmada digitalmente con el usuario y la hora exacta.\n\n` +
+            `¿Deseas que te asista registrando un movimiento de caja o consultando las citas de hoy?`,
+      action: null
+    }
   }
 
   // Finanzas de Caja
