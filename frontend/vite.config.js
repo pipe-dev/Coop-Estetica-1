@@ -119,6 +119,7 @@ function aiDevMiddlewarePlugin() {
 export default defineConfig({
   plugins: [react(), aiDevMiddlewarePlugin()],
   server: {
+    host: true,
     proxy: {
       '/api/admin': 'http://localhost:4000',
       '/api/auth': 'http://localhost:4000',
