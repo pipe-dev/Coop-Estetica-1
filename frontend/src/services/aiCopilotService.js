@@ -227,7 +227,25 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
     }))
   ]
 
-  // 1. INTENTO 1: Backend Proxy de NestJS (/api/ai/chat)
+  // 1. INTENTO 1: Host Local / Vite Middleware (/api/ai/chat)
+  try {
+    const localRes = await fetch('/api/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: payloadMessages })
+    })
+
+    if (localRes.ok) {
+      const data = await localRes.json()
+      if (data && (data.text || data.action)) {
+        return data
+      }
+    }
+  } catch (localErr) {
+    // Si falla el endpoint relativo, probar backend directo
+  }
+
+  // 2. INTENTO 2: Backend Proxy de NestJS (/api/ai/chat)
   try {
     const backendToken = localStorage.getItem('spa_admin_token') || sessionStorage.getItem('spa_admin_token')
     const headers = { 'Content-Type': 'application/json' }
