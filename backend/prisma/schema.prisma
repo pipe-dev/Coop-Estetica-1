@@ -41,17 +41,17 @@ model User {
 // ----------------------------------------------------
 model BusinessConfig {
   id             String    @id @default("singleton")
-  businessName   String    @default("Catheryne Ríos Estética")
-  whatsappNumber String    @default("3006269056")
-  phone          String?   @default("3006269056")
-  address        String?   @default("Calle 123 #45-67, Barrio El Prado")
-  openingHours   String?   @default("Lunes a Sábado: 8:00 AM - 7:00 PM")
-  instagramUrl   String?   @default("https://instagram.com")
-  tiktokUrl      String?   @default("https://tiktok.com")
-  facebookUrl    String?   @default("https://facebook.com")
-  promoBanner    String?   @default("Reserva tu experiencia de lujo este mes y recibe asesoría facial personalizada.")
-  ownerEmail     String?   @default("duena@catherynerios.com")
-  adminEmail     String?   @default("admin@catherynerios.com")
+  businessName   String    @default("")
+  whatsappNumber String    @default("")
+  phone          String?   @default("")
+  address        String?   @default("")
+  openingHours   String?   @default("")
+  instagramUrl   String?   @default("")
+  tiktokUrl      String?   @default("")
+  facebookUrl    String?   @default("")
+  promoBanner    String?   @default("")
+  ownerEmail     String?   @default("")
+  adminEmail     String?   @default("")
   masterPinHash  String?   // Hash Bcrypt/Argon2 del PIN de 4-6 dígitos de la dueña
   updatedAt      DateTime  @updatedAt
 }
