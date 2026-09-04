@@ -16,7 +16,7 @@ import {
   Volume2
 } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
-import { sendChatMessageToCopilot } from '../../services/aiCopilotService'
+import { sendChatMessageToCopilot, cleanAndNormalizeVoiceText } from '../../services/aiCopilotService'
 import styles from './AdminAiCopilot.module.css'
 
 function formatInline(text) {
@@ -218,10 +218,9 @@ function renderFormattedMessage(content) {
 
 const INITIAL_GREETING = {
   role: 'assistant',
-  content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva de operaciones e inteligencia de negocios para tu estética.\n\n` +
-           `Estoy diseñada para acompañarte día a día y hacer que la administración de tu estética sea impecable, rápida y sin estrés.\n\n` +
-           `Para comenzar a conocernos y presentarte todo mi potencial paso a paso, haz clic abajo o pregúntame:\n\n` +
-           `👉 **"¿Qué puedes hacer por mí y por mi estética?"**`,
+  content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva.\n\n` +
+           `Estoy lista para ayudarte con caja, agenda de citas, liquidaciones de especialistas e inventario.\n\n` +
+           `Pregúntame lo que necesites o pulsa una sugerencia rápida abajo:`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
@@ -309,13 +308,44 @@ export default function AdminAiCopilot() {
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
+  const [voiceInterim, setVoiceInterim] = useState('')
   const [lastActionExecuted, setLastActionExecuted] = useState(null)
 
+  const messagesContainerRef = useRef(null)
+  const latestAssistantMsgRef = useRef(null)
   const messagesEndRef = useRef(null)
+  const recognitionRef = useRef(null)
 
-  // Scroll al final al recibir mensajes
+  // Scroll inteligente y cómodo:
+  // - Si el usuario envió mensaje o la IA está pensando -> scroll al final.
+  // - Si la IA responde -> scroll exactamente al INICIO de la respuesta para leer desde la primera línea.
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return
+
+    const lastMsg = messages[messages.length - 1]
+    const isAssistant = lastMsg && lastMsg.role === 'assistant'
+
+    if (isLoading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+
+    if (isAssistant) {
+      const timer = setTimeout(() => {
+        if (latestAssistantMsgRef.current && messagesContainerRef.current) {
+          const container = messagesContainerRef.current
+          const el = latestAssistantMsgRef.current
+          const targetScrollTop = el.offsetTop - container.offsetTop - 12
+          container.scrollTo({
+            top: Math.max(0, targetScrollTop),
+            behavior: 'smooth'
+          })
+        } else {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 70)
+      return () => clearTimeout(timer)
+    } else {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isOpen, isLoading])
@@ -445,42 +475,81 @@ export default function AdminAiCopilot() {
   }
 
   // ----------------------------------------------------
-  // ENTRADA DE VOZ (MICROPHONE DICTATION)
+  // ENTRADA DE VOZ ROBUSTA CON RETROALIMENTACIÓN EN VIVO
   // ----------------------------------------------------
   const handleVoiceInput = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
-      alert('Tu navegador no soporta reconocimiento de voz nativo.')
+      alert('Tu navegador no soporta reconocimiento de voz nativo. Te recomendamos usar Google Chrome o Microsoft Edge.')
       return
     }
 
+    // Si ya está escuchando, el clic finaliza el dictado y envía de inmediato
     if (isListening) {
+      try {
+        recognitionRef.current?.stop()
+      } catch (e) {
+        console.warn('Error deteniendo dictado:', e)
+      }
       setIsListening(false)
+      setVoiceInterim('')
+      if (inputText.trim()) {
+        handleSendMessage(inputText.trim())
+      }
       return
     }
 
     try {
       const recognition = new SpeechRecognition()
+      recognitionRef.current = recognition
       recognition.lang = 'es-CO'
-      recognition.interimResults = false
-      recognition.maxAlternatives = 1
+      recognition.interimResults = true
+      recognition.continuous = false
+      recognition.maxAlternatives = 2
 
-      recognition.onstart = () => setIsListening(true)
-      recognition.onend = () => setIsListening(false)
-      recognition.onerror = () => setIsListening(false)
+      recognition.onstart = () => {
+        setIsListening(true)
+        setVoiceInterim('Escuchando... habla claramente')
+      }
 
       recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript
-        if (transcript) {
-          setInputText(transcript)
-          handleSendMessage(transcript)
+        let interim = ''
+        let final = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const res = event.results[i]
+          if (res.isFinal) {
+            final += res[0].transcript + ' '
+          } else {
+            interim += res[0].transcript
+          }
         }
+
+        const raw = (final + interim).trim()
+        if (raw) {
+          const normalized = cleanAndNormalizeVoiceText(raw)
+          setVoiceInterim(normalized)
+          setInputText(normalized)
+        }
+      }
+
+      recognition.onerror = (event) => {
+        console.warn('[VOICE] Estado dictado:', event.error)
+        setIsListening(false)
+        setVoiceInterim('')
+      }
+
+      recognition.onend = () => {
+        setIsListening(false)
+        setVoiceInterim('')
+        setInputText(prev => cleanAndNormalizeVoiceText(prev))
       }
 
       recognition.start()
     } catch (e) {
       console.warn('Error iniciando dictado:', e)
       setIsListening(false)
+      setVoiceInterim('')
     }
   }
 
@@ -563,12 +632,14 @@ export default function AdminAiCopilot() {
               </div>
 
               {/* FEED DE MENSAJES */}
-              <div className={styles.messagesContainer}>
+              <div ref={messagesContainerRef} className={styles.messagesContainer}>
                 {messages.map((msg, index) => {
                   const isUser = msg.role === 'user'
+                  const isLastAssistant = !isUser && index === messages.length - 1
                   return (
                     <div 
                       key={index} 
+                      ref={isLastAssistant ? latestAssistantMsgRef : null}
                       className={`${styles.messageRow} ${isUser ? styles.userRow : ''}`}
                     >
                       <div className={`${styles.bubble} ${isUser ? styles.userBubble : styles.botBubble}`}>
@@ -638,6 +709,24 @@ export default function AdminAiCopilot() {
 
               {/* FOOTER FORMULARIO */}
               <div className={styles.footer}>
+                {/* BANNER EN VIVO DE DICTADO POR VOZ */}
+                {isListening && (
+                  <div className={styles.voiceLiveBanner}>
+                    <div className={styles.voicePulseDot} />
+                    <span className={styles.voiceLiveText}>
+                      {voiceInterim || '🎙️ Escuchando... habla claramente'}
+                    </span>
+                    <button 
+                      type="button" 
+                      className={styles.voiceStopBtn}
+                      onClick={handleVoiceInput}
+                      title="Enviar lo dictado"
+                    >
+                      Listo / Enviar
+                    </button>
+                  </div>
+                )}
+
                 <form 
                   className={styles.inputForm}
                   onSubmit={(e) => {

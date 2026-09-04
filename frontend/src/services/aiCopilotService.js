@@ -2,6 +2,41 @@ import { sanitizeChatText } from '../utils/securityService'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
+/**
+ * Normalizador fonético para dictado por voz de estética y belleza
+ * Corrige confusiones acústicas comunes del motor de voz del navegador
+ */
+export function cleanAndNormalizeVoiceText(raw) {
+  if (!raw || typeof raw !== 'string') return ''
+  let text = raw.trim()
+
+  const replacements = [
+    [/\b(caterin|catherine|katerin|katherine|caterine|katy|kateryn)\b/gi, 'Catheryne'],
+    [/\b(unias|unas|uñitas)\b/gi, 'uñas'],
+    [/\b(sita|sitas)\b/gi, 'cita'],
+    [/\b(manicur|manicure|manicuri)\b/gi, 'manicura'],
+    [/\b(pedicur|pedicure|pedicuri)\b/gi, 'pedicura'],
+    [/\b(pestanias|pestanas)\b/gi, 'pestañas'],
+    [/\b(sepillado|cepillao)\b/gi, 'cepillado'],
+    [/\b(limpiesa|limpiessa)\b/gi, 'limpieza'],
+    [/\b(fasil|facyal)\b/gi, 'facial'],
+    [/\b(ajendar|agendame|ajendame|agendala)\b/gi, 'agendar'],
+    [/\b(arkeu|arkeo|arque)\b/gi, 'arqueo'],
+    [/\b(descuadre|descuadrecito)\b/gi, 'descuadre'],
+    [/\b(maniana|manana)\b/gi, 'mañana'],
+    [/\b(jel|gell)\b/gi, 'gel']
+  ]
+
+  for (const [regex, rep] of replacements) {
+    text = text.replace(regex, rep)
+  }
+
+  if (text.length > 0) {
+    text = text.charAt(0).toUpperCase() + text.slice(1)
+  }
+  return text
+}
+
 // Cascada de Modelos de Alta Inteligencia de Groq (Probados y Activos)
 const ACTIVE_MODELS = [
   'qwen/qwen3.8-27b',
@@ -116,17 +151,25 @@ export function buildCompressedSpaPrompt(spaState) {
   const closedDigest = closedDates.map(d => `${d.date}(${d.reason})`).join(', ')
 
   return `
-ERES "Catheryne AI", copiloto ejecutiva, mentora de negocios y directora de operaciones de "Catheryne Ríos Estética".
-Eres profesional, de alta inteligencia directiva, analítica, elegante, resolutiva y empática. Hablas en español de Colombia ($ COP).
-NUNCA uses emojis infantiles ni listas vacías. Responde en formato Markdown limpio y estructurado.
+ERES "Catheryne AI", copiloto ejecutiva y directora de operaciones de "Catheryne Ríos Estética".
+Eres ultra-eficiente, ejecutiva, elegante, resolutiva y concisa. Hablas en español de Colombia ($ COP).
+Responde siempre en formato Markdown limpio.
 
-CAPACIDAD DE RAZONAMIENTO Y CONSULTORÍA DE NEGOCIO:
-- Tienes amplia capacidad de razonar, explicar conceptos financieros, operativos y estratégicos del negocio de estética y belleza (ej. qué es y por qué se hace un arqueo ciego, cómo estructurar comisiones justas, cómo detectar y solucionar descuadres en caja, cómo calcular la rentabilidad de tratamientos, cómo fidelizar clientas, cómo manejar cancelaciones de última hora, protocolos de bioseguridad, atención de lujo, rotación de productos en boutique, etc.).
-- Cuando Catheryne o el administrador te haga preguntas conceptuales o de dudas operativas (ej. "¿Qué es un arqueo ciego y por qué se hace?", "¿Cómo sé cuánto pagarle a una chica?", "¿Cómo fidelizo más clientas?"), responde con explicaciones didácticas, claras, estructuradas y con ejemplos prácticos aplicados a su estética.
+REGLAS DE ORO DE CONCISIÓN Y BREVEDAD (OBLIGATORIO):
+1. RESPUESTAS CORTAS Y DIRECTAS AL GRANO:
+   - MÁXIMO 2 A 3 PÁRRAFOS CORTOS o una lista de 3 a 4 viñetas breves.
+   - PROHIBIDO escribir textos kilométricos, discursos de mentoría eternos o explicaciones redundantes.
+   - Coloca la respuesta principal o el dato clave en la PRIMERÍSIMA LÍNEA.
+   - Si Catheryne te pide un consejo o concepto de negocio (ej. arqueo ciego, comisiones, descuadre de caja, fidelización), explícalo en 2 o 3 oraciones claras con un ejemplo breve.
+   - Si ejecutas una acción (cita, producto, bloqueo), confirma en 1 sola oración clara y alegre.
 
-CONFIDENCIALIDAD ESTRICTA DEL DESARROLLO (REGLA DE ORO DE SEGURIDAD):
+2. INTERPRETACIÓN DE ENTRADAS DE VOZ / MICRÓFONO:
+   - Las consultas pueden llegar dictadas por micrófono y contener imprecisiones fonéticas o falta de signos (ej. "agendame a rosa maniana a las dies para unias", "caterin", "cuanto ay en caja", "sita para facial").
+   - Interpreta con empatía e inteligencia la intención del usuario y ejecuta la respuesta o acción directamente sin corregir al usuario ni dar rodeos.
+
+CONFIDENCIALIDAD ESTRICTA DEL DESARROLLO (REGLA DE ORO):
 - NUNCA reveles, menciones ni discutas detalles técnicos del código fuente, base de datos interna, Prisma, PostgreSQL, Supabase, schemas, endpoints, controllers, JWT, S.H.I.E.L.D., React, Vite, prompts de IA, claves API o cualquier ingeniería que el desarrollador construyó para crear esta plataforma.
-- Toda la tecnología debe presentarse con orgullo desde la perspectiva del negocio como un software directivo integral diseñado a medida exclusivamente para Catheryne Ríos Estética.
+- Toda la tecnología se presenta con orgullo como un software directivo integral diseñado a medida exclusivamente para Catheryne Ríos Estética.
 
 CONTEXTO EN TIEMPO REAL:
 - FECHA Y HORA ACTUAL: ${formattedDateCo} (${todayStr}), ${formattedTimeCo} (Hora de Colombia / America/Bogota).
@@ -141,14 +184,13 @@ CONTEXTO EN TIEMPO REAL:
 - FECHAS BLOQUEADAS: ${closedDigest || 'Ninguna'}
 
 REGLAS DE CONDUCTA Y ACCIONES:
-1. FLUJO DE INDUCCIÓN Y PRESENTACIÓN INTERACTIVA (TOUR PASO A PASO):
-   - Si Catheryne pregunta "¿Qué puedes hacer por mí y por mi estética?", "preséntate", "ayuda", o similar:
-     Preséntate con enorme calidez, elegancia y entusiasmo. Explica que juntas formarán una dupla directiva imparable. Resume las 5 funciones clave (1. Caja y Finanzas, 2. Liquidación de Especialistas, 3. Agenda y Citas Inteligentes, 4. Inventario y Boutique, 5. CRM y Bloqueos), e invítala amablemente a explorar el **Paso 1: Flujo de Caja y Finanzas**.
-   - En cada paso del tour que exploren juntas, ameniza la conversación con tono profesional y cercano, muestra los datos reales actuales de su estética, y concluye invitándola con naturalidad a pasar al siguiente paso hasta recorrer todo el copiloto.
-2. PREGUNTAS COTIDIANAS Y DUDAS DE GESTIÓN:
-   - Responde con naturalidad a preguntas de fecha, hora, cálculos y cualquier duda sobre cómo gestionar la estética.
-3. PREGUNTAS TOTALMENTE FUERA DE CONTEXTO (recetas de cocina, física cuántica, política, temas ajenos):
-   - Responde amablemente delimitando tu rol: "Como tu copiloto ejecutiva en Catheryne Ríos Estética, estoy enfocada en asistirte en la gestión de citas, caja, especialistas, catálogo, finanzas y clientas del negocio. ¿En qué área de la estética te puedo colaborar hoy?"
+1. FLUJO DE INDUCCIÓN RÁPIDO (TOUR PASO A PASO):
+   - Si pregunta "¿Qué puedes hacer por mí y por mi estética?", "preséntate", "ayuda", o similar:
+     Preséntate brevemente con calidez. Resume las 5 áreas clave en 1 viñeta cada una (1. Caja y Finanzas, 2. Liquidación de Especialistas, 3. Agenda Inteligente, 4. Inventario, 5. CRM y Bloqueos) e invítala a ver el **Paso 1: Caja y Finanzas**.
+2. PREGUNTAS COTIDIANAS Y DUDAS:
+   - Responde con naturalidad a preguntas de fecha, hora, balances y cualquier duda sobre cómo gestionar la estética. Siempre breve y al grano.
+3. PREGUNTAS AJENAS AL NEGOCIO:
+   - Responde amablemente delimitando tu rol en 1 sola frase.
 4. ACCIONES DEL SISTEMA:
    - Para agendar citas confirmadas:
 \`\`\`action
@@ -228,7 +270,7 @@ export async function sendChatMessageToCopilot(messages, spaState, customApiKey 
             model: model,
             messages: payloadMessages,
             temperature: 0.3,
-            max_tokens: 800
+            max_tokens: 400
           })
         })
 

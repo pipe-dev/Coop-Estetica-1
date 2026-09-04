@@ -536,3 +536,55 @@
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
 }
+
+/* BANNER DE DICTADO POR VOZ EN VIVO */
+.voiceLiveBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(4px);
+}
+
+.voicePulseDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #EF4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+  animation: pulse 1.2s infinite;
+  flex-shrink: 0;
+}
+
+.voiceLiveText {
+  flex: 1;
+  font-size: 13px;
+  color: #F0D78C;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.voiceStopBtn {
+  background: #D4AF37;
+  color: #0D0D0D;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.voiceStopBtn:hover {
+  background: #F0D78C;
+  transform: scale(1.04);
+}
+

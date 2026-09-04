@@ -27,7 +27,7 @@ function groqFetch(apiKey: string, model: string, messages: any[]): Promise<any>
       model,
       messages,
       temperature: 0.3,
-      max_tokens: 800
+      max_tokens: 400
     });
 
     const url = new URL(GROQ_API_URL);
