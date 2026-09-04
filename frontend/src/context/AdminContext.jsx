@@ -11,6 +11,29 @@ import { clearCopilotCache } from '../services/aiCopilotService'
 
 const AdminContext = createContext()
 
+const CURRENT_STORAGE_VERSION = '2026_VIRGIN_PURE_V1'
+try {
+  if (typeof window !== 'undefined' && localStorage.getItem('spa_storage_version') !== CURRENT_STORAGE_VERSION) {
+    const keysToPurge = [
+      'spa_admin_categories',
+      'spa_admin_team',
+      'spa_admin_appointments',
+      'spa_admin_transactions',
+      'spa_admin_notifications',
+      'spa_admin_cash_sessions',
+      'spa_admin_reconciliations',
+      'spa_admin_clients',
+      'spa_admin_products',
+      'spa_admin_memberships',
+      'spa_admin_closed_dates',
+      'spa_admin_business_config',
+      'spa_groq_api_key'
+    ]
+    keysToPurge.forEach(k => localStorage.removeItem(k))
+    localStorage.setItem('spa_storage_version', CURRENT_STORAGE_VERSION)
+  }
+} catch (e) {}
+
 const todayStr = getLocalDateString()
 
 const initialClosedDates = []

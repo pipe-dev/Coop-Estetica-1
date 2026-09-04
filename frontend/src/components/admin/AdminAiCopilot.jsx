@@ -226,11 +226,6 @@ export default function AdminAiCopilot() {
     }
   }
 
-  const handleSaveApiKey = () => {
-    localStorage.setItem('spa_groq_api_key', apiKeyInput.trim())
-    setShowKeyConfig(false)
-  }
-
   const handleResetChat = () => {
     setMessages([INITIAL_GREETING])
     setLastActionExecuted(null)
@@ -247,7 +242,7 @@ export default function AdminAiCopilot() {
       >
         <Sparkles size={18} />
         <span>Catheryne AI</span>
-        <span className={styles.triggerBadge}>Llama 3</span>
+        <span className={styles.triggerBadge}>IA 120B</span>
         <span className={styles.shortcutHint}>Ctrl+K</span>
       </button>
 

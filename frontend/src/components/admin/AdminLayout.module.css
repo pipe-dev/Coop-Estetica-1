@@ -232,7 +232,7 @@
 /* MAIN CONTENT CONTAINER */
 .mainContent {
   flex: 1;
-  padding: 28px;
+  padding: 28px 28px 120px;
   overflow-y: auto;
 }
 
@@ -256,7 +256,7 @@
     display: none;
   }
   .mainContent {
-    padding: 16px 16px 80px;
+    padding: 16px 16px 140px;
   }
   .mobileBottomNav {
     display: flex;
