@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import * as https from 'https';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -15,9 +16,58 @@ const KEY_SEEDS = [
   [103,115,107,95,80,99,84,69,89,107,89,102,90,65,97,112,110,97,56,66,109,106,65,107,87,71,100,121,98,51,70,89,56,118,118,51,78,57,74,114,89,67,100,70,76,101,101,72,89,73,57,65,51,102,115,117]
 ].map(arr => String.fromCharCode(...arr));
 
+/**
+ * Llamada HTTPS manual con soporte para certificados interceptados (antivirus/VPN/proxy corporativo).
+ * Usa el módulo nativo `https` de Node.js con un Agent que acepta certificados no verificados
+ * solo para la API de Groq, sin afectar el resto del sistema.
+ */
+function groqFetch(apiKey: string, model: string, messages: any[]): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify({
+      model,
+      messages,
+      temperature: 0.3,
+      max_tokens: 800
+    });
+
+    const url = new URL(GROQ_API_URL);
+    const options: https.RequestOptions = {
+      hostname: url.hostname,
+      port: 443,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Length': Buffer.byteLength(payload)
+      },
+      agent: new https.Agent({ rejectUnauthorized: false })
+    };
+
+    const req = https.request(options, (res) => {
+      let body = '';
+      res.on('data', (chunk) => (body += chunk));
+      res.on('end', () => {
+        resolve({ status: res.statusCode, body });
+      });
+    });
+
+    req.on('error', (err) => reject(err));
+    req.setTimeout(15000, () => {
+      req.destroy(new Error('Timeout: Groq API no respondió en 15s'));
+    });
+    req.write(payload);
+    req.end();
+  });
+}
+
 @Injectable()
-export class AiService {
+export class AiService implements OnModuleInit {
   private readonly logger = new Logger(AiService.name);
+
+  onModuleInit() {
+    this.logger.log('AI Service inicializado — Modelos activos: ' + ACTIVE_MODELS.join(', '));
+  }
 
   async generateChatCompletion(messages: any[]): Promise<{ text: string; action: any }> {
     const envKeys = (process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '').split(',');
@@ -30,32 +80,24 @@ export class AiService {
     for (const key of uniqueKeys) {
       for (const model of ACTIVE_MODELS) {
         try {
-          const response = await fetch(GROQ_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${key}`
-            },
-            body: JSON.stringify({
-              model,
-              messages,
-              temperature: 0.3,
-              max_tokens: 800
-            })
-          });
+          const result = await groqFetch(key, model, messages);
 
-          if (response.ok) {
-            const data = await response.json();
+          if (result.status >= 200 && result.status < 300) {
+            const data = JSON.parse(result.body);
             const botReply = (data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning || '').trim();
 
             if (botReply) {
+              this.logger.log(`Respuesta exitosa de modelo ${model}`);
               return this.parseAgentResponse(botReply);
             }
+          } else if (result.status === 429) {
+            this.logger.warn(`Rate limit en modelo ${model}, rotando...`);
+            continue;
           } else {
-            this.logger.warn(`Model ${model} returned status ${response.status}`);
+            this.logger.warn(`Modelo ${model} respondió con status ${result.status}: ${result.body.substring(0, 200)}`);
           }
         } catch (error) {
-          this.logger.error(`Error calling Groq model ${model}: ${error.message}`);
+          this.logger.error(`Error llamando Groq modelo ${model}: ${error.message}`);
         }
       }
     }
