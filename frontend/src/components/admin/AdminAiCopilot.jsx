@@ -136,8 +136,8 @@ function getBestSpanishFemaleVoice(savedVoiceURI = '') {
   const voices = window.speechSynthesis.getVoices() || []
   if (voices.length === 0) return null
 
-  // 1. Si el usuario eligió una voz específica en el selector, usarla
-  if (savedVoiceURI) {
+  // 1. Si el usuario eligió una voz específica en el selector (y no es el token cloud_catalina)
+  if (savedVoiceURI && savedVoiceURI !== 'cloud_catalina') {
     const matched = voices.find(v => v.voiceURI === savedVoiceURI || v.name === savedVoiceURI)
     if (matched) return matched
   }
@@ -458,9 +458,13 @@ export default function AdminAiCopilot() {
 
   const [selectedVoiceURI, setSelectedVoiceURI] = useState(() => {
     try {
-      return localStorage.getItem('spa_copilot_voice_uri') || ''
+      const saved = localStorage.getItem('spa_copilot_voice_uri')
+      if (saved && (saved === 'cloud_catalina' || saved.toLowerCase().includes('catalina'))) {
+        return saved
+      }
+      return 'cloud_catalina'
     } catch (e) {
-      return ''
+      return 'cloud_catalina'
     }
   })
   const [voiceRate, setVoiceRate] = useState(() => {
@@ -556,9 +560,14 @@ export default function AdminAiCopilot() {
     const textToSpeak = extractPlainTextForSpeech(content)
     if (!textToSpeak) return
 
-    // ¿Se debe usar el streaming HD de Catalina (Safari en iPhone, Chrome, o selección manual)?
-    const isCloudCatalina = selectedVoiceURI === 'cloud_catalina' || 
-      (!selectedVoiceURI && !availableVoices.some(v => v.name.toLowerCase().includes('catalina')))
+    // Detección inteligente: ¿El navegador tiene a Catalina de forma nativa (Microsoft Edge)?
+    const hasNativeCatalina = typeof window !== 'undefined' && 
+      (window.speechSynthesis?.getVoices() || []).some(v => v.name && v.name.toLowerCase().includes('catalina'))
+
+    // En Safari (iPhone), Chrome o si no hay Catalina nativa -> Usar streaming HD de Catalina
+    const isCloudCatalina = selectedVoiceURI === 'cloud_catalina'
+      ? !hasNativeCatalina
+      : (!hasNativeCatalina && (!selectedVoiceURI || selectedVoiceURI.toLowerCase().includes('catalina')))
 
     if (isCloudCatalina) {
       try {
@@ -575,7 +584,7 @@ export default function AdminAiCopilot() {
           setSpeakingMessageIndex(null)
         }
         audio.play().catch(err => {
-          console.warn('Autoplay pendiente de interacción:', err)
+          console.warn('Autoplay pendiente de interacción en Safari:', err)
           setSpeakingMessageIndex(null)
         })
         return
@@ -690,6 +699,16 @@ export default function AdminAiCopilot() {
     if (!query.trim() || isLoading) return
 
     stopSpeaking()
+
+    // Pre-desbloqueo de audio para Safari en iPhone/iPad (gesto directo del usuario)
+    if (typeof Audio !== 'undefined') {
+      if (!audioRef.current) {
+        audioRef.current = new Audio()
+      }
+      try {
+        audioRef.current.load()
+      } catch (e) {}
+    }
 
     const userMsg = {
       role: 'user',
@@ -909,6 +928,9 @@ export default function AdminAiCopilot() {
         console.warn('[VOICE] Estado dictado:', event.error)
         setIsListening(false)
         setVoiceInterim('')
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          alert('🎙️ Safari en red local HTTP restringe el micrófono web por seguridad de iOS.\n\n💡 Tip Pro: Toca el campo de texto y pulsa el botón de micrófono del teclado de tu iPhone (Dictado de iOS). ¡Es instantáneo y 100% preciso!')
+        }
       }
 
       recognition.onend = () => {
