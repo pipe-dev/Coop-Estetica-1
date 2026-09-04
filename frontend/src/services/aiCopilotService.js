@@ -154,14 +154,18 @@ CONTEXTO EN TIEMPO REAL:
 - FECHAS BLOQUEADAS: ${closedDigest || 'Ninguna'}
 
 REGLAS DE CONDUCTA Y ALCANCE:
-1. PREGUNTAS COTIDIANAS BÁSICAS (Fecha, Hora, Saludos, Cálculos):
+1. FLUJO DE INDUCCIÓN Y PRESENTACIÓN INTERACTIVA (TOUR PASO A PASO):
+   - Si Catheryne pregunta "¿Qué puedes hacer por mí y por mi estética?", "preséntate", "ayuda", o similar:
+     Preséntate con enorme calidez, elegancia y entusiasmo. Explica que juntas formarán una dupla directiva imparable. Resume las 5 funciones clave (1. Caja y Finanzas, 2. Liquidación de Especialistas, 3. Agenda y Citas Inteligentes, 4. Inventario y Boutique, 5. CRM y Bloqueos), e invítala amablemente a explorar el **Paso 1: Flujo de Caja y Finanzas**.
+   - En cada paso del tour que exploren juntas, ameniza la conversación con tono profesional y cercano, muestra los datos reales actuales de su estética, y concluye invitándola con naturalidad a pasar al siguiente paso hasta recorrer todo el copiloto.
+2. PREGUNTAS COTIDIANAS BÁSICAS (Fecha, Hora, Saludos, Cálculos):
    - Si preguntan "¿qué día es hoy?", "¿qué fecha es hoy?" o la hora, responde directamente con la fecha/hora en vivo de Colombia indicada arriba.
    - Si saludan cordialmente o preguntan cómo estás, responde con cortesía ejecutiva y ofrece un resumen breve de las operaciones del día.
-2. PREGUNTAS OPERATIVAS DE LA ESTÉTICA (Caja, Citas, Especialistas, Clientes, Servicios):
+3. PREGUNTAS OPERATIVAS DE LA ESTÉTICA (Caja, Citas, Especialistas, Clientes, Servicios):
    - Responde con datos reales basados exclusivamente en el contexto. No inventes nombres si el estado está vacío.
-3. PREGUNTAS TOTALMENTE FUERA DE CONTEXTO (recetas de cocina, física cuántica, política, temas ajenos):
+4. PREGUNTAS TOTALMENTE FUERA DE CONTEXTO (recetas de cocina, física cuántica, política, temas ajenos):
    - Responde amablemente delimitando tu rol: "Como tu copiloto ejecutiva en Catheryne Ríos Estética, estoy enfocada en asistirte en la gestión de citas, caja, especialistas, catálogo y clientas del negocio. ¿En qué área de la estética te puedo colaborar hoy?"
-4. ACCIONES DEL SISTEMA:
+5. ACCIONES DEL SISTEMA:
    - Para agendar citas confirmadas:
 \`\`\`action
 {"action": "CREATE_APPOINTMENT", "data": {"clientName": "...", "clientPhone": "...", "serviceName": "...", "specialistName": "...", "date": "YYYY-MM-DD", "time": "HH:MM AM/PM"}}
@@ -312,7 +316,7 @@ function processLocalFallbackAgent(userQuery, spaState) {
   }
 
   // Consulta de Fecha y Hora
-  if (query.includes('dia') || query.includes('día') || query.includes('fecha') || query.includes('hora') || query.includes('que dia es') || query.includes('qué día es') || query.includes('que fecha es') || query.includes('qué fecha es')) {
+  if (query.includes('que dia es') || query.includes('qué día es') || query.includes('que fecha es') || query.includes('qué fecha es') || query === 'dia' || query === 'día' || query === 'fecha' || query === 'hora') {
     return {
       text: `**Fecha y Hora Actual (Colombia):**\n\n` +
             `- **Día y Fecha:** ${formattedDateCo}\n` +
@@ -327,24 +331,116 @@ function processLocalFallbackAgent(userQuery, spaState) {
   if (query.startsWith('hola') || query.includes('buenos dias') || query.includes('buenos días') || query.includes('buenas tardes') || query.includes('buenas noches') || query.includes('como estas') || query.includes('cómo estás')) {
     const todayApps = (spaState.appointments || []).filter(a => a.date === todayStr && a.status !== 'Cancelada')
     return {
-      text: `¡Hola Catheryne! Todo listo en **Catheryne Ríos Estética**.\n\n` +
+      text: `¡Hola Catheryne! Qué gusto saludarte.\n\n` +
             `- **Fecha de hoy:** ${formattedDateCo}\n` +
             `- **Citas de hoy:** ${todayApps.length} programada(s)\n\n` +
-            `¿En qué te puedo colaborar hoy? Puedes consultarme sobre caja, comisiones, agendar citas o gestionar el inventario.`,
+            `Si deseas conocer todo lo que puedo hacer por tu estética, pregúntame: **"¿Qué puedes hacer por mí y por mi estética?"** o pídeme cualquier gestión de caja, citas o equipo.`,
       action: null
     }
   }
 
-  // Ayuda y Capacidades
-  if (query.includes('ayuda') || query.includes('que puedes hacer') || query.includes('qué puedes hacer') || query.includes('opciones') || query.includes('funciones')) {
+  // ----------------------------------------------------
+  // FLUJO DE INDUCCIÓN Y TOUR GUIADO PASO A PASO
+  // ----------------------------------------------------
+  if (query.includes('que puedes hacer') || query.includes('qué puedes hacer') || query.includes('por mi') || query.includes('por mí') || query.includes('presentate') || query.includes('preséntate') || query.includes('tour') || query.includes('guíame') || query.includes('guiame') || query.includes('empezar')) {
     return {
-      text: `**Capacidades de Catheryne AI en tu Estética:**\n\n` +
-            `- **Caja y Finanzas:** Consulta ingresos, gastos y balance neto en tiempo real.\n` +
-            `- **Liquidación de Especialistas:** Cálculo automático de comisiones y pagos del equipo.\n` +
-            `- **Agenda y Citas:** Consulta de citas para hoy y agendamiento automático.\n` +
-            `- **Inventario y Boutique:** Consulta de stock y creación rápida de productos.\n` +
-            `- **Bloqueos:** Cierre de festivos o fechas especiales en la agenda.\n` +
-            `- **CRM y Clientas:** Consulta de teléfonos, notas estéticas y preferencias.`,
+      text: `¡Qué alegría comenzar este camino juntas, Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva de operaciones e inteligencia de negocios.\n\n` +
+            `Mi misión es acompañarte en el día a día para que tu estética funcione con la máxima elegancia, precisión financiera y sin estrés administrativo.\n\n` +
+            `Estoy conectada en tiempo real a los **5 pilares clave** de tu negocio:\n\n` +
+            `1. **Flujo de Caja y Finanzas:** Control de ingresos, gastos y arqueo ciego en tiempo real.\n` +
+            `2. **Liquidación de Especialistas:** Cálculo exacto y automático de comisiones según citas atendidas.\n` +
+            `3. **Agenda Inteligente:** Agendamiento instantáneo por voz o texto y control de turnos de hoy.\n` +
+            `4. **Inventario y Boutique:** Control de stock y alta rápida de productos.\n` +
+            `5. **CRM y Festivos:** Ficha técnica de clientas y bloqueo de fechas especiales.\n\n` +
+            `¿Te parece si empezamos explorando el **Paso 1: Flujo de Caja y Finanzas**?`,
+      action: null
+    }
+  }
+
+  // PASO 1: Flujo de Caja y Finanzas
+  if (query.includes('paso 1') || query.includes('1.') || query.includes('caja y finanzas') || query.includes('explícame el flujo de caja') || query.includes('explicame el flujo de caja')) {
+    const txs = spaState.transactions || []
+    const inflows = txs.filter(t => t.type === 'Ingreso').reduce((acc, t) => acc + t.amount, 0)
+    const outflows = txs.filter(t => t.type === 'Egreso').reduce((acc, t) => acc + t.amount, 0)
+    const net = inflows - outflows
+
+    return {
+      text: `**Paso 1: Control de Caja y Finanzas en Tiempo Real**\n\n` +
+            `Catheryne, cada vez que una clienta paga un servicio o producto, o cuando registras un gasto (como insumos o servicios), el balance se actualiza al instante sin necesidad de hojas de cálculo.\n\n` +
+            `**Estado Financiero Actual de tu Estética:**\n` +
+            `- **Total Ingresos Registrados:** +$${inflows.toLocaleString()} COP\n` +
+            `- **Total Gastos / Egresos:** -$${outflows.toLocaleString()} COP\n` +
+            `- **Balance Neto en Caja:** **$${net.toLocaleString()} COP**\n\n` +
+            `Además, cuentas con **Arqueo Ciego Auditado** para cerrar caja cada noche con total tranquilidad.\n\n` +
+            `¿Lista para pasar al **Paso 2: Liquidación de Especialistas**?`,
+      action: null
+    }
+  }
+
+  // PASO 2: Liquidación de Especialistas
+  if (query.includes('paso 2') || query.includes('2.') || query.includes('liquidación de especialistas') || query.includes('liquidacion de especialistas') || query.includes('comisiones del equipo')) {
+    const specialists = spaState.teamMembers || []
+    let teamDesc = ''
+
+    if (specialists.length === 0) {
+      teamDesc = `*Actualmente tu equipo está listo para recibir a tus especialistas desde la sección "Equipo".*`
+    } else {
+      teamDesc = `**Equipo registrado (${specialists.length} colaboradoras):**\n` +
+        specialists.map(sp => `- **${sp.name}** (${sp.role}): Comisión del ${sp.commissionRate || 45}%`).join('\n')
+    }
+
+    return {
+      text: `**Paso 2: Liquidación Automática de Especialistas**\n\n` +
+            `Olvídate de calcular porcentajes a mano al final del día o de la quincena.\n\n` +
+            `- Cada especialista tiene su porcentaje asignado (ej. 40%, 45% o 50%).\n` +
+            `- El sistema calcula automáticamente la comisión **únicamente sobre citas confirmadas y pagadas**.\n` +
+            `- Te muestra en segundos el **Pago Neto para la Especialista** y la **Retención Neta para la Estética** con 0 errores matemáticos.\n\n` +
+            `${teamDesc}\n\n` +
+            `¿Avanzamos al **Paso 3: Agenda Inteligente y Agendamiento por Voz**?`,
+      action: null
+    }
+  }
+
+  // PASO 3: Agenda Inteligente y Citas
+  if (query.includes('paso 3') || query.includes('3.') || query.includes('agendar citas por voz') || query.includes('agenda inteligente') || query.includes('agendar citas')) {
+    const todayApps = (spaState.appointments || []).filter(a => a.date === todayStr && a.status !== 'Cancelada')
+    return {
+      text: `**Paso 3: Agenda Inteligente y Agendamiento Rápido**\n\n` +
+            `Puedes gestionar tu agenda por escrito o dictándome con el botón de micrófono.\n\n` +
+            `Por ejemplo, solo dime:\n` +
+            `> *"Agendar a Mariana López para mañana a las 3 PM para Limpieza Facial con Catheryne"*\n\n` +
+            `Yo interpretaré la solicitud, crearé la cita directamente en tu calendario y el sistema enviará los comprobantes por correo y WhatsApp.\n\n` +
+            `**Citas programadas para hoy (${formattedDateCo}):** ${todayApps.length} cita(s).\n\n` +
+            `¿Continuamos con el **Paso 4: Inventario y Boutique**?`,
+      action: null
+    }
+  }
+
+  // PASO 4: Inventario y Boutique
+  if (query.includes('paso 4') || query.includes('4.') || query.includes('inventario y boutique') || query.includes('boutique y productos')) {
+    const products = spaState.products || []
+    return {
+      text: `**Paso 4: Inventario y Boutique de Productos**\n\n` +
+            `Controla todos los productos de belleza y cuidado en casa que vendes en tu estética.\n\n` +
+            `- Puedes consultar el stock disponible en cualquier momento.\n` +
+            `- Si llega un nuevo producto, solo dímelo: *"Crea Sérum Vitamina C precio 75000 con 10 unidades"* y lo daré de alta de inmediato en tu catálogo.\n\n` +
+            `**Productos registrados actualmente:** ${products.length} producto(s).\n\n` +
+            `¿Vamos al **Paso 5: CRM de Clientas y Bloqueo de Festivos** para cerrar el tour?`,
+      action: null
+    }
+  }
+
+  // PASO 5: CRM de Clientas y Bloqueo de Festivos
+  if (query.includes('paso 5') || query.includes('5.') || query.includes('crm de clientas') || query.includes('crm y festivos') || query.includes('festivos')) {
+    return {
+      text: `**Paso 5: CRM de Clientas y Cierre de Fechas Especiales**\n\n` +
+            `Aquí cuidamos la experiencia personalizada de cada persona que visita tu estética:\n\n` +
+            `- **Ficha de Clientas:** Guarda notas estéticas (tono de esmalte favorito, tipo de piel, alergias o preferencias).\n` +
+            `- **Bloqueo de Festivos:** Puedes pedirme: *"Bloquea el 25 de diciembre por Navidad"* o *"Bloquea el lunes por mantenimiento"* para proteger tu agenda de reservas en días no laborales.\n\n` +
+            `---\n\n` +
+            `🎉 **¡Felicitaciones Catheryne! Hemos completado el recorrido.**\n\n` +
+            `Ahora tienes el control total de tu estética en la palma de tu mano. Recuerda que puedes abrirme en cualquier momento presionando **Ctrl + K** o haciendo clic en el botón dorado flotante.\n\n` +
+            `¿En qué te gustaría que empecemos a trabajar en este momento?`,
       action: null
     }
   }

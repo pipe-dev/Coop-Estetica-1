@@ -101,19 +101,80 @@ function renderFormattedMessage(content) {
 
 const INITIAL_GREETING = {
   role: 'assistant',
-  content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva de operaciones.\n\n` +
-           `Tengo acceso en tiempo real a tus citas de hoy, reportes de caja, liquidación de especialistas, inventario y clientas de la estética.\n\n` +
-           `¿En qué te ayudo hoy?`,
+  content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva de operaciones e inteligencia de negocios para tu estética.\n\n` +
+           `Estoy diseñada para acompañarte día a día y hacer que la administración de tu estética sea impecable, rápida y sin estrés.\n\n` +
+           `Para comenzar a conocernos y presentarte todo mi potencial paso a paso, haz clic abajo o pregúntame:\n\n` +
+           `👉 **"¿Qué puedes hacer por mí y por mi estética?"**`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-const QUICK_SUGGESTIONS = [
-  '¿Cómo va el reporte de caja de hoy?',
-  '¿Qué citas tenemos programadas para hoy?',
-  '¿Cuánto se le debe pagar a las especialistas hoy?',
-  '¿Qué día es hoy?',
-  'Bloquear un festivo o cierre'
-]
+const getDynamicSuggestions = (messages) => {
+  const lastMsg = messages[messages.length - 1]?.content?.toLowerCase() || ''
+
+  if (messages.length <= 1) {
+    return [
+      '¿Qué puedes hacer por mí y por mi estética?',
+      '¿Cómo va el reporte de caja de hoy?',
+      '¿Qué día es hoy?'
+    ]
+  }
+
+  if (lastMsg.includes('paso 1: flujo de caja') || lastMsg.includes('5 pilares clave') || lastMsg.includes('empezamos explorando el paso 1')) {
+    return [
+      '1. Explícame el Flujo de Caja y Finanzas',
+      '2. Explícame la Liquidación de Especialistas',
+      '¿Cómo va el reporte de caja de hoy?'
+    ]
+  }
+
+  if (lastMsg.includes('paso 1: control de caja') || lastMsg.includes('¿lista para pasar al paso 2')) {
+    return [
+      '2. Explícame la Liquidación de Especialistas',
+      '¿Cómo registro un movimiento de caja?',
+      '¿Cómo va el balance neto hoy?'
+    ]
+  }
+
+  if (lastMsg.includes('paso 2: liquidación') || lastMsg.includes('¿avanzamos al paso 3')) {
+    return [
+      '3. Explícame cómo Agendar Citas por Voz o Texto',
+      '¿Cuánto se le debe pagar a las especialistas hoy?',
+      '¿Cómo se configuran las comisiones?'
+    ]
+  }
+
+  if (lastMsg.includes('paso 3: agenda inteligente') || lastMsg.includes('¿continuamos con el paso 4')) {
+    return [
+      '4. Explícame el Inventario y Boutique',
+      '¿Qué citas tenemos programadas para hoy?',
+      'Agendar una cita rápida'
+    ]
+  }
+
+  if (lastMsg.includes('paso 4: inventario') || lastMsg.includes('¿vamos al paso 5')) {
+    return [
+      '5. Explícame el CRM de Clientas y Festivos',
+      '¿Qué productos tenemos en stock?',
+      'Crea un producto nuevo'
+    ]
+  }
+
+  if (lastMsg.includes('hemos completado el recorrido') || lastMsg.includes('felicitaciones')) {
+    return [
+      '¿Cómo va el reporte de caja de hoy?',
+      '¿Qué citas tenemos programadas para hoy?',
+      '¿Qué día es hoy?',
+      'Bloquear un festivo o cierre'
+    ]
+  }
+
+  return [
+    '¿Cómo va el reporte de caja de hoy?',
+    '¿Qué citas tenemos programadas para hoy?',
+    '¿Qué día es hoy?',
+    '¿Qué puedes hacer por mí y por mi estética?'
+  ]
+}
 
 export default function AdminAiCopilot() {
   const adminState = useAdmin()
@@ -444,9 +505,9 @@ export default function AdminAiCopilot() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* CHIPS DE SUGERENCIAS RÁPIDAS */}
+              {/* CHIPS DE SUGERENCIAS RÁPIDAS DINÁMICAS */}
               <div className={styles.suggestionsWrap}>
-                {QUICK_SUGGESTIONS.map((sug, i) => (
+                {getDynamicSuggestions(messages).map((sug, i) => (
                   <button 
                     key={i} 
                     type="button" 
