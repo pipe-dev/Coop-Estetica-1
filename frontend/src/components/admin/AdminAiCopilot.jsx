@@ -15,7 +15,9 @@ import {
   CalendarX,
   Volume2,
   VolumeX,
-  Square
+  Square,
+  SlidersHorizontal,
+  Play
 } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { sendChatMessageToCopilot, cleanAndNormalizeVoiceText } from '../../services/aiCopilotService'
@@ -40,38 +42,89 @@ function extractPlainTextForSpeech(content) {
 }
 
 /**
- * Selecciona la mejor voz femenina en español disponible nativamente en el navegador
+ * Puntuación de calidad y naturalidad humana para voces en español
+ * Prioriza voces Neurales/Naturales de Colombia y Latinoamérica,
+ * y penaliza drásticamente voces robóticas de Windows Desktop (como Helena).
  */
-function getBestSpanishFemaleVoice() {
+function getVoiceQualityScore(v) {
+  const name = (v.name || '').toLowerCase()
+  const lang = (v.lang || '').toLowerCase()
+  let score = 0
+
+  // 1. BONIFICACIÓN MÁXIMA: Voces Neurales / Naturales (Ultra-Humanas de última generación)
+  if (name.includes('natural') || name.includes('neural') || name.includes('online')) {
+    score += 120
+  }
+
+  // 2. Acento colombiano o latino
+  if (lang === 'es-co' || name.includes('colombia')) {
+    score += 50
+  } else if (lang === 'es-419' || lang === 'es-mx' || name.includes('mexico')) {
+    score += 35
+  } else if (lang === 'es-us') {
+    score += 30
+  }
+
+  // 3. Voces de Google (en Chrome son voces de nube de alta fidelidad)
+  if (name.includes('google')) {
+    score += 90
+  }
+
+  // 4. Voces femeninas reconocidas de alta calidad acústica
+  if (name.includes('salome') || name.includes('salomé')) score += 60
+  if (name.includes('dalia')) score += 55
+  if (name.includes('camila')) score += 50
+  if (name.includes('sabina') || name.includes('sabrina')) score += 45
+  if (name.includes('jimena')) score += 45
+  if (name.includes('paulina')) score += 40
+  if (name.includes('paloma')) score += 40
+  if (name.includes('laura')) score += 35
+  if (name.includes('monica') || name.includes('mónica')) score += 30
+
+  // 5. Cloud Service (Chrome remote voices)
+  if (v.localService === false) {
+    score += 40
+  }
+
+  // 6. PENALIZACIÓN SEVERA: Voces masculinas (el copiloto es Catheryne)
+  if (name.includes('pablo') || name.includes('jorge') || name.includes('alvaro') || 
+      name.includes('gonzalo') || name.includes('alonso') || name.includes('raul') || 
+      name.includes('male') || name.includes('hombre')) {
+    score -= 100
+  }
+
+  // 7. PENALIZACIÓN SEVERA: Voces antiguas y metálicas de Windows Desktop (robóticas)
+  if (name.includes('desktop') || name.includes('helena')) {
+    score -= 80
+  }
+
+  return score
+}
+
+export function rankSpanishVoices(voices) {
+  if (!voices || voices.length === 0) return []
+  const spanish = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'))
+  if (spanish.length === 0) return voices.slice(0, 1)
+
+  return [...spanish].sort((a, b) => getVoiceQualityScore(b) - getVoiceQualityScore(a))
+}
+
+/**
+ * Selecciona la voz más humana y realista disponible
+ */
+function getBestSpanishFemaleVoice(savedVoiceURI = '') {
   if (typeof window === 'undefined' || !window.speechSynthesis) return null
   const voices = window.speechSynthesis.getVoices() || []
   if (voices.length === 0) return null
 
-  // 1. Prioridad: Voces femeninas latinas naturales
-  const preferred = voices.find(v => 
-    v.lang.startsWith('es') && 
-    (v.name.toLowerCase().includes('sabina') || 
-     v.name.toLowerCase().includes('dalia') ||
-     v.name.toLowerCase().includes('helena') ||
-     v.name.toLowerCase().includes('monica') ||
-     v.name.toLowerCase().includes('paulina') ||
-     v.name.toLowerCase().includes('paloma') ||
-     v.name.toLowerCase().includes('lucia') ||
-     v.name.toLowerCase().includes('female') ||
-     v.name.toLowerCase().includes('natural') ||
-     v.name.toLowerCase().includes('google español'))
-  )
-  if (preferred) return preferred
+  // Si el usuario eligió una voz específica, usarla
+  if (savedVoiceURI) {
+    const matched = voices.find(v => v.voiceURI === savedVoiceURI || v.name === savedVoiceURI)
+    if (matched) return matched
+  }
 
-  // 2. Voz de Colombia o Latinoamérica
-  const latin = voices.find(v => v.lang === 'es-CO' || v.lang === 'es-419' || v.lang === 'es-MX')
-  if (latin) return latin
-
-  // 3. Cualquier voz en español
-  const anySpanish = voices.find(v => v.lang.startsWith('es'))
-  if (anySpanish) return anySpanish
-
-  return voices[0] || null
+  const ranked = rankSpanishVoices(voices)
+  return ranked[0] || voices[0] || null
 }
 
 function formatInline(text) {
@@ -366,30 +419,56 @@ export default function AdminAiCopilot() {
   const [voiceInterim, setVoiceInterim] = useState('')
   const [lastActionExecuted, setLastActionExecuted] = useState(null)
 
-  // ESTADO DE VOZ DE LECTURA (TTS 100% GRATUITO Y NATIVO)
+  // ESTADO DE VOZ DE LECTURA (TTS 100% GRATUITO, ULTRA-HUMANO Y AUTOMÁTICO POR DEFECTO)
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
     try {
-      return localStorage.getItem('spa_copilot_voice_enabled') === 'true'
+      const saved = localStorage.getItem('spa_copilot_voice_enabled')
+      // ¡HABLA AUTOMÁTICAMENTE POR DEFECTO!
+      return saved === null ? true : saved === 'true'
     } catch (e) {
-      return false
+      return true
     }
   })
   const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null)
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null)
+
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState(() => {
+    try {
+      return localStorage.getItem('spa_copilot_voice_uri') || ''
+    } catch (e) {
+      return ''
+    }
+  })
+  const [voiceRate, setVoiceRate] = useState(() => {
+    try {
+      return parseFloat(localStorage.getItem('spa_copilot_voice_rate')) || 0.98
+    } catch (e) {
+      return 0.98
+    }
+  })
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false)
+  const [availableVoices, setAvailableVoices] = useState([])
 
   const messagesContainerRef = useRef(null)
   const latestAssistantMsgRef = useRef(null)
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
 
-  // Carga de voces del navegador (en Chrome cargan asíncronamente)
+  // Carga y ordenamiento de voces ultra-humanas del navegador
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       synthRef.current = window.speechSynthesis
-      const handleVoicesChanged = () => {
-        window.speechSynthesis.getVoices()
+      const updateVoices = () => {
+        const all = window.speechSynthesis.getVoices() || []
+        const ranked = rankSpanishVoices(all)
+        setAvailableVoices(ranked)
+        // Si no hay voz elegida aún, guardar automáticamente la #1 (la más humana)
+        if (!selectedVoiceURI && ranked.length > 0) {
+          setSelectedVoiceURI(ranked[0].voiceURI)
+        }
       }
-      window.speechSynthesis.onvoiceschanged = handleVoicesChanged
+      updateVoices()
+      window.speechSynthesis.onvoiceschanged = updateVoices
       return () => {
         if (window.speechSynthesis) {
           window.speechSynthesis.onvoiceschanged = null
@@ -424,7 +503,7 @@ export default function AdminAiCopilot() {
     setSpeakingMessageIndex(null)
   }
 
-  // Reproducir mensaje con la voz nativa de Catheryne
+  // Reproducir mensaje con la voz nativa ultra-humana de Catheryne
   const speakMessage = (content, index) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return
 
@@ -441,7 +520,7 @@ export default function AdminAiCopilot() {
 
     try {
       const utterance = new SpeechSynthesisUtterance(textToSpeak)
-      const voice = getBestSpanishFemaleVoice()
+      const voice = getBestSpanishFemaleVoice(selectedVoiceURI)
       if (voice) {
         utterance.voice = voice
         utterance.lang = voice.lang || 'es-CO'
@@ -449,8 +528,11 @@ export default function AdminAiCopilot() {
         utterance.lang = 'es-CO'
       }
 
-      utterance.rate = 1.02 // Cadencia fluida y ejecutiva
-      utterance.pitch = 1.05 // Tono femenino cálido y elegante
+      // Parámetros acústicos ultra-humanos:
+      // ¡PITCH 1.0! Vital para preservar formantes, respiración y entonación de grabaciones neurales
+      utterance.pitch = 1.0
+      // Cadencia natural y relajada (0.98x)
+      utterance.rate = voiceRate || 0.98
 
       utterance.onstart = () => {
         setSpeakingMessageIndex(index)
@@ -782,9 +864,19 @@ export default function AdminAiCopilot() {
                     type="button" 
                     className={`${styles.iconBtn} ${isVoiceEnabled ? styles.iconBtnActive : ''}`} 
                     onClick={toggleVoiceEnabled}
-                    title={isVoiceEnabled ? "Desactivar voz de lectura automática" : "Activar voz de lectura automática (Catheryne Habla)"}
+                    title={isVoiceEnabled ? "Voz automática activa (Clic para silenciar)" : "Activar voz automática de Catheryne"}
                   >
                     {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  </button>
+
+                  {/* AJUSTES DE VOZ HUMANA */}
+                  <button 
+                    type="button" 
+                    className={`${styles.iconBtn} ${showVoiceSettings ? styles.iconBtnActive : ''}`} 
+                    onClick={() => setShowVoiceSettings(prev => !prev)}
+                    title="Configurar y probar voces humanas de Catheryne"
+                  >
+                    <SlidersHorizontal size={15} />
                   </button>
 
                   <button 
@@ -812,6 +904,82 @@ export default function AdminAiCopilot() {
                   </button>
                 </div>
               </div>
+
+              {/* PANEL DE CONFIGURACIÓN DE VOZ HUMANA */}
+              <AnimatePresence>
+                {showVoiceSettings && (
+                  <motion.div 
+                    className={styles.voiceSettingsPanel}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <div className={styles.voiceSettingsHeader}>
+                      <div className={styles.voiceSettingsTitle}>
+                        <Sparkles size={14} />
+                        <span>Voz Humana de Catheryne AI</span>
+                      </div>
+                      <button 
+                        type="button" 
+                        className={styles.voiceCloseBtn}
+                        onClick={() => setShowVoiceSettings(false)}
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+
+                    <div className={styles.voiceControlGroup}>
+                      <label className={styles.voiceLabel}>Voz seleccionada:</label>
+                      <select 
+                        className={styles.voiceSelect}
+                        value={selectedVoiceURI || (availableVoices[0]?.voiceURI || '')}
+                        onChange={(e) => {
+                          const uri = e.target.value
+                          setSelectedVoiceURI(uri)
+                          localStorage.setItem('spa_copilot_voice_uri', uri)
+                        }}
+                      >
+                        {availableVoices.map((v, i) => {
+                          const isNeural = v.name.toLowerCase().includes('natural') || v.name.toLowerCase().includes('neural') || v.name.toLowerCase().includes('google')
+                          return (
+                            <option key={v.voiceURI || i} value={v.voiceURI}>
+                              {isNeural ? '✨ [Ultra-Humana] ' : ''}{v.name}
+                            </option>
+                          )
+                        })}
+                      </select>
+                    </div>
+
+                    <div className={styles.voiceSettingsRow}>
+                      <div className={styles.voiceSliderGroup}>
+                        <span className={styles.voiceLabel}>Velocidad: {voiceRate}x</span>
+                        <input 
+                          type="range" 
+                          min="0.85" 
+                          max="1.15" 
+                          step="0.05"
+                          value={voiceRate}
+                          onChange={(e) => {
+                            const r = parseFloat(e.target.value)
+                            setVoiceRate(r)
+                            localStorage.setItem('spa_copilot_voice_rate', r)
+                          }}
+                          className={styles.voiceSlider}
+                        />
+                      </div>
+
+                      <button 
+                        type="button" 
+                        className={styles.voiceTestBtn}
+                        onClick={() => speakMessage('¡Hola Catheryne! Soy tu copiloto ejecutiva. Así suena mi voz natural para tu estética.', -1)}
+                      >
+                        <Play size={11} />
+                        <span>Probar</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* FEED DE MENSAJES */}
               <div ref={messagesContainerRef} className={styles.messagesContainer}>
