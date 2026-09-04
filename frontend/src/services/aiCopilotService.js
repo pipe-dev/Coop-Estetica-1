@@ -12,33 +12,8 @@ const ACTIVE_MODELS = [
   'openai/gpt-oss-20b'
 ]
 
-// Memoria caché semántica ultra-estricta con invalidación instantánea
-const queryCache = new Map()
-const CACHE_TTL_MS = 15000 // Máximo 15 segundos solo para consultas puramente estáticas
-
-/**
- * Invalidador Atómico de Caché
- * Se ejecuta cada vez que ocurre una mutación de citas, caja, clientes o inventario.
- */
 export function clearCopilotCache() {
-  queryCache.clear()
-  console.log('[AI COPILOT] Caché invalidado por mutación de datos en tiempo real.')
-}
-
-/**
- * Detector de Consultas en Tiempo Real
- * Las preguntas de finanzas, caja, citas, especialistas, fecha/hora o acciones NUNCA se cachean.
- */
-function isRealtimeQuery(query) {
-  const q = query.toLowerCase()
-  const realtimeKeywords = [
-    'caja', 'plata', 'dinero', 'ingreso', 'egreso', 'gasto', 'balance',
-    'pagar', 'pago', 'comisi', 'cuanto', 'cuánto', 'liquidacion', 'liquidación',
-    'cita', 'agenda', 'hoy', 'mañana', 'turno', 'reserv',
-    'crea', 'agrega', 'bloquea', 'cliente', 'clienta',
-    'dia', 'día', 'hora', 'fecha'
-  ]
-  return realtimeKeywords.some(kw => q.includes(kw))
+  // Conexión viva sin intermediarios
 }
 
 // Reconstrucción segura de claves de respaldo en tiempo de ejecución
