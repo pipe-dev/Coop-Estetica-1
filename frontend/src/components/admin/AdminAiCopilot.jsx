@@ -13,11 +13,66 @@ import {
   DollarSign, 
   Package, 
   CalendarX,
-  Volume2
+  Volume2,
+  VolumeX,
+  Square
 } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { sendChatMessageToCopilot, cleanAndNormalizeVoiceText } from '../../services/aiCopilotService'
 import styles from './AdminAiCopilot.module.css'
+
+/**
+ * Limpia etiquetas Markdown y bloques de código para una locución fluida y natural
+ */
+function extractPlainTextForSpeech(content) {
+  if (!content) return ''
+  return content
+    .replace(/```action[\s\S]*?```/gi, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[*_~`#|>]/g, '')
+    .replace(/👉|🎉|💡|⚠️|✨|🚀|📊/g, '')
+    .replace(/•|-|\+/g, '')
+    .replace(/\n+/g, '. ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Selecciona la mejor voz femenina en español disponible nativamente en el navegador
+ */
+function getBestSpanishFemaleVoice() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return null
+  const voices = window.speechSynthesis.getVoices() || []
+  if (voices.length === 0) return null
+
+  // 1. Prioridad: Voces femeninas latinas naturales
+  const preferred = voices.find(v => 
+    v.lang.startsWith('es') && 
+    (v.name.toLowerCase().includes('sabina') || 
+     v.name.toLowerCase().includes('dalia') ||
+     v.name.toLowerCase().includes('helena') ||
+     v.name.toLowerCase().includes('monica') ||
+     v.name.toLowerCase().includes('paulina') ||
+     v.name.toLowerCase().includes('paloma') ||
+     v.name.toLowerCase().includes('lucia') ||
+     v.name.toLowerCase().includes('female') ||
+     v.name.toLowerCase().includes('natural') ||
+     v.name.toLowerCase().includes('google español'))
+  )
+  if (preferred) return preferred
+
+  // 2. Voz de Colombia o Latinoamérica
+  const latin = voices.find(v => v.lang === 'es-CO' || v.lang === 'es-419' || v.lang === 'es-MX')
+  if (latin) return latin
+
+  // 3. Cualquier voz en español
+  const anySpanish = voices.find(v => v.lang.startsWith('es'))
+  if (anySpanish) return anySpanish
+
+  return voices[0] || null
+}
 
 function formatInline(text) {
   if (!text) return ''
@@ -311,10 +366,109 @@ export default function AdminAiCopilot() {
   const [voiceInterim, setVoiceInterim] = useState('')
   const [lastActionExecuted, setLastActionExecuted] = useState(null)
 
+  // ESTADO DE VOZ DE LECTURA (TTS 100% GRATUITO Y NATIVO)
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('spa_copilot_voice_enabled') === 'true'
+    } catch (e) {
+      return false
+    }
+  })
+  const [speakingMessageIndex, setSpeakingMessageIndex] = useState(null)
+  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null)
+
   const messagesContainerRef = useRef(null)
   const latestAssistantMsgRef = useRef(null)
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
+
+  // Carga de voces del navegador (en Chrome cargan asíncronamente)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      synthRef.current = window.speechSynthesis
+      const handleVoicesChanged = () => {
+        window.speechSynthesis.getVoices()
+      }
+      window.speechSynthesis.onvoiceschanged = handleVoicesChanged
+      return () => {
+        if (window.speechSynthesis) {
+          window.speechSynthesis.onvoiceschanged = null
+          window.speechSynthesis.cancel()
+        }
+      }
+    }
+  }, [])
+
+  // Alternar voz automática (mute / unmute general)
+  const toggleVoiceEnabled = () => {
+    setIsVoiceEnabled(prev => {
+      const next = !prev
+      try {
+        localStorage.setItem('spa_copilot_voice_enabled', next ? 'true' : 'false')
+      } catch (e) {}
+      if (!next && synthRef.current) {
+        synthRef.current.cancel()
+        setSpeakingMessageIndex(null)
+      }
+      return next
+    })
+  }
+
+  // Detener locución
+  const stopSpeaking = () => {
+    if (synthRef.current) {
+      try {
+        synthRef.current.cancel()
+      } catch (e) {}
+    }
+    setSpeakingMessageIndex(null)
+  }
+
+  // Reproducir mensaje con la voz nativa de Catheryne
+  const speakMessage = (content, index) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+
+    // Si ya está hablando este mensaje específico, alternar (detener)
+    if (synthRef.current && synthRef.current.speaking && speakingMessageIndex === index) {
+      stopSpeaking()
+      return
+    }
+
+    stopSpeaking()
+
+    const textToSpeak = extractPlainTextForSpeech(content)
+    if (!textToSpeak) return
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(textToSpeak)
+      const voice = getBestSpanishFemaleVoice()
+      if (voice) {
+        utterance.voice = voice
+        utterance.lang = voice.lang || 'es-CO'
+      } else {
+        utterance.lang = 'es-CO'
+      }
+
+      utterance.rate = 1.02 // Cadencia fluida y ejecutiva
+      utterance.pitch = 1.05 // Tono femenino cálido y elegante
+
+      utterance.onstart = () => {
+        setSpeakingMessageIndex(index)
+      }
+      utterance.onend = () => {
+        setSpeakingMessageIndex(null)
+      }
+      utterance.onerror = (e) => {
+        console.warn('Error en síntesis de voz:', e)
+        setSpeakingMessageIndex(null)
+      }
+
+      synthRef.current.speak(utterance)
+    } catch (err) {
+      console.warn('No se pudo reproducir audio:', err)
+      setSpeakingMessageIndex(null)
+    }
+  }
 
   // Scroll inteligente y cómodo:
   // - Si el usuario envió mensaje o la IA está pensando -> scroll al final.
@@ -358,6 +512,7 @@ export default function AdminAiCopilot() {
         setIsOpen(prev => !prev)
       }
       if (e.key === 'Escape' && isOpen) {
+        stopSpeaking()
         setIsOpen(false)
       }
     }
@@ -371,6 +526,8 @@ export default function AdminAiCopilot() {
   const handleSendMessage = async (textToSend) => {
     const query = textToSend || inputText
     if (!query.trim() || isLoading) return
+
+    stopSpeaking()
 
     const userMsg = {
       role: 'user',
@@ -395,7 +552,16 @@ export default function AdminAiCopilot() {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
 
-      setMessages(prev => [...prev, botMsg])
+      setMessages(prev => {
+        const nextMsgs = [...prev, botMsg]
+        // Si la voz está activada, iniciar locución automática
+        if (isVoiceEnabled && botMsg.content) {
+          setTimeout(() => {
+            speakMessage(botMsg.content, nextMsgs.length - 1)
+          }, 250)
+        }
+        return nextMsgs
+      })
 
       // Si el modelo emitió una acción, ejecutarla en el sistema
       if (response.action) {
@@ -611,10 +777,23 @@ export default function AdminAiCopilot() {
                 </div>
 
                 <div className={styles.headerActions}>
+                  {/* BOTÓN DE VOZ DE LECTURA NATIVO (100% GRATIS) */}
+                  <button 
+                    type="button" 
+                    className={`${styles.iconBtn} ${isVoiceEnabled ? styles.iconBtnActive : ''}`} 
+                    onClick={toggleVoiceEnabled}
+                    title={isVoiceEnabled ? "Desactivar voz de lectura automática" : "Activar voz de lectura automática (Catheryne Habla)"}
+                  >
+                    {isVoiceEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  </button>
+
                   <button 
                     type="button" 
                     className={styles.iconBtn} 
-                    onClick={handleResetChat}
+                    onClick={() => {
+                      stopSpeaking()
+                      handleResetChat()
+                    }}
                     title="Reiniciar Conversación"
                   >
                     <RotateCcw size={16} />
@@ -623,7 +802,10 @@ export default function AdminAiCopilot() {
                   <button 
                     type="button" 
                     className={styles.iconBtn} 
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      stopSpeaking()
+                      setIsOpen(false)
+                    }}
                     title="Cerrar (Esc)"
                   >
                     <X size={18} />
@@ -672,7 +854,34 @@ export default function AdminAiCopilot() {
                           </div>
                         )}
 
-                        <span className={styles.timeLabel}>{msg.timestamp}</span>
+                        {/* PIE DE BURBUJA: HORA + BOTÓN DE AUDIO */}
+                        <div className={styles.bubbleFooter}>
+                          <span className={styles.timeLabel}>{msg.timestamp}</span>
+
+                          {!isUser && msg.content && (
+                            <button
+                              type="button"
+                              className={`${styles.voicePlayBtn} ${speakingMessageIndex === index ? styles.voicePlayBtnActive : ''}`}
+                              onClick={() => speakMessage(msg.content, index)}
+                              title={speakingMessageIndex === index ? "Detener locución" : "Escuchar respuesta de Catheryne AI"}
+                            >
+                              {speakingMessageIndex === index ? (
+                                <>
+                                  <span className={styles.soundWaveBar} />
+                                  <span className={styles.soundWaveBar} />
+                                  <span className={styles.soundWaveBar} />
+                                  <Square size={10} />
+                                  <span>Detener</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Volume2 size={12} />
+                                  <span>Escuchar</span>
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )

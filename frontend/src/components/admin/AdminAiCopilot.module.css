@@ -164,6 +164,13 @@
   border-color: #D4AF37;
 }
 
+.iconBtnActive {
+  background: rgba(212, 175, 55, 0.2) !important;
+  color: #D4AF37 !important;
+  border-color: #D4AF37 !important;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+}
+
 /* API KEY SETTINGS BANNER */
 .apiKeyBanner {
   background: #1A1A1A;
@@ -365,11 +372,82 @@
   border-top-right-radius: 4px;
 }
 
+.bubbleFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .timeLabel {
   font-size: 10px;
   opacity: 0.5;
-  margin-top: 4px;
   display: block;
+}
+
+.voicePlayBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #D4AF37;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.voicePlayBtn:hover {
+  background: rgba(212, 175, 55, 0.22);
+  border-color: #D4AF37;
+  color: #F0D78C;
+  transform: translateY(-1px);
+}
+
+.voicePlayBtnActive {
+  background: rgba(212, 175, 55, 0.28) !important;
+  border-color: #D4AF37 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.soundWaveBar {
+  display: inline-block;
+  width: 2px;
+  height: 9px;
+  background: #D4AF37;
+  border-radius: 1px;
+  animation: soundWaveAnim 0.8s infinite ease-in-out alternate;
+}
+
+.soundWaveBar:nth-child(1) {
+  animation-delay: 0s;
+  height: 6px;
+}
+
+.soundWaveBar:nth-child(2) {
+  animation-delay: 0.2s;
+  height: 11px;
+}
+
+.soundWaveBar:nth-child(3) {
+  animation-delay: 0.4s;
+  height: 7px;
+}
+
+@keyframes soundWaveAnim {
+  0% {
+    transform: scaleY(0.4);
+  }
+  100% {
+    transform: scaleY(1.4);
+  }
 }
 
 /* ACTION CONFIRMATION CARD */
