@@ -21,12 +21,20 @@ import styles from './AdminAiCopilot.module.css'
 
 function formatInline(text) {
   if (!text) return ''
-  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|__.*?__|_.*?_)/g)
+  const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__|_{1}[^_]+_{1})/g)
   return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
+    if (!part) return null
+    if (part.startsWith('`') && part.endsWith('`') && part.length >= 2) {
+      return <code key={i} className={styles.msgInlineCode}>{part.slice(1, -1)}</code>
+    }
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
       return <strong key={i}>{part.slice(2, -2)}</strong>
     }
-    if ((part.startsWith('*') && part.endsWith('*')) || (part.startsWith('_') && part.endsWith('_'))) {
+    if (part.startsWith('__') && part.endsWith('__') && part.length >= 4) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>
+    }
+    if ((part.startsWith('*') && part.endsWith('*') && part.length >= 2) ||
+        (part.startsWith('_') && part.endsWith('_') && part.length >= 2)) {
       return <em key={i}>{part.slice(1, -1)}</em>
     }
     return part
@@ -40,6 +48,7 @@ function renderFormattedMessage(content) {
   const elements = []
   let currentList = []
   let listType = null // 'ul' | 'ol'
+  let currentTable = []
 
   const flushList = () => {
     if (currentList.length > 0) {
@@ -53,11 +62,118 @@ function renderFormattedMessage(content) {
     }
   }
 
+  const flushTable = () => {
+    if (currentTable.length > 0) {
+      const rows = currentTable
+      const isSeparator = (r) => /^\|(\s*:?-+:?\s*\|)+$/.test(r.trim())
+      
+      let headerRow = null
+      let bodyRows = []
+
+      if (rows.length >= 2 && isSeparator(rows[1])) {
+        headerRow = rows[0].split('|').slice(1, -1).map(c => c.trim())
+        bodyRows = rows.slice(2).map(r => r.split('|').slice(1, -1).map(c => c.trim()))
+      } else {
+        bodyRows = rows.map(r => r.split('|').slice(1, -1).map(c => c.trim()))
+      }
+
+      elements.push(
+        <div key={`tbl-wrap-${elements.length}`} className={styles.msgTableWrap}>
+          <table className={styles.msgTable}>
+            {headerRow && (
+              <thead>
+                <tr>
+                  {headerRow.map((h, hi) => (
+                    <th key={hi}>{formatInline(h)}</th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {bodyRows.map((row, ri) => (
+                <tr key={ri}>
+                  {row.map((cell, ci) => (
+                    <td key={ci}>{formatInline(cell)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+      currentTable = []
+    }
+  }
+
   lines.forEach((line, index) => {
     const trimmed = line.trim()
 
-    // Bullet list item
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+    // 1. Markdown Table Row
+    if (trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.length > 2) {
+      flushList()
+      currentTable.push(trimmed)
+      return
+    }
+    flushTable()
+
+    // 2. Headings (#, ##, ###, ####)
+    if (trimmed.startsWith('#### ')) {
+      flushList()
+      elements.push(
+        <h6 key={`h4-${index}`} className={styles.msgHeading4}>
+          {formatInline(trimmed.slice(5))}
+        </h6>
+      )
+      return
+    }
+    if (trimmed.startsWith('### ')) {
+      flushList()
+      elements.push(
+        <h5 key={`h3-${index}`} className={styles.msgHeading3}>
+          {formatInline(trimmed.slice(4))}
+        </h5>
+      )
+      return
+    }
+    if (trimmed.startsWith('## ')) {
+      flushList()
+      elements.push(
+        <h4 key={`h2-${index}`} className={styles.msgHeading2}>
+          {formatInline(trimmed.slice(3))}
+        </h4>
+      )
+      return
+    }
+    if (trimmed.startsWith('# ')) {
+      flushList()
+      elements.push(
+        <h3 key={`h1-${index}`} className={styles.msgHeading1}>
+          {formatInline(trimmed.slice(2))}
+        </h3>
+      )
+      return
+    }
+
+    // 3. Horizontal Dividers
+    if (/^(---|___|\*\*\*)$/.test(trimmed)) {
+      flushList()
+      elements.push(<div key={`div-${index}`} className={styles.msgDivider} />)
+      return
+    }
+
+    // 4. Blockquotes
+    if (trimmed.startsWith('> ')) {
+      flushList()
+      elements.push(
+        <blockquote key={`quote-${index}`} className={styles.msgBlockquote}>
+          {formatInline(trimmed.slice(2))}
+        </blockquote>
+      )
+      return
+    }
+
+    // 5. Bullet list item
+    if (trimmed.startsWith('- ') || (trimmed.startsWith('* ') && !trimmed.endsWith('*'))) {
       if (listType !== 'ul') flushList()
       listType = 'ul'
       const itemText = trimmed.slice(2)
@@ -69,7 +185,7 @@ function renderFormattedMessage(content) {
       return
     }
 
-    // Numbered list item
+    // 6. Numbered list item
     const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/)
     if (numMatch) {
       if (listType !== 'ol') flushList()
@@ -96,6 +212,7 @@ function renderFormattedMessage(content) {
   })
 
   flushList()
+  flushTable()
   return <div className={styles.formattedMsg}>{elements}</div>
 }
 

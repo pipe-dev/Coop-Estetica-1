@@ -257,6 +257,91 @@
   line-height: 1.55;
 }
 
+.msgHeading1 {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 10px 0 4px 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.msgHeading2 {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 15px;
+  font-weight: 700;
+  color: #F0D78C;
+  margin: 8px 0 3px 0;
+}
+
+.msgHeading3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #D4AF37;
+  margin: 8px 0 2px 0;
+  letter-spacing: 0.2px;
+}
+
+.msgHeading4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #E5E5E5;
+  margin: 6px 0 2px 0;
+}
+
+.msgDivider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.05) 100%);
+  margin: 8px 0;
+}
+
+.msgBlockquote {
+  margin: 6px 0;
+  padding: 6px 12px;
+  background: rgba(212, 175, 55, 0.08);
+  border-left: 3px solid #D4AF37;
+  border-radius: 0 6px 6px 0;
+  color: #F0D78C;
+  font-style: italic;
+}
+
+.msgInlineCode {
+  background: rgba(212, 175, 55, 0.15);
+  color: #F0D78C;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.msgTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.msgTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.msgTable th {
+  background: rgba(212, 175, 55, 0.15);
+  color: #D4AF37;
+  padding: 6px 8px;
+  text-align: left;
+  border: 1px solid #333333;
+  font-weight: 700;
+}
+
+.msgTable td {
+  padding: 5px 8px;
+  border: 1px solid #282828;
+  color: #D4D4D4;
+}
+
 .msgList {
   margin: 6px 0 8px 0;
   padding-left: 20px;
