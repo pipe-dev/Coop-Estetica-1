@@ -675,21 +675,66 @@ export default function AdminAiCopilot() {
     const { action, data } = actionObj
 
     if (action === 'CREATE_APPOINTMENT' && data) {
-      // Resolver ID de especialista y servicio si vinieron por nombre
-      const matchedSp = teamMembers.find(t => t.name.toLowerCase().includes((data.specialistName || '').toLowerCase())) || teamMembers[0]
       const allServices = serviceCategories.flatMap(c => c.services || [])
-      const matchedSrv = allServices.find(s => s.name.toLowerCase().includes((data.serviceName || '').toLowerCase())) || allServices[0]
 
+      // 1. Validar especialistas registradas
+      if (!teamMembers || teamMembers.length === 0) {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: '⚠️ **No se pudo procesar la cita**: Actualmente no hay especialistas registradas en el sistema. Por favor registra a tu equipo en la sección de Especialistas antes de agendar.',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ])
+        return
+      }
+
+      // 2. Validar que la especialista solicitada exista en el equipo
+      const requestedSpName = (data.specialistName || '').trim().toLowerCase()
+      const matchedSp = teamMembers.find(t => t.name.toLowerCase().includes(requestedSpName))
+
+      if (!matchedSp) {
+        const teamNames = teamMembers.map(t => t.name).join(', ')
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `⚠️ **No se pudo procesar la cita**: No encontramos a ninguna especialista llamada **"${data.specialistName || 'desconocida'}"** en tu equipo.\n\nEspecialistas disponibles: **${teamNames}**.`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ])
+        return
+      }
+
+      // 3. Validar servicio del catálogo
+      const requestedSrvName = (data.serviceName || '').trim().toLowerCase()
+      const isInvalidSrv = !requestedSrvName || requestedSrvName.includes('no especificado') || requestedSrvName === 'tratamiento estética' || requestedSrvName === 'indefinido'
+      const matchedSrv = allServices.find(s => s.name.toLowerCase().includes(requestedSrvName))
+
+      if (isInvalidSrv || !matchedSrv) {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: '⚠️ **No se pudo procesar la cita**: Falta especificar qué servicio o tratamiento del catálogo se va a realizar.',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ])
+        return
+      }
+
+      // 4. Todo verificado y conforme al flujo de negocio: crear cita
       const newAppointment = {
         clientName: data.clientName || 'Clienta',
         clientPhone: data.clientPhone || '3000000000',
-        serviceId: matchedSrv?.id || 'srv-1',
-        serviceName: data.serviceName || matchedSrv?.name || 'Tratamiento Estética',
-        specialistId: matchedSp?.id || 'team-1',
-        specialistName: data.specialistName || matchedSp?.name || 'Catheryne Ríos',
+        serviceId: matchedSrv.id,
+        serviceName: matchedSrv.name,
+        specialistId: matchedSp.id,
+        specialistName: matchedSp.name,
         date: data.date || new Date().toISOString().split('T')[0],
         time: data.time || '10:00 AM',
-        price: matchedSrv?.price || 50000,
+        price: matchedSrv.price || 0,
         status: 'Reservada'
       }
 
