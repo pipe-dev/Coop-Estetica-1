@@ -14,8 +14,10 @@ import { ConfigNegocioModule } from './config-negocio/config-negocio.module';
 import { ClientsModule } from './clients/clients.module';
 import { AiModule } from './ai/ai.module';
 import { TelemetryModule } from './telemetry/telemetry.module';
+import { AppController } from './app.controller';
 
 @Module({
+  controllers: [AppController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([
