@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { History, Calendar, Filter, DollarSign, ShieldCheck, Scale, CheckCircle2, AlertTriangle, ArrowUpRight, ArrowDownRight, Wallet, Search, Clock, FileText, Ban, Download } from 'lucide-react'
+import { History, Calendar, Filter, DollarSign, ShieldCheck, Scale, CheckCircle2, AlertTriangle, ArrowUpRight, ArrowDownRight, Wallet, Search, Clock, FileText, Ban, Download, ChevronDown } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { getLocalDateString } from '../../utils/currencyUtils'
 import { exportAuditHistory } from '../../utils/exportUtils'
@@ -154,10 +154,7 @@ export default function AdminHistorial() {
     <div className={styles.container}>
       {/* EXECUTIVE HEADER */}
       <div className={styles.header}>
-        <div>
-          <h2>📜 Historial & Auditoría de Movimientos</h2>
-          <p className={styles.subtitle}>Registro cronológico e inmutable de todos los movimientos de caja, ventas y operaciones</p>
-        </div>
+        <p className={styles.subtitle}>Registro cronológico e inmutable de todos los movimientos de caja, ventas y operaciones.</p>
 
         {/* SUMMARY STATS BADGES + EXPORT */}
         <div className={styles.headerRight}>
@@ -201,6 +198,7 @@ export default function AdminHistorial() {
               <option value="cash">Aperturas y Cierres de Caja</option>
               <option value="reconciliation">Reconciliaciones de Descuadre</option>
             </select>
+            <ChevronDown size={14} className={styles.chevronIcon} />
           </div>
 
           <div className={styles.inputWrapper}>
@@ -211,6 +209,7 @@ export default function AdminHistorial() {
               <option value="week">Esta Semana</option>
               <option value="month">Este Mes</option>
             </select>
+            <ChevronDown size={14} className={styles.chevronIcon} />
           </div>
         </div>
 

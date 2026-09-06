@@ -16,7 +16,8 @@ import {
   Phone,
   User,
   Mail,
-  Send
+  Send,
+  AlertTriangle
 } from 'lucide-react'
 import Button from '../components/ui/Button'
 import { useAdmin } from '../context/AdminContext'
@@ -356,26 +357,28 @@ function Booking() {
                       <p style={{ color: '#A3A3A3', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
                         Estamos configurando nuevos servicios y horarios de atención. Puedes reservar tu cita prioritaria directamente comunicándote a nuestra línea oficial de WhatsApp.
                       </p>
-                      <a
-                        href="https://wa.me/573006269056"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          background: 'linear-gradient(135deg, #D4AF37 0%, #AA820A 100%)',
-                          color: '#0D0D0D',
-                          padding: '12px 24px',
-                          borderRadius: 9999,
-                          fontWeight: 700,
-                          fontSize: 14,
-                          textDecoration: 'none'
-                        }}
-                      >
-                        <MessageSquare size={18} />
-                        <span>Agendar por WhatsApp</span>
-                      </a>
+                      {businessConfig?.whatsappNumber && (
+                        <a
+                          href={`https://wa.me/57${businessConfig.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent('Hola! Me gustaría agendar una cita en ' + (businessConfig?.businessName || 'Catheryne Ríos Estética'))}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            background: 'linear-gradient(135deg, #D4AF37 0%, #AA820A 100%)',
+                            color: '#0D0D0D',
+                            padding: '12px 24px',
+                            borderRadius: 9999,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            textDecoration: 'none'
+                          }}
+                        >
+                          <MessageSquare size={16} />
+                          <span>Contactar por WhatsApp</span>
+                        </a>
+                      )}
                     </div>
                   ) : (
                     <div className={styles.categoriesGrid}>
@@ -768,7 +771,8 @@ function Booking() {
                               {bookingError}
                             </p>
                             {(() => {
-                              const cleanPhone = (businessConfig?.whatsappNumber || '3006269056').replace(/\D/g, '')
+                              const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
+                              if (!cleanPhone) return null
                               const msg = `Hola Catheryne Ríos Estética, tuve una falla de internet al intentar agendar en la página web. ¿Me podrían ayudar a apartar mi cita manualmente por favor?\n\n• Tratamiento: ${selectedService?.name}\n• Especialista: ${selectedSpecialist?.name}\n• Fecha deseada: ${booking.date}\n• Hora deseada: ${booking.time}\n• Mi Nombre: ${clientName || 'Cliente'}\n• Mi Celular: ${clientPhone || 'No especificado'}\n\nQuedo atenta a su confirmación.`
                               return (
                                 <a 
@@ -813,7 +817,8 @@ function Booking() {
 
                   {/* WHATSAPP INSTANT NOTIFICATION BANNER */}
                   {(() => {
-                    const cleanPhone = (businessConfig?.whatsappNumber || '3006269056').replace(/\D/g, '')
+                    const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
+                    if (!cleanPhone) return null
                     const whatsappMsg = `Hola Catheryne Ríos Estética, acabo de agendar mi cita en la web:\n\n• Tratamiento: ${confirmedData.serviceName}\n• Especialista: ${confirmedData.specialistName}\n• Fecha: ${confirmedData.date}\n• Hora: ${confirmedData.time}\n• Inversión: $${confirmedData.price.toLocaleString()} COP\n• Cliente: ${confirmedData.clientName}\n• Teléfono: ${confirmedData.clientPhone}\n\nQuedo atenta para confirmar los detalles.`
                     const whatsappLink = `https://wa.me/57${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`
 

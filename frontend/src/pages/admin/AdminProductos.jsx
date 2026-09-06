@@ -257,8 +257,8 @@ export default function AdminProductos() {
         {filteredProducts.length === 0 ? (
           <div className={styles.emptyState}>
             <Package size={42} className={styles.emptyIcon} />
-            <h3>No se encontraron productos</h3>
-            <p>Agrega un nuevo producto a la tienda pulsando "Nuevo Producto".</p>
+            <h3 className={styles.emptyTitle}>No se encontraron productos</h3>
+            <p className={styles.emptySubtitle}>Agrega un nuevo producto a la tienda pulsando "Nuevo Producto".</p>
           </div>
         ) : (
           filteredProducts.map(prod => {
@@ -421,7 +421,7 @@ export default function AdminProductos() {
                 <ImageUploader 
                   value={image} 
                   onChange={setImage} 
-                  label="Foto del Producto (Subir a CDN ImgBB)" 
+                  label="Foto del Producto" 
                 />
               </div>
 

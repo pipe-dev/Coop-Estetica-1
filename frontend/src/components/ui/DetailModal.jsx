@@ -21,10 +21,6 @@ export const DetailModal = ({ item, type = 'product', onClose, onAction }) => {
   if (!item) return null
 
   const isService = type === 'service'
-  const whatsappText = encodeURIComponent(
-    `Hola, me interesa obtener más información sobre ${isService ? 'el servicio' : 'el producto'} "${item.name}".`
-  )
-  const whatsappUrl = `https://wa.me/573000000000?text=${whatsappText}`
 
   return (
     <AnimatePresence>

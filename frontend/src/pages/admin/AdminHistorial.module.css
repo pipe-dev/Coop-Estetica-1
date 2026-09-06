@@ -22,9 +22,11 @@
 }
 
 .subtitle {
-  font-size: 0.82rem;
-  color: #D1D5DB;
-  margin-top: 4px;
+  font-size: 0.84rem;
+  color: #A3A3A3;
+  margin: 0;
+  max-width: 480px;
+  line-height: 1.4;
 }
 
 /* HEADER RIGHT — pills + export button */
@@ -116,21 +118,37 @@
 }
 
 .inputWrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 999px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 220px;
+  box-sizing: border-box;
+}
+.inputWrapper:hover {
+  border-color: var(--color-gold);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
 }
 
 .goldIcon {
   color: var(--color-gold);
+  position: absolute;
+  left: 16px;
+  pointer-events: none;
+  z-index: 3;
+  flex-shrink: 0;
 }
 
 .selectInput {
+  width: 100%;
+  height: 42px;
+  padding: 0 38px 0 42px;
   background: transparent;
   border: none;
   color: #FFFFFF;
@@ -139,10 +157,31 @@
   font-weight: 600;
   outline: none;
   cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  z-index: 2;
+  box-sizing: border-box;
+  text-align: left;
 }
 .selectInput option {
   background: #141414;
   color: #FFFFFF;
+  padding: 8px 12px;
+}
+
+.chevronIcon {
+  position: absolute;
+  right: 16px;
+  color: #A3A3A3;
+  pointer-events: none;
+  z-index: 3;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+.inputWrapper:hover .chevronIcon {
+  color: var(--color-gold);
 }
 
 .searchWrapper {
@@ -340,3 +379,52 @@
   color: var(--color-gold);
   opacity: 0.5;
 }
+
+/* ========================================================== */
+/* RESPONSIVE DESIGN MOBILE (< 900px)                         */
+/* ========================================================== */
+@media (max-width: 900px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .headerRight {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
+  .statsSummaryPills {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .exportBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .filterGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  .inputWrapper,
+  .searchWrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .timelineItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .timelineAmount {
+    align-self: flex-end;
+  }
+}
+

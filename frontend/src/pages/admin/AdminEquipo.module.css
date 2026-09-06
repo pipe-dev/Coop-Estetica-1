@@ -22,9 +22,11 @@
 }
 
 .subtext {
-  font-size: 0.82rem;
-  color: #D1D5DB;
-  margin-top: 4px;
+  font-size: 0.84rem;
+  color: #A3A3A3;
+  margin: 0;
+  max-width: 520px;
+  line-height: 1.4;
 }
 
 .addMemberBtn {
@@ -420,3 +422,41 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+/* ========================================================== */
+/* RESPONSIVE DESIGN MOBILE (< 900px)                         */
+/* ========================================================== */
+@media (max-width: 900px) {
+  .topRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .headerBtns {
+    flex-direction: column;
+    width: 100%;
+  }
+  .exportPayrollBtn,
+  .addMemberBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .summaryStatsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .workersGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .modalCard {
+    padding: 20px 16px;
+    max-width: 100%;
+    border-radius: 18px;
+  }
+}
+

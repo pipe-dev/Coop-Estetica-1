@@ -3,6 +3,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import SectionTitle from './SectionTitle'
+import { useAdmin } from '../../context/AdminContext'
 import styles from './GiftCardCustomizer.module.css'
 
 const presets = [
@@ -12,6 +13,7 @@ const presets = [
 ]
 
 export default function GiftCardCustomizer({ showTitle = true }) {
+  const { businessConfig } = useAdmin()
   const [selectedPreset, setSelectedPreset] = useState(presets[0])
   const [customValue, setCustomValue] = useState('')
   const [recipient, setRecipient] = useState('')
@@ -57,7 +59,12 @@ export default function GiftCardCustomizer({ showTitle = true }) {
 
   const handleBuyWhatsApp = (e) => {
     e.preventDefault()
-    const sponsorPhone = '573006269056'
+    const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
+    if (!cleanPhone) {
+      alert('La línea de WhatsApp de la estética aún no ha sido configurada en el panel de administración.')
+      return
+    }
+    const sponsorPhone = '57' + cleanPhone
 
     const messageLines = [
       '🎁 *SOLICITUD DE BONO DE REGALO (GIFT CARD)* 🎁',

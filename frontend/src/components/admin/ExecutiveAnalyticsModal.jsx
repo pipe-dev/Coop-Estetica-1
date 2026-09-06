@@ -106,9 +106,9 @@ export default function ExecutiveAnalyticsModal({ cardType, onClose, transaction
                   <div className={`${styles.iconBadge} ${styles.ingresosBadge}`}>
                     <TrendingUp size={22} />
                   </div>
-                  <div>
-                    <h2 className={styles.modalTitle}>Análisis de Ingresos — {periodLabelMap[activePeriod]}</h2>
-                    <p className={styles.modalSubtitle}>Desglose detallado de ventas y canales de cobro</p>
+                  <div className={styles.headerTextWrap}>
+                    <h2 className={styles.modalTitle}>Análisis de Ingresos</h2>
+                    <p className={styles.modalSubtitle}>Ventas y canales de cobro • {periodLabelMap[activePeriod]}</p>
                   </div>
                 </>
               )}
@@ -118,9 +118,9 @@ export default function ExecutiveAnalyticsModal({ cardType, onClose, transaction
                   <div className={`${styles.iconBadge} ${styles.egresosBadge}`}>
                     <TrendingDown size={22} />
                   </div>
-                  <div>
-                    <h2 className={styles.modalTitle}>Control de Egresos — {periodLabelMap[activePeriod]}</h2>
-                    <p className={styles.modalSubtitle}>Distribución de insumos, costos y pagos operativos</p>
+                  <div className={styles.headerTextWrap}>
+                    <h2 className={styles.modalTitle}>Control de Egresos</h2>
+                    <p className={styles.modalSubtitle}>Costos y pagos operativos • {periodLabelMap[activePeriod]}</p>
                   </div>
                 </>
               )}
@@ -130,16 +130,16 @@ export default function ExecutiveAnalyticsModal({ cardType, onClose, transaction
                   <div className={`${styles.iconBadge} ${styles.balanceBadge}`}>
                     <Wallet size={22} />
                   </div>
-                  <div>
-                    <h2 className={styles.modalTitle}>Salud Financiera & Balance — {periodLabelMap[activePeriod]}</h2>
-                    <p className={styles.modalSubtitle}>Indicadores de liquidez, rentabilidad y flujo neto</p>
+                  <div className={styles.headerTextWrap}>
+                    <h2 className={styles.modalTitle}>Salud Financiera & Balance</h2>
+                    <p className={styles.modalSubtitle}>Liquidez y rentabilidad • {periodLabelMap[activePeriod]}</p>
                   </div>
                 </>
               )}
             </div>
 
-            <button type="button" className={styles.closeBtn} onClick={onClose}>
-              <X size={20} />
+            <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">
+              <X size={18} />
             </button>
           </div>
 
@@ -150,28 +150,31 @@ export default function ExecutiveAnalyticsModal({ cardType, onClose, transaction
               className={`${styles.periodTabBtn} ${activePeriod === 'hoy' ? styles.activePeriodTab : ''}`}
               onClick={() => setActivePeriod('hoy')}
             >
-              ☀️ Hoy
+              <span>☀️ Hoy</span>
             </button>
             <button
               type="button"
               className={`${styles.periodTabBtn} ${activePeriod === 'semana' ? styles.activePeriodTab : ''}`}
               onClick={() => setActivePeriod('semana')}
             >
-              🗓️ Esta Semana
+              <span className={styles.desktopTabLabel}>🗓️ Esta Semana</span>
+              <span className={styles.mobileTabLabel}>🗓️ Semana</span>
             </button>
             <button
               type="button"
               className={`${styles.periodTabBtn} ${activePeriod === 'mes' ? styles.activePeriodTab : ''}`}
               onClick={() => setActivePeriod('mes')}
             >
-              📈 Este Mes
+              <span className={styles.desktopTabLabel}>📈 Este Mes</span>
+              <span className={styles.mobileTabLabel}>📈 Mes</span>
             </button>
             <button
               type="button"
               className={`${styles.periodTabBtn} ${activePeriod === 'all' ? styles.activePeriodTab : ''}`}
               onClick={() => setActivePeriod('all')}
             >
-              🌐 Todo el Historial
+              <span className={styles.desktopTabLabel}>🌐 Todo el Historial</span>
+              <span className={styles.mobileTabLabel}>🌐 Historial</span>
             </button>
           </div>
 

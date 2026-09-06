@@ -17,11 +17,13 @@ async function main() {
   await prisma.membership.deleteMany();
   await prisma.closedDate.deleteMany();
   await prisma.securityAuditLog.deleteMany();
+  await prisma.payrollRecord.deleteMany();
+  await prisma.testimonial.deleteMany();
   await prisma.user.deleteMany();
   await prisma.teamMember.deleteMany();
 
   const defaultPasswordHash = await bcrypt.hash('admin123', 10);
-  const defaultMasterPinHash = await bcrypt.hash('2026', 10);
+  const defaultMasterPinHash = await bcrypt.hash('202626', 10);
 
   // 2. Configuración Base 100% Virgen (Todo en blanco para llenado de la dueña)
   await prisma.businessConfig.upsert({
@@ -39,6 +41,9 @@ async function main() {
       ownerEmail: '',
       adminEmail: '',
       masterPinHash: defaultMasterPinHash,
+      masterPin: '202626',
+      adminPin: '123456',
+      specialistPin: '777777',
     },
     create: {
       id: 'singleton',
@@ -54,31 +59,16 @@ async function main() {
       ownerEmail: '',
       adminEmail: '',
       masterPinHash: defaultMasterPinHash,
+      masterPin: '202626',
+      adminPin: '123456',
+      specialistPin: '777777',
     },
   });
 
-  // 3. Usuarios Administradores Base (Sin datos hardcodeados de prueba)
-  await prisma.user.create({
-    data: {
-      email: 'duena@catherynerios.com',
-      passwordHash: defaultPasswordHash,
-      name: 'Dueña',
-      role: Role.OWNER,
-      active: true,
-    },
-  });
+  // 3. No se crean usuarios con correos inventados (Modo 100% Virgen).
+  // El acceso al sistema se realiza mediante los PINs maestros configurables (202626 / 123456 / 777777).
 
-  await prisma.user.create({
-    data: {
-      email: 'admin@catherynerios.com',
-      passwordHash: defaultPasswordHash,
-      name: 'Administración',
-      role: Role.ADMIN,
-      active: true,
-    },
-  });
-
-  console.log('Base de datos 100% Virgen: Todos los campos en blanco.');
+  console.log('Base de datos 100% Virgen: Todos los campos en blanco y 0 registros ficticios.');
 }
 
 main()

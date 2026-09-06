@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Users, Phone, MessageSquare, Plus, Search, Calendar, DollarSign, FileText, Star, Clock, UserPlus, ExternalLink, Download } from 'lucide-react'
+import { Users, Phone, Plus, Search, Calendar, DollarSign, FileText, Star, Clock, UserPlus, ExternalLink, Download } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { useAdmin } from '../../context/AdminContext'
 import { exportClientsDirectory } from '../../utils/exportUtils'
 import styles from './AdminClientes.module.css'
@@ -74,10 +75,7 @@ export default function AdminClientes() {
     <div className={styles.container}>
       {/* HEADER */}
       <div className={styles.header}>
-        <div>
-          <h2>👥 Directorio & Ficha de Clientas</h2>
-          <p className={styles.subtitle}>Gestión de clientes, historial de visitas, llamadas directas y contacto por WhatsApp</p>
-        </div>
+        <p className={styles.subtitle}>Gestión de clientes, historial de visitas, llamadas directas y contacto por WhatsApp</p>
 
         <div className={styles.headerActions}>
           <button
@@ -198,7 +196,7 @@ export default function AdminClientes() {
                     className={styles.waBtn}
                     title={`Enviar WhatsApp directo a ${client.name}`}
                   >
-                    <MessageSquare size={15} />
+                    <FaWhatsapp size={15} />
                     <span>WhatsApp</span>
                   </a>
 

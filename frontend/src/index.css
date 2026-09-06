@@ -287,3 +287,9 @@ html {
     --navbar-height: 64px;
   }
 }
+
+/* Global Select Option Styling for Dark Theme */
+select option {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+}

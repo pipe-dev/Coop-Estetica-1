@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class ConfigNegocioService {
   constructor(private prisma: PrismaService) {}
 
   // ----------------------------------------------------
-  // CONFIGURACIÓN GENERAL DEL NEGOCIO
+  // CONFIGURACIÓN GENERAL DEL NEGOCIO (PÚBLICA - CERO FUGA DE CLAVES)
   // ----------------------------------------------------
   async getPublicConfig() {
     let config = await this.prisma.businessConfig.findUnique({
@@ -19,26 +20,51 @@ export class ConfigNegocioService {
       });
     }
 
-    // Omitir masterPinHash en respuestas públicas
-    const { masterPinHash, ...publicData } = config;
-    return publicData;
+    // Exponer ÚNICAMENTE datos comerciales públicos. Cero PINs, cero hashes, cero correos privados.
+    return {
+      id: config.id,
+      businessName: config.businessName,
+      whatsappNumber: config.whatsappNumber,
+      phone: config.phone,
+      address: config.address,
+      openingHours: config.openingHours,
+      instagramUrl: config.instagramUrl,
+      tiktokUrl: config.tiktokUrl,
+      facebookUrl: config.facebookUrl,
+      promoBanner: config.promoBanner,
+      updatedAt: config.updatedAt,
+    };
   }
 
-  async updateConfig(data: {
-    businessName?: string;
-    whatsappNumber?: string;
-    phone?: string;
-    address?: string;
-    openingHours?: string;
-    instagramUrl?: string;
-    tiktokUrl?: string;
-    facebookUrl?: string;
-    promoBanner?: string;
-  }) {
+  // ----------------------------------------------------
+  // CONFIGURACIÓN GENERAL DEL NEGOCIO (ADMINISTRATIVA - PROTEGIDA)
+  // ----------------------------------------------------
+  async getAdminConfig() {
+    let config = await this.prisma.businessConfig.findUnique({
+      where: { id: 'singleton' },
+    });
+
+    if (!config) {
+      config = await this.prisma.businessConfig.create({
+        data: { id: 'singleton' },
+      });
+    }
+
+    // Omitir masterPinHash pero permitir ver los PINs activos al panel administrativo autorizado
+    const { masterPinHash, ...adminData } = config;
+    return adminData;
+  }
+
+  async updateConfig(data: any) {
+    // Sanitización: prevenir inyección o manipulación directa de hash
+    const { id, masterPinHash, ...cleanData } = data;
+    if (cleanData.masterPin && typeof cleanData.masterPin === 'string') {
+      cleanData.masterPinHash = await bcrypt.hash(cleanData.masterPin.trim(), 10);
+    }
     return this.prisma.businessConfig.upsert({
       where: { id: 'singleton' },
-      update: data,
-      create: { id: 'singleton', ...data },
+      update: cleanData,
+      create: { id: 'singleton', ...cleanData },
     });
   }
 

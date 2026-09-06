@@ -418,7 +418,8 @@ export default function AdminAgenda() {
             }
             setShowBlockModal(true)
           }}>
-            <span>Bloquear Almuerzo / Permiso</span>
+            <Clock size={15} />
+            <span>Bloquear Horario</span>
           </button>
 
           <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>
@@ -444,15 +445,22 @@ export default function AdminAgenda() {
             return (
               <div key={dateKey} className={styles.dateCategorySection}>
                 <div className={styles.categoryHeaderRow}>
-                  {headerInfo.type === 'HOY' && (
-                    <div className={styles.categoryBadgeToday}>HOY — {headerInfo.label}</div>
-                  )}
-                  {headerInfo.type === 'MAÑANA' && (
-                    <div className={styles.categoryBadgeTomorrow}>MAÑANA — {headerInfo.label}</div>
-                  )}
-                  {headerInfo.type === 'DATE' && (
-                    <div className={styles.categoryBadgeDate}>{headerInfo.label}</div>
-                  )}
+                  <div className={styles.categoryHeaderLeft}>
+                    {headerInfo.type === 'HOY' && (
+                      <span className={styles.categoryBadgeToday}>HOY</span>
+                    )}
+                    {headerInfo.type === 'MAÑANA' && (
+                      <span className={styles.categoryBadgeTomorrow}>MAÑANA</span>
+                    )}
+                    {headerInfo.type === 'DATE' && (
+                      <span className={styles.categoryBadgeDate}>FECHA</span>
+                    )}
+                    <h3 className={styles.categoryDateHeading}>{headerInfo.label}</h3>
+                  </div>
+
+                  <span className={styles.categoryCountBadge}>
+                    {group.length} {group.length === 1 ? 'registro' : 'registros'}
+                  </span>
                 </div>
 
                 {group.length === 0 ? (
@@ -706,6 +714,8 @@ export default function AdminAgenda() {
                   label="Hora de la Cita"
                   value={time}
                   onChange={setTime}
+                  placement="up"
+                  align="right"
                 />
               </div>
 
@@ -788,12 +798,16 @@ export default function AdminAgenda() {
                   label="Desde"
                   value={blockStartTime}
                   onChange={setBlockStartTime}
+                  placement="up"
+                  align="left"
                 />
 
                 <TimePickerUniversal
                   label="Hasta"
                   value={blockEndTime}
                   onChange={setBlockEndTime}
+                  placement="up"
+                  align="right"
                 />
               </div>
 
@@ -887,6 +901,8 @@ export default function AdminAgenda() {
                   label="Hora de la Cita"
                   value={editTime}
                   onChange={setEditTime}
+                  placement="up"
+                  align="right"
                 />
               </div>
 
@@ -971,12 +987,16 @@ export default function AdminAgenda() {
                   label="Desde"
                   value={editBlockStartTime}
                   onChange={setEditBlockStartTime}
+                  placement="up"
+                  align="left"
                 />
 
                 <TimePickerUniversal
                   label="Hasta"
                   value={editBlockEndTime}
                   onChange={setEditBlockEndTime}
+                  placement="up"
+                  align="right"
                 />
               </div>
 

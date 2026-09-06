@@ -1,14 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request, ForbiddenException } from '@nestjs/common';
 import { ClientsService } from './clients.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('api')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Get('clients')
-  async getAllClients(@Res({ passthrough: true }) res: Response) {
-    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+  async getAllClients() {
     return this.clientsService.getAllClients();
   }
 
@@ -28,7 +28,10 @@ export class ClientsController {
   }
 
   @Delete('clients/:id')
-  async deleteClient(@Param('id') id: string) {
+  async deleteClient(@Param('id') id: string, @Request() req: any) {
+    if (req.user?.role === 'SPECIALIST') {
+      throw new ForbiddenException('Acceso denegado: Las especialistas no tienen autorización para eliminar fichas de clientas.');
+    }
     return this.clientsService.deleteClient(id);
   }
 }

@@ -11,7 +11,7 @@ import { clearCopilotCache } from '../services/aiCopilotService'
 
 const AdminContext = createContext()
 
-const CURRENT_STORAGE_VERSION = '2026_VIRGIN_PURE_V2'
+const CURRENT_STORAGE_VERSION = '2026_VIRGIN_PURE_V3'
 try {
   if (typeof window !== 'undefined' && localStorage.getItem('spa_storage_version') !== CURRENT_STORAGE_VERSION) {
     const keysToPurge = [
@@ -50,7 +50,6 @@ const initialBusinessConfig = {
   promoBanner: '',
   ownerEmail: '',
   adminEmail: '',
-  masterPin: '2026'
 }
 
 const initialTeam = []
@@ -69,7 +68,7 @@ export function AdminProvider({ children }) {
     } catch (e) { return initialBusinessConfig }
   })
 
-  // 2. Roles del Sistema: 'OWNER' (Dueña) | 'ADMIN' (Administradora) | 'SPECIALIST' (Especialista)
+  // 2. Roles del Sistema: 'OWNER' (Propietaria / CEO) | 'ADMIN' (Administradora) | 'SPECIALIST' (Especialista)
   const [currentUserRole, setCurrentUserRole] = useState(() => {
     try {
       const saved = localStorage.getItem('spa_admin_current_role')
@@ -181,7 +180,7 @@ export function AdminProvider({ children }) {
         liveTxs,
         liveApps
       ] = await Promise.all([
-        api.getConfig(),
+        api.getAdminConfig ? api.getAdminConfig() : api.getConfig(),
         api.getMemberships(),
         api.getClosedDates(),
         api.getCategories(),
@@ -288,9 +287,9 @@ export function AdminProvider({ children }) {
   }, [appointments, transactions, cashSessions, products, clients, serviceCategories, teamMembers, businessConfig, closedDates])
 
   // ----------------------------------------------------
-  // GESTIÓN DE CONFIGURACIÓN & PIN MAESTRO
+  // GESTIÓN DE CONFIGURACIÓN & CLAVES POR ROLES (DUEÑA)
   // ----------------------------------------------------
-  const updateBusinessConfig = (newConfig) => {
+  const updateBusinessConfig = async (newConfig) => {
     setBusinessConfig(prev => {
       const merged = { ...prev, ...newConfig }
       api.updateConfig(merged)
@@ -298,12 +297,26 @@ export function AdminProvider({ children }) {
     })
   }
 
-  const verifyMasterPin = (pin) => {
-    return String(pin).trim() === String(businessConfig.masterPin || '2026').trim()
+  const updateRolePin = async (role, newPin) => {
+    let updatePayload = {}
+    if (role === 'OWNER') updatePayload = { masterPin: String(newPin).trim() }
+    if (role === 'ADMIN') updatePayload = { adminPin: String(newPin).trim() }
+    if (role === 'SPECIALIST') updatePayload = { specialistPin: String(newPin).trim() }
+
+    return await api.updateConfig(updatePayload)
   }
 
-  const changeMasterPin = (newPin) => {
-    setBusinessConfig(prev => ({ ...prev, masterPin: String(newPin).trim() }))
+  const verifyMasterPin = async (pin) => {
+    try {
+      const res = await api.verifyPin(pin)
+      return !!(res && res.valid && res.role === 'OWNER')
+    } catch (e) {
+      return false
+    }
+  }
+
+  const changeMasterPin = async (newPin) => {
+    return await updateRolePin('OWNER', newPin)
   }
 
   // ----------------------------------------------------
@@ -657,13 +670,23 @@ export function AdminProvider({ children }) {
     })
   }
 
-  const addMembership = (newPlan) => {
+  const addMembership = async (newPlan) => {
     const planId = newPlan.id || `plan-${Date.now()}`
-    setMemberships(prev => [...prev, { ...newPlan, id: planId }])
+    const planWithId = { ...newPlan, id: planId }
+    setMemberships(prev => [...prev, planWithId])
+    try {
+      const saved = await api.createMembership(newPlan)
+      if (saved && saved.id) {
+        setMemberships(prev => prev.map(m => m.id === planId ? saved : m))
+      }
+    } catch (e) {
+      console.warn('Fallo al crear membresía en DB:', e)
+    }
   }
 
   const deleteMembership = (id) => {
     setMemberships(prev => prev.filter(m => m.id !== id))
+    api.deleteMembership(id)
   }
 
   // 12. Handlers de Días de Cierre, Festivos y Vacaciones
@@ -698,6 +721,7 @@ export function AdminProvider({ children }) {
       setCurrentSpecialistId,
       verifyMasterPin,
       changeMasterPin,
+      updateRolePin,
 
       // CMS Categorías & Servicios
       serviceCategories,
@@ -770,8 +794,58 @@ export function AdminProvider({ children }) {
   )
 }
 
+const defaultAdminContextFallback = {
+  currentUserRole: 'OWNER',
+  setCurrentUserRole: () => {},
+  currentSpecialistId: null,
+  setCurrentSpecialistId: () => {},
+  businessConfig: {},
+  updateBusinessConfig: () => {},
+  teamMembers: [],
+  addTeamMember: () => {},
+  updateTeamMember: () => {},
+  deleteTeamMember: () => {},
+  serviceCategories: [],
+  addCategory: () => {},
+  updateCategory: () => {},
+  deleteCategory: () => {},
+  addService: () => {},
+  updateService: () => {},
+  deleteService: () => {},
+  products: [],
+  addProduct: () => {},
+  updateProduct: () => {},
+  deleteProduct: () => {},
+  toggleProductAvailability: () => {},
+  appointments: [],
+  addAppointment: () => {},
+  updateAppointmentStatus: () => {},
+  cancelAppointment: () => {},
+  transactions: [],
+  addTransaction: () => {},
+  cashSessions: [],
+  activeCashSession: null,
+  openCashSession: () => {},
+  closeCashSession: () => {},
+  reconcileCashSession: () => {},
+  reconciliations: [],
+  notifications: [],
+  addNotification: () => {},
+  toggleNotificationActive: () => {},
+  deleteNotification: () => {},
+  clients: [],
+  addClient: () => {},
+  updateClient: () => {},
+  refreshData: () => {},
+  memberships: [],
+  closedDates: []
+}
+
 export function useAdmin() {
   const ctx = useContext(AdminContext)
-  if (!ctx) throw new Error('useAdmin must be used within AdminProvider')
+  if (!ctx) {
+    console.warn('[AdminContext Resilient] useAdmin invocado fuera de AdminProvider o durante recarga HMR. Se utiliza fallback seguro.')
+    return defaultAdminContextFallback
+  }
   return ctx
 }

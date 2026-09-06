@@ -3,10 +3,13 @@ import { motion } from 'framer-motion'
 import SectionTitle from '../components/ui/SectionTitle'
 import Button from '../components/ui/Button'
 import GiftCardCustomizer from '../components/ui/GiftCardCustomizer'
-import { memberships } from '../data/memberships'
+import { useAdmin } from '../context/AdminContext'
+import { memberships as defaultMemberships } from '../data/memberships'
 import styles from './GiftCards.module.css'
 
 function GiftCards() {
+  const { businessConfig, memberships: adminMemberships } = useAdmin()
+  const currentMemberships = adminMemberships && adminMemberships.length > 0 ? adminMemberships : defaultMemberships
   return (
     <main className={styles.giftCards}>
       {/* HERO BANNER */}
@@ -39,28 +42,35 @@ function GiftCards() {
             light
           />
           <div className={styles.membershipsGrid}>
-            {memberships.map((plan, i) => (
-              <div
-                key={plan.id}
-                className={`${styles.membershipCard} ${plan.popular ? styles.popular : ''}`}
-              >
-                {plan.popular && <div className={styles.popularBadge}>Más Popular</div>}
-                <h3 className={styles.planName}>{plan.name}</h3>
-                <div className={styles.planPrice}>
-                  <span className={styles.currency}>$</span>
-                  <span className={styles.amount}>{plan.price.toLocaleString()}</span>
-                  <span className={styles.period}>/mes</span>
+            {currentMemberships.map((plan, i) => {
+              const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
+              const planWhatsappUrl = cleanPhone 
+                ? `https://wa.me/57${cleanPhone}?text=${encodeURIComponent(`Hola! Me gustaría más información para adquirir el plan de Membresía VIP: ${plan.name} en ${businessConfig?.businessName || 'Catheryne Ríos Estética'}.`)}`
+                : '/servicios'
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`${styles.membershipCard} ${plan.popular ? styles.popular : ''}`}
+                >
+                  {plan.popular && <div className={styles.popularBadge}>Más Popular</div>}
+                  <h3 className={styles.planName}>{plan.name}</h3>
+                  <div className={styles.planPrice}>
+                    <span className={styles.currency}>$</span>
+                    <span className={styles.amount}>{plan.price.toLocaleString()}</span>
+                    <span className={styles.period}>/mes</span>
+                  </div>
+                  <ul className={styles.planFeatures}>
+                    {plan.features.map((f, j) => (
+                      <li key={j}><span className={styles.check}>✦</span> {f}</li>
+                    ))}
+                  </ul>
+                  <Button variant={plan.popular ? 'primary' : 'outline'} size="md" href={planWhatsappUrl}>
+                    Elegir Plan
+                  </Button>
                 </div>
-                <ul className={styles.planFeatures}>
-                  {plan.features.map((f, j) => (
-                    <li key={j}><span className={styles.check}>✦</span> {f}</li>
-                  ))}
-                </ul>
-                <Button variant={plan.popular ? 'primary' : 'outline'} size="md" href="https://wa.me/573006269056?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20las%20Membres%C3%ADas%20VIP">
-                  Elegir Plan
-                </Button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

@@ -157,7 +157,8 @@
 
 .formGroup input,
 .formGroup textarea,
-.formGroup select {
+.formGroup select,
+.selectInput {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
@@ -169,11 +170,72 @@
   transition: all 0.2s ease;
 }
 
+.formGroup select,
+.selectInput {
+  cursor: pointer;
+  background-color: #141414;
+}
+
+.formGroup select option,
+.selectInput option,
+select option {
+  background-color: #1A1A1A !important;
+  color: #FFFFFF !important;
+  padding: 10px 14px;
+  font-size: 0.84rem;
+}
+
 .formGroup input:focus,
 .formGroup textarea:focus,
-.formGroup select:focus {
+.formGroup select:focus,
+.selectInput:focus {
   border-color: var(--color-gold);
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.datePickerTrigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.datePickerTrigger:hover {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.goldDateIcon {
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.dateTriggerTextSelected {
+  color: #FFFFFF;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.dateTriggerTextPlaceholder {
+  color: #737373;
+  font-size: 0.82rem;
+}
+
+.dateChipBadge {
+  margin-left: auto;
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--color-gold-light);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-family: monospace;
+  font-weight: 700;
 }
 
 .inputWithIcon {
@@ -202,7 +264,13 @@
 
 .formRowThree {
   display: grid;
-  grid-template-columns: 1fr 1fr 2fr;
+  grid-template-columns: 1.2fr 1fr 2fr;
+  gap: 12px;
+}
+
+.formRowFour {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 1.8fr;
   gap: 12px;
 }
 
@@ -268,6 +336,127 @@
   color: #000000;
 }
 
+/* ROLES PIN MANAGEMENT */
+.rolesPinGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.rolePinCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.rolePinCard:hover {
+  border-color: rgba(212, 175, 55, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.rolePinHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.roleBadgeOwner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #F0D78C;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.roleBadgeAdmin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #93C5FD;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.roleBadgeSpecialist {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #C4B5FD;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.roleScopeTag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #A3A3A3;
+}
+
+.rolePinValueRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rolePinLabel {
+  font-size: 0.74rem;
+  color: #888888;
+}
+
+.rolePinCode {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--color-gold-light);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.rolePinDesc {
+  font-size: 0.72rem;
+  color: #737373;
+  margin: 0;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.changeRolePinBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.changeRolePinBtn:hover {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+  color: #000000;
+}
+
 .submitRow {
   grid-column: 1 / -1;
   display: flex;
@@ -310,6 +499,14 @@
   gap: 16px;
 }
 
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .sectionHeader h3 {
   font-family: var(--font-heading);
   font-size: 1.25rem;
@@ -317,10 +514,114 @@
   margin: 0 0 2px;
 }
 
-.sectionHeader p {
+.sectionHeader p,
+.sectionHelpText {
   font-size: 0.78rem;
   color: #888888;
   margin: 0;
+}
+
+.addPlanBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B38E22 100%);
+  color: #000000;
+  border: none;
+  border-radius: 9px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+}
+
+.addPlanBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+}
+
+.emptyMembershipsBox {
+  background: #0E0E0E;
+  border: 1px dashed rgba(212, 175, 55, 0.35);
+  border-radius: 16px;
+  padding: 48px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.emptyCrownIcon {
+  color: var(--color-gold);
+  opacity: 0.85;
+}
+
+.emptyMembershipsBox h4 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.emptyMembershipsBox p {
+  font-size: 0.8rem;
+  color: #888888;
+  max-width: 520px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.emptyActionsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.createFirstPlanBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  background: var(--color-gold);
+  color: #000000;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.createFirstPlanBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+}
+
+.loadDefaultPlansBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  color: var(--color-gold-light);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loadDefaultPlansBtn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--color-gold);
 }
 
 .membershipsGrid {
@@ -415,12 +716,19 @@
   margin-top: 1px;
 }
 
+.planActionsRow {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
 .editPlanBtn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px;
+  padding: 9px 12px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 8px;
@@ -434,6 +742,65 @@
 .editPlanBtn:hover {
   background: rgba(212, 175, 55, 0.2);
   border-color: var(--color-gold);
+}
+
+.deletePlanBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 12px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  color: #F87171;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.deletePlanBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+  color: #FFFFFF;
+}
+
+.colorPickerContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.colorChip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.colorChip:hover {
+  transform: scale(1.15);
+}
+
+.colorChipActive {
+  border-color: #FFFFFF;
+  box-shadow: 0 0 0 2px var(--color-gold), 0 0 10px rgba(212, 175, 55, 0.5);
+  transform: scale(1.1);
+}
+
+.colorInputNative {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -681,6 +1048,181 @@
   cursor: pointer;
 }
 
+/* ─────────────────────────────────────────────────────────────
+    BIG GOLD CALENDAR MODAL (Feature E)
+   ───────────────────────────────────────────────────────────── */
+.bigCalendarModalCard {
+  width: 100%;
+  max-width: 440px;
+  background: #141414;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 24px;
+  padding: 24px;
+  color: #FFFFFF;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(212, 175, 55, 0.15);
+  font-family: var(--font-body);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
+}
+
+.calNavHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calNavBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calNavBtn:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: scale(1.08);
+}
+
+.calMonthYearTitle h3 {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  text-transform: capitalize;
+  letter-spacing: -0.5px;
+}
+
+.calWeekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.calWeekDayHeader {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calDaysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.calDayEmpty {
+  height: 46px;
+}
+
+.calDayCell {
+  height: 46px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.calDayCell:hover {
+  border-color: var(--color-gold);
+  background: rgba(212, 175, 55, 0.15);
+  transform: translateY(-2px);
+}
+
+.calDaySelected {
+  background: var(--color-gold) !important;
+  color: #0E0E0E !important;
+  font-weight: 800 !important;
+  border-color: var(--color-gold) !important;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.calDayToday {
+  border: 1.5px solid var(--color-gold);
+}
+
+.calDayAlreadyClosed {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.calDayNumber {
+  font-family: var(--font-body);
+}
+
+.calClosedDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #EF4444;
+  position: absolute;
+  bottom: 5px;
+}
+
+.calFooterActions {
+  display: flex;
+  gap: 12px;
+}
+
+.todayQuickBtn {
+  flex: 1;
+  padding: 11px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid var(--color-gold);
+  border-radius: 999px;
+  color: var(--color-gold);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.todayQuickBtn:hover {
+  background: rgba(212, 175, 55, 0.25);
+}
+
+.closeCalBtn {
+  flex: 1;
+  padding: 11px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: #A3A3A3;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.closeCalBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .configGrid {
@@ -694,5 +1236,12 @@
   }
   .formRowThree {
     grid-template-columns: 1fr;
+  }
+  .formRowFour {
+    grid-template-columns: 1fr;
+  }
+  .bigCalendarModalCard {
+    max-width: 95vw;
+    padding: 16px;
   }
 }

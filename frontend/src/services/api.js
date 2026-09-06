@@ -1,6 +1,39 @@
 // Cliente de conexión HTTP y sincronización viva con PostgreSQL para Catheryne Ríos Estética
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
 
+export const purgeAdminAuth = (reason = 'Sesión no válida o expirada') => {
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.removeItem('spa_admin_token')
+      sessionStorage.removeItem('spa_admin_authed')
+      sessionStorage.removeItem('spa_admin_role')
+      localStorage.removeItem('spa_admin_token')
+    } catch (e) {}
+    window.dispatchEvent(new CustomEvent('spa_auth_ejected', { detail: { reason } }))
+  }
+}
+
+export const getAdminHeaders = () => {
+  const token = typeof window !== 'undefined' ? (sessionStorage.getItem('spa_admin_token') || localStorage.getItem('spa_admin_token')) : null
+  const headers = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  return headers
+}
+
+export const authFetch = async (url, options = {}) => {
+  const adminHeaders = getAdminHeaders()
+  const headers = {
+    ...adminHeaders,
+    ...(options.headers || {})
+  }
+  const res = await fetch(url, { ...options, headers })
+  if (res.status === 401 || res.status === 403) {
+    purgeAdminAuth('Acceso denegado: Token no válido, manipulado o expirado. Se ha cerrado la sesión por seguridad.')
+    throw new Error('401 Unauthorized: Sesión expulsada')
+  }
+  return res
+}
+
 export const api = {
   // ----------------------------------------------------
   // 1. CONFIGURACIÓN DEL NEGOCIO
@@ -16,16 +49,43 @@ export const api = {
     }
   },
 
+  async getAdminConfig() {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/admin/config`)
+      if (!res.ok) throw new Error('Error al obtener configuración administrativa')
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Fallo al obtener configuración administrativa, intentando fallback público:', e)
+      return this.getConfig()
+    }
+  },
+
+  async verifyPin(pin) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: String(pin).trim() }),
+      })
+      if (!res.ok) return { valid: false }
+      return await res.json()
+    } catch (e) {
+      console.error('Fallo al validar PIN con el servidor:', e)
+      return { valid: false, error: 'Servidor no disponible' }
+    }
+  },
+
   async updateConfig(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/config`, {
+      const res = await authFetch(`${API_BASE_URL}/config`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       if (!res.ok) throw new Error('Error al actualizar configuración en DB')
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al sincronizar con PostgreSQL en backend:', e)
       return null
     }
@@ -47,13 +107,13 @@ export const api = {
 
   async createCategory(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/categories`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al crear categoría en DB:', e)
       return null
     }
@@ -61,13 +121,13 @@ export const api = {
 
   async updateCategory(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar categoría en DB:', e)
       return null
     }
@@ -75,11 +135,12 @@ export const api = {
 
   async deleteCategory(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/categories/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar categoría en DB:', e)
       return null
     }
@@ -98,13 +159,13 @@ export const api = {
 
   async createService(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/services`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/services`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al crear servicio en DB:', e)
       return null
     }
@@ -112,13 +173,13 @@ export const api = {
 
   async updateService(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/services/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/services/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar servicio en DB:', e)
       return null
     }
@@ -126,11 +187,12 @@ export const api = {
 
   async deleteService(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/services/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/services/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar servicio en DB:', e)
       return null
     }
@@ -152,13 +214,13 @@ export const api = {
 
   async createProduct(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/products`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al crear producto en DB:', e)
       return null
     }
@@ -166,13 +228,13 @@ export const api = {
 
   async updateProduct(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar producto en DB:', e)
       return null
     }
@@ -180,11 +242,12 @@ export const api = {
 
   async deleteProduct(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/products/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar producto en DB:', e)
       return null
     }
@@ -206,13 +269,13 @@ export const api = {
 
   async createTeamMember(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/team`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/team`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al crear especialista en DB:', e)
       return null
     }
@@ -220,13 +283,13 @@ export const api = {
 
   async updateTeamMember(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/team/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/team/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar especialista en DB:', e)
       return null
     }
@@ -234,11 +297,12 @@ export const api = {
 
   async deleteTeamMember(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/team/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/team/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar especialista en DB:', e)
       return null
     }
@@ -258,16 +322,43 @@ export const api = {
     }
   },
 
-  async updateMembership(id, data) {
+  async createMembership(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/memberships/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await authFetch(`${API_BASE_URL}/admin/memberships`, {
+        method: 'POST',
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Fallo al crear membresía en DB:', e)
+      return null
+    }
+  },
+
+  async updateMembership(id, data) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/admin/memberships/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar membresía en DB:', e)
+      return null
+    }
+  },
+
+  async deleteMembership(id) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/admin/memberships/${id}`, {
+        method: 'DELETE',
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Fallo al eliminar membresía en DB:', e)
       return null
     }
   },
@@ -288,13 +379,13 @@ export const api = {
 
   async createClosedDate(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/closed-dates`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/closed-dates`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al guardar fecha de cierre en DB:', e)
       return null
     }
@@ -302,11 +393,12 @@ export const api = {
 
   async deleteClosedDate(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/closed-dates/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/admin/closed-dates/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar fecha de cierre en DB:', e)
       return null
     }
@@ -317,10 +409,11 @@ export const api = {
   // ----------------------------------------------------
   async getClients() {
     try {
-      const res = await fetch(`${API_BASE_URL}/clients`)
+      const res = await authFetch(`${API_BASE_URL}/clients`)
       if (!res.ok) throw new Error('Error al obtener clientes')
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('API offline: usando clientes locales', e)
       return null
     }
@@ -328,13 +421,13 @@ export const api = {
 
   async createClient(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/clients`, {
+      const res = await authFetch(`${API_BASE_URL}/clients`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al guardar cliente en DB:', e)
       return null
     }
@@ -342,13 +435,13 @@ export const api = {
 
   async updateClient(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/clients/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar cliente en DB:', e)
       return null
     }
@@ -356,11 +449,12 @@ export const api = {
 
   async deleteClient(id) {
     try {
-      const res = await fetch(`${API_BASE_URL}/clients/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/clients/${id}`, {
         method: 'DELETE',
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al eliminar cliente en DB:', e)
       return null
     }
@@ -376,10 +470,11 @@ export const api = {
       if (role) params.append('role', role)
       if (specialistId) params.append('specialistId', specialistId)
       
-      const res = await fetch(`${API_BASE_URL}/appointments?${params.toString()}`)
+      const res = await authFetch(`${API_BASE_URL}/appointments?${params.toString()}`)
       if (!res.ok) throw new Error('Error al obtener agenda')
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('API offline: usando citas locales', e)
       return null
     }
@@ -387,13 +482,13 @@ export const api = {
 
   async updateAppointmentStatus(id, status) {
     try {
-      const res = await fetch(`${API_BASE_URL}/appointments/${id}/status`, {
+      const res = await authFetch(`${API_BASE_URL}/appointments/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al actualizar estado de cita en DB:', e)
       return null
     }
@@ -401,13 +496,13 @@ export const api = {
 
   async cancelAppointment(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/appointments/${id}/cancel`, {
+      const res = await authFetch(`${API_BASE_URL}/appointments/${id}/cancel`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al cancelar cita en DB:', e)
       return null
     }
@@ -418,7 +513,7 @@ export const api = {
     try {
       res = await fetch(`${API_BASE_URL}/appointments/book`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify(data),
       })
     } catch (networkError) {
@@ -438,33 +533,35 @@ export const api = {
   // ----------------------------------------------------
   async getActiveCashSession() {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/active`)
+      const res = await authFetch(`${API_BASE_URL}/cash/active`)
       if (!res.ok) return null
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       return null
     }
   },
 
   async getCashSessions() {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/sessions`)
+      const res = await authFetch(`${API_BASE_URL}/cash/sessions`)
       if (!res.ok) return null
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       return null
     }
   },
 
   async openCashSession(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/open`, {
+      const res = await authFetch(`${API_BASE_URL}/cash/open`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al abrir caja en DB:', e)
       return null
     }
@@ -472,13 +569,13 @@ export const api = {
 
   async closeCashSession(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/close`, {
+      const res = await authFetch(`${API_BASE_URL}/cash/close`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al cerrar caja en DB:', e)
       return null
     }
@@ -486,13 +583,13 @@ export const api = {
 
   async reconcileCashSession(id, data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/reconcile/${id}`, {
+      const res = await authFetch(`${API_BASE_URL}/cash/reconcile/${id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al reconciliar caja en DB:', e)
       return null
     }
@@ -500,23 +597,24 @@ export const api = {
 
   async getCashTransactions() {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/transactions`)
+      const res = await authFetch(`${API_BASE_URL}/cash/transactions`)
       if (!res.ok) return null
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       return null
     }
   },
 
   async createCashTransaction(data) {
     try {
-      const res = await fetch(`${API_BASE_URL}/cash/transactions`, {
+      const res = await authFetch(`${API_BASE_URL}/cash/transactions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
       return await res.json()
     } catch (e) {
+      if (e.message?.includes('401')) throw e
       console.warn('Fallo al registrar transacción en DB:', e)
       return null
     }
@@ -536,5 +634,114 @@ export const api = {
       throw new Error(err.message || 'Credenciales inválidas')
     }
     return await res.json()
+  },
+
+  // ----------------------------------------------------
+  // 11. TELEMETRÍA Y LOGS DEL SISTEMA
+  // ----------------------------------------------------
+  async getSystemLogs({ level, source, search, page = 1, limit = 25 } = {}) {
+    try {
+      const params = new URLSearchParams()
+      if (level && level !== 'ALL') params.append('level', level)
+      if (source && source !== 'ALL') params.append('source', source)
+      if (search) params.append('search', search)
+      params.append('page', String(page))
+      params.append('limit', String(limit))
+
+      const res = await authFetch(`${API_BASE_URL}/system-logs?${params.toString()}`)
+      if (!res.ok) throw new Error('Error al cargar logs del sistema')
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('API offline o error al consultar telemetría:', e)
+      return { logs: [], total: 0, page: 1, limit, totalPages: 1 }
+    }
+  },
+
+  async getAllSystemLogs(limit = 1000) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/system-logs/all?limit=${limit}`)
+      if (!res.ok) throw new Error('Error al obtener todos los logs')
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Error al obtener todos los logs:', e)
+      return { logs: [], count: 0 }
+    }
+  },
+
+  async getTelemetryStats() {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/system-logs/stats`)
+      if (!res.ok) throw new Error('Error al obtener estadísticas de telemetría')
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Error al obtener stats:', e)
+      return {
+        totalCount: 0,
+        criticalCount: 0,
+        errorCount: 0,
+        warningCount: 0,
+        infoCount: 0,
+        recentErrors24h: 0,
+        systemHealth: 'OPTIMO',
+        appVersion: 'Versión 2.0',
+        gitCommit: 'main-prod',
+        timestamp: new Date().toISOString(),
+      }
+    }
+  },
+
+  async verifyTelemetryPin(pin) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/system-logs/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: String(pin).trim() }),
+      })
+      if (!res.ok) return false
+      const data = await res.json()
+      if (data?.accessToken) {
+        try {
+          sessionStorage.setItem('spa_admin_token', data.accessToken)
+        } catch (e) {}
+      }
+      return !!data?.valid
+    } catch (e) {
+      console.error('Error al validar PIN de telemetría con backend:', e)
+      return false
+    }
+  },
+
+  async createTestLog(data = {}) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/system-logs/test-event`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Error al crear log de prueba:', e)
+      return null
+    }
+  },
+
+  async purgeSystemLogs({ days = 30, all = false } = {}) {
+    try {
+      const params = new URLSearchParams()
+      if (all) params.append('all', 'true')
+      else params.append('days', String(days))
+
+      const res = await authFetch(`${API_BASE_URL}/system-logs/purge?${params.toString()}`, {
+        method: 'DELETE',
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Error al purgar logs:', e)
+      return { success: false }
+    }
   }
 }

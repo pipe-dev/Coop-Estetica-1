@@ -28,6 +28,14 @@
   background: linear-gradient(135deg, #F0D78C 0%, #D4AF37 100%);
 }
 
+.desktopBrandName {
+  display: inline;
+}
+
+.mobileIaText {
+  display: none;
+}
+
 .triggerBadge {
   background: #0D0D0D;
   color: #D4AF37;
@@ -136,6 +144,19 @@
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
+}
+
+.memoryBadge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .headerActions {
@@ -783,5 +804,94 @@
 .voiceTestBtn:hover {
   transform: scale(1.05);
 }
+
+/* ========================================================== */
+/* RESPONSIVE DESIGN MOBILE (< 900px)                         */
+/* ========================================================== */
+@media (max-width: 900px) {
+  .desktopBrandName,
+  .triggerBadge,
+  .shortcutHint {
+    display: none !important;
+  }
+
+  .mobileIaText {
+    display: inline-block !important;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    line-height: 1;
+    color: #0D0D0D;
+  }
+
+  .floatingTrigger {
+    bottom: 80px;
+    right: 16px;
+    padding: 10px 16px;
+    gap: 6px;
+    border-radius: 9999px;
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.45), 0 0 12px rgba(212, 175, 55, 0.3);
+    z-index: 999;
+  }
+
+  .floatingTrigger .sparkleIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* DRAWER PANTALLA COMPLETA EN MOBILE */
+  .drawer {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-left: none;
+    border-radius: 0;
+  }
+
+  .header {
+    padding: 14px 16px;
+  }
+
+  .headerTitle {
+    font-size: 16px;
+  }
+
+  .messagesContainer {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .bubble {
+    max-width: 90%;
+    padding: 12px 14px;
+    font-size: 13.5px;
+  }
+
+  .suggestionsWrap {
+    padding: 8px 14px 0;
+  }
+
+  .chip {
+    font-size: 11.5px;
+    padding: 5px 11px;
+  }
+
+  .footer {
+    padding: 10px 14px max(14px, env(safe-area-inset-bottom));
+  }
+
+  .inputForm {
+    padding: 3px 6px 3px 12px;
+  }
+
+  .inputField {
+    font-size: 13.5px;
+  }
+}
+
 
 

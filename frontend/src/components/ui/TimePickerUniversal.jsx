@@ -3,7 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChevronDown } from 'lucide-react'
 import styles from './TimePickerUniversal.module.css'
 
-export default function TimePickerUniversal({ value = '10:00 AM', onChange, label }) {
+export default function TimePickerUniversal({
+  value = '10:00 AM',
+  onChange,
+  label,
+  placement = 'up',
+  align = 'right'
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
 
@@ -57,27 +63,29 @@ export default function TimePickerUniversal({ value = '10:00 AM', onChange, labe
     <div className={styles.wrapper} ref={containerRef}>
       {label && <label className={styles.fieldLabel}>{label}</label>}
 
-      {/* TRIGGER BUTTON */}
-      <button
-        type="button"
-        className={`${styles.triggerBtn} ${isOpen ? styles.triggerActive : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <Clock size={16} className={styles.clockIcon} />
-        <span className={styles.timeText}>{value || '10:00 AM'}</span>
-        <ChevronDown size={14} className={`${styles.chevronIcon} ${isOpen ? styles.chevronRotated : ''}`} />
-      </button>
+      {/* TRIGGER CONTAINER WITH RELATIVE POSITION */}
+      <div className={styles.triggerContainer}>
+        {/* TRIGGER BUTTON */}
+        <button
+          type="button"
+          className={`${styles.triggerBtn} ${isOpen ? styles.triggerActive : ''}`}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <Clock size={16} className={styles.clockIcon} />
+          <span className={styles.timeText}>{value || '10:00 AM'}</span>
+          <ChevronDown size={14} className={`${styles.chevronIcon} ${isOpen ? styles.chevronRotated : ''}`} />
+        </button>
 
-      {/* FLOATING POPOVER */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.97 }}
-            transition={{ duration: 0.15 }}
-            className={styles.popover}
-          >
+        {/* FLOATING POPOVER */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: placement === 'up' ? 8 : -8, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: placement === 'up' ? 8 : -8, scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+              className={`${styles.popover} ${placement === 'up' ? styles.popoverUp : styles.popoverDown} ${align === 'left' ? styles.alignLeft : styles.alignRight}`}
+            >
             {/* 3-COLUMN SELECTOR */}
             <div className={styles.selectorRow}>
               {/* HOURS COLUMN */}
@@ -143,6 +151,7 @@ export default function TimePickerUniversal({ value = '10:00 AM', onChange, labe
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   )
 }

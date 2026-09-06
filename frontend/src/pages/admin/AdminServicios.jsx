@@ -406,7 +406,7 @@ export default function AdminServicios() {
                 <ImageUploader 
                   value={serviceImage} 
                   onChange={setServiceImage} 
-                  label="Foto del Tratamiento (Subir a CDN ImgBB)" 
+                  label="Foto del Tratamiento" 
                 />
 
                 <div className={styles.modalButtons}>
@@ -461,7 +461,7 @@ export default function AdminServicios() {
                 <ImageUploader 
                   value={categoryImage} 
                   onChange={setCategoryImage} 
-                  label="Foto de Portada de la Categoría (Subir a CDN ImgBB)" 
+                  label="Foto de Portada de la Categoría" 
                 />
 
                 <div className={styles.modalButtons}>

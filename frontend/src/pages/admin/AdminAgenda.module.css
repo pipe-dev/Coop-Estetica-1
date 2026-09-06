@@ -23,24 +23,60 @@
 .inputWrapper {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 10px;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(212, 175, 55, 0.45);
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 999px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 12px rgba(212, 175, 55, 0.12);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
 }
 .inputWrapper:hover {
   border-color: var(--color-gold);
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 18px rgba(212, 175, 55, 0.25);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
 }
 
 .goldIcon {
   color: var(--color-gold);
   filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.4));
   flex-shrink: 0;
+}
+
+.dateDisplaySpan {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.dateInputHidden {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.selectInput {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  flex: 1;
+  text-align: left;
+}
+.selectInput option {
+  background: #141414;
+  color: #FFFFFF;
+  padding: 8px;
 }
 
 .btnGroupRow {
@@ -51,183 +87,158 @@
 }
 
 .blockBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  background: rgba(239, 68, 68, 0.15);
-  color: #EF4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 11px 18px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
   border-radius: 999px;
+  font-family: var(--font-body);
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 .blockBtn:hover {
-  background: rgba(239, 68, 68, 0.3);
-}
-
-.modalTitleBlock {
-  margin-bottom: 16px;
-}
-.modalTitleBlock h3 {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #EF4444;
   color: #FFFFFF;
-  margin: 0;
-  font-weight: 700;
-}
-.modalSubtitle {
-  font-size: 0.8rem;
-  color: #A3A3A3;
-  margin: 4px 0 0;
-}
-
-.chipGrid {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.chipBtn {
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  color: #CCCCCC;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.chipBtn:hover {
-  border-color: rgba(212, 175, 55, 0.4);
-  background: rgba(212, 175, 55, 0.08);
-}
-
-.activeChip {
-  background: rgba(212, 175, 55, 0.2) !important;
-  border-color: var(--color-gold) !important;
-  color: var(--color-gold) !important;
-  font-weight: 700;
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
-}
-
-.timeTabSelector {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.timeTabBtn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #A3A3A3;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.timeTabBtn strong {
-  color: #FFFFFF;
-  font-size: 0.95rem;
-}
-
-.activeTimeTab {
-  background: rgba(212, 175, 55, 0.15) !important;
-  border-color: var(--color-gold) !important;
-  color: var(--color-gold) !important;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-}
-.activeTimeTab strong {
-  color: var(--color-gold) !important;
-}
-
-.radialWrapperBox {
-  display: flex;
-  justify-content: center;
-  margin-top: 4px;
-}
-
-.blockSubmitBtn {
-  flex: 1.2;
-  padding: 12px;
-  background: #EF4444;
-  border: none;
-  border-radius: 999px;
-  color: #FFFFFF;
-  font-weight: 700;
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-.blockSubmitBtn:hover {
-  background: #DC2626;
-  transform: translateY(-1px);
-}
-
-.dateInput, .selectInput {
-  background: transparent;
-  border: none;
-  color: #FFFFFF;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
-  outline: none;
-  cursor: pointer;
-}
-
-/* Invert native dark browser calendar icon to bright gold */
-.dateInput::-webkit-calendar-picker-indicator {
-  filter: invert(0.8) sepia(1) saturate(5) hue-rotate(5deg);
-  cursor: pointer;
-  opacity: 0.9;
-  padding: 2px;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-.dateInput::-webkit-calendar-picker-indicator:hover {
-  transform: scale(1.15);
-  opacity: 1;
-}
-
-.selectInput option {
-  background: #141414;
-  color: #FFFFFF;
-  padding: 8px;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
 }
 
 .addBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  background: var(--color-gold);
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 11px 18px;
+  background: linear-gradient(135deg, #E5C378 0%, #D4AF37 50%, #AA820A 100%);
   color: #0E0E0E;
   border: none;
   border-radius: 999px;
+  font-family: var(--font-body);
   font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
   box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.addBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
 }
 
-/* CARDS GRID */
-.cardsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+/* TIMELINE & DATE CATEGORIES */
+.agendaTimelineContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.dateCategorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.categoryHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.categoryHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.categoryDateHeading {
+  font-family: var(--font-heading);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.categoryBadgeToday {
+  background: var(--color-gold);
+  color: #0E0E0E;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
+  display: inline-flex;
+  align-items: center;
+}
+
+.categoryBadgeTomorrow {
+  background: rgba(59, 130, 246, 0.18);
+  color: #60A5FA;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.categoryBadgeDate {
+  background: rgba(255, 255, 255, 0.08);
+  color: #E5E5E5;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.categoryCountBadge {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #A3A3A3;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.emptyDayNotice {
+  padding: 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  color: #888888;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .emptyAgenda {
-  grid-column: 1 / -1;
   padding: 50px 20px;
   text-align: center;
   background: rgba(255, 255, 255, 0.02);
@@ -251,194 +262,29 @@
   margin-bottom: 6px;
 }
 
-.dateCategorySection {
-  margin-bottom: 36px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* CARDS GRID */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
-.emptyDayNotice {
-  padding: 24px;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  color: #888888;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.categoryHeaderRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-}
-
-.categoryBadgeToday {
-  background: var(--color-gold);
-  color: #0E0E0E;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.95rem;
-  padding: 6px 20px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.35);
-  display: inline-flex;
-  align-items: center;
-}
-
-.categoryBadgeTomorrow {
-  background: #1E40AF;
-  color: #FFFFFF;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.95rem;
-  padding: 6px 20px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.categoryBadgeDate {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--color-gold);
-  color: #FFFFFF;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.95rem;
-  padding: 6px 20px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.viewModeToggleBtn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 999px;
-  color: var(--color-gold);
-  font-family: var(--font-heading);
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.viewModeToggleBtn:hover {
-  background: rgba(212, 175, 55, 0.15);
-}
-
+/* APPOINTMENT CARD */
 .appointmentCard {
-  background: var(--color-cream);
+  background: #FFFFFF;
   border: 1px solid #E5E5E5;
   border-radius: 18px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   color: #000000 !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-/* SOLID DARK GREY BLOCKED CARDS */
-.blockedAgendaCard {
-  background: #2C2C32 !important;
-  border-left: 5px solid #8E8E93 !important;
-  border: 1px solid #3A3A40;
-  border-radius: 18px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-.blockedCardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.blockedHeaderLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.syneBlockedTitle {
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--color-gold);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.syneBlockedTime {
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  letter-spacing: 0.5px;
-}
-
-.blockedCardBody {
-  margin: 16px 0;
-}
-
-.blockedDetailLine {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.syneBlockedName {
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #FFFFFF;
-}
-
-.bodyBlockedReason {
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #CCCCCC;
-}
-
-.blockedCardFooter {
-  margin-top: 10px;
-}
-
-.unblockBtn {
-  width: 100%;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  color: #E5E5E5;
-  font-family: var(--font-heading);
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.unblockBtn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #FF6B6B;
-  border-color: #EF4444;
+.appointmentCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
 .cardHeader {
@@ -447,15 +293,45 @@
   justify-content: space-between;
 }
 
+.timeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  background: var(--color-gold) !important;
+  color: #0E0E0E !important;
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
+}
+.timeBadge span {
+  color: #0E0E0E !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums;
+}
+
 .cardHeaderRight {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
+.statusPill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+}
+.status_Confirmada, .status_Reservada { background: #DBEAFE; color: #1D4ED8; }
+.status_En_Atencion, .status_En\ Atención { background: #FEF3C7; color: #D97706; }
+.status_Finalizada, .status_Pagada { background: #D1FAE5; color: #047857; }
+.status_Cancelada { background: #FEE2E2; color: #B91C1C; }
+
 .iconEditBtn, .iconDeleteBtn {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -486,95 +362,14 @@
   color: #FF6B6B;
 }
 
-.timeBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 5px 14px;
-  background: var(--color-gold) !important;
-  color: #0E0E0E !important;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.85rem;
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
-}
-
-.timeBadge span {
-  color: #0E0E0E !important;
-  font-weight: 800 !important;
-}
-
-.combinedTimeBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  background: var(--color-gold);
-  border-radius: 999px;
-  color: #0E0E0E;
-}
-
-.todayPillTag {
-  background: #0E0E0E;
-  color: var(--color-gold);
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.68rem;
-  padding: 2px 7px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-}
-
-.tomorrowPillTag {
-  background: #1E40AF;
-  color: #FFFFFF;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.68rem;
-  padding: 2px 7px;
-  border-radius: 999px;
-  letter-spacing: 0.5px;
-}
-
-.timeValSpan {
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 0.82rem;
-  color: #0E0E0E;
-}
-
-.blockedTimeRow {
-  margin: 12px 0 8px;
-}
-
-.syneBlockedTimeVal {
-  font-family: var(--font-heading);
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #FFFFFF !important;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.statusPill {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 999px;
-}
-.status_Confirmada, .status_Reservada { background: #DBEAFE; color: #1D4ED8; }
-.status_En_Atencion, .status_En\ Atención { background: #FEF3C7; color: #D97706; }
-.status_Finalizada, .status_Pagada { background: #D1FAE5; color: #047857; }
-.status_Cancelada { background: #FEE2E2; color: #B91C1C; }
-
 .cardBody {
   margin: 14px 0;
 }
 
 .clientTitle {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.12rem;
+  font-weight: 700;
   color: #000000 !important;
   margin: 0 0 4px;
 }
@@ -584,12 +379,13 @@
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  color: #1A1A1A !important;
-  font-weight: 700;
+  color: #404040 !important;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .phoneRow svg {
-  color: #000000 !important;
+  color: #525252 !important;
 }
 
 .divider {
@@ -602,12 +398,12 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.82rem;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
-.label { color: #333333 !important; font-weight: 700; }
-.value { color: #000000 !important; font-weight: 800; }
-.priceValue { color: #B8960C !important; font-weight: 800; font-size: 0.98rem; }
+.label { color: #525252 !important; font-weight: 600; }
+.value { color: #111111 !important; font-weight: 700; }
+.priceValue { color: #A16207 !important; font-weight: 800; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
 
 .cardFooter {
   display: flex;
@@ -618,9 +414,9 @@
 
 .attendBtn, .finishBtn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: 10px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
@@ -628,74 +424,217 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  transition: all 0.2s ease;
 }
 
 .attendBtn {
-  background: rgba(245, 158, 11, 0.2);
-  color: #F59E0B;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.18);
+  color: #D97706;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.attendBtn:hover {
+  background: rgba(245, 158, 11, 0.28);
 }
 
 .finishBtn {
-  background: rgba(16, 185, 129, 0.2);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.18);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.finishBtn:hover {
+  background: rgba(16, 185, 129, 0.28);
 }
 
 .cancelBtn {
-  padding: 8px;
-  background: rgba(239, 68, 68, 0.15);
+  padding: 9px;
+  background: rgba(239, 68, 68, 0.12);
   color: #EF4444;
   border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 10px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cancelBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
 }
 
 .reactivateBtn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   background: rgba(212, 175, 55, 0.15);
-  color: var(--color-gold);
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #92400E;
+  border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 10px;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 .reactivateBtn:hover {
   background: rgba(212, 175, 55, 0.3);
 }
 
-/* MODAL */
+/* BLOCKED AGENDA CARDS */
+.blockedAgendaCard {
+  background: #1C1C20 !important;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-left: 4px solid var(--color-gold) !important;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.blockedCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.blockedHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.syneBlockedTitle {
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.blockedCardBody {
+  margin: 16px 0;
+}
+
+.blockedTimeRow {
+  margin-bottom: 8px;
+}
+
+.syneBlockedTimeVal {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF !important;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.blockedDetailLine {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.syneBlockedName {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.bodyBlockedReason {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: #D4D4D4;
+}
+
+.blockedCardFooter {
+  margin-top: 10px;
+}
+
+.unblockBtn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  color: #F87171;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.unblockBtn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #FFFFFF;
+  border-color: #EF4444;
+}
+
+/* MODALS - GENERAL LUXURY & SCROLLING FIX */
 .modalOverlay {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 .modalCard {
   width: 100%;
   max-width: 480px;
   background: #141414;
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.35);
   border-radius: 20px;
   padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(212, 175, 55, 0.15);
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: auto;
 }
 
 .modalCard h3 {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.18rem;
   color: #FFFFFF;
-  margin: 0 0 20px;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.modalTitleBlock {
+  margin-bottom: 16px;
+}
+
+.modalSubtitle {
+  font-size: 0.82rem;
+  color: #A3A3A3;
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+.modalHeaderBlock {
+  margin-bottom: 16px;
+}
+
+.syneBlockedHeaderTag {
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--color-gold);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
 }
 
 .modalForm {
@@ -721,19 +660,31 @@
   min-width: 0;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 175, 55, 0.2);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: 10px;
   color: #FFFFFF;
   outline: none;
   font-family: var(--font-body);
   box-sizing: border-box;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease;
+}
+.formGroup input:focus, .formGroup select:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
 .formGroup select option {
   background: #141414;
   color: #FFFFFF;
+}
+
+/* Native dark browser calendar icon */
+.formGroup input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) saturate(5) hue-rotate(5deg);
+  cursor: pointer;
+  opacity: 0.9;
+  padding: 2px;
 }
 
 .formRow {
@@ -746,111 +697,128 @@
   min-width: 0;
 }
 
-.modalBtnGroup {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.closeBtn {
-  flex: 1;
-  padding: 12px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  color: #A3A3A3;
-  cursor: pointer;
-}
-
-.saveBtn {
-  flex: 1;
-  padding: 12px;
-  background: var(--color-gold);
-  border: none;
-  border-radius: 999px;
-  color: #0E0E0E;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.dateDisplaySpan {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  letter-spacing: 0.3px;
-}
-
-.dateInputHidden {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-  pointer-events: none;
-}
-
-/* SIMPLIFIED EDIT BLOCK MODAL STYLES */
-.modalHeaderBlock {
-  margin-bottom: 16px;
-}
-
-.syneBlockedHeaderTag {
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--color-gold);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.modalSubtitle {
-  font-size: 0.82rem;
-  color: #A3A3A3;
-  margin: 4px 0 0;
-}
-
+/* REASON CHIPS */
 .chipGrid {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  margin: 4px 0 8px;
+  flex-wrap: wrap;
 }
 
 .chipBtn {
-  padding: 6px 12px;
+  padding: 8px 14px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
   color: #CCCCCC;
-  font-size: 0.78rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .chipBtn:hover {
-  border-color: var(--color-gold);
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.1);
   color: #FFFFFF;
 }
+
 .activeChip {
-  background: var(--color-gold) !important;
-  color: #0E0E0E !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.15) 100%) !important;
   border-color: var(--color-gold) !important;
-  font-weight: 800 !important;
+  color: var(--color-gold) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
+}
+
+/* MODAL ACTION BUTTONS */
+.modalBtnGroup {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.closeBtn {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: #D4D4D4;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.saveBtn {
+  flex: 1.2;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #E5C378 0%, #D4AF37 50%, #AA820A 100%);
+  border: none;
+  border-radius: 999px;
+  color: #0E0E0E;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.saveBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.45);
+}
+
+.blockSubmitBtn {
+  flex: 1.2;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  border: none;
+  border-radius: 999px;
+  color: #FFFFFF;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blockSubmitBtn:hover {
+  background: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
 }
 
 .saveBlockBtn {
-  flex: 1;
-  padding: 12px;
+  flex: 1.2;
+  padding: 12px 16px;
   background: #2C2C32;
   border: 1px solid var(--color-gold);
   border-radius: 999px;
   color: var(--color-gold);
-  font-family: var(--font-heading);
-  font-weight: 800;
+  font-family: var(--font-body);
+  font-weight: 700;
   font-size: 0.88rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .saveBlockBtn:hover {
   background: var(--color-gold);
@@ -866,8 +834,11 @@
   border-radius: 24px;
   padding: 24px;
   color: #FFFFFF;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(212, 175, 55, 0.15);
   font-family: var(--font-body);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
 }
 
 .calNavHeader {
@@ -897,8 +868,8 @@
 
 .calMonthYearTitle h3 {
   font-family: var(--font-heading);
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: 1.3rem;
+  font-weight: 700;
   color: #FFFFFF;
   margin: 0;
   text-transform: capitalize;
@@ -942,11 +913,12 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   color: #FFFFFF;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
+  font-variant-numeric: tabular-nums;
 }
 .calDayCell:hover {
   border-color: var(--color-gold);
@@ -967,7 +939,7 @@
 }
 
 .calDayNumber {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
 }
 
 .appDotContainer {
@@ -1082,10 +1054,95 @@
   font-size: 1.4rem;
   font-weight: 800;
   color: var(--color-white);
+  font-variant-numeric: tabular-nums;
 }
 
 .specialistRateLabel {
   font-size: 0.7rem;
   color: #A3A3A3;
 }
+
+/* ========================================================== */
+/* RESPONSIVE DESIGN MOBILE (< 900px)                         */
+/* ========================================================== */
+@media (max-width: 900px) {
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .filterGroup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+  .inputWrapper {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    padding: 11px 18px;
+  }
+  .btnGroupRow {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .blockBtn,
+  .addBtn {
+    width: 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding: 11px 18px;
+    font-size: 0.84rem;
+  }
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .specialistBanner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px;
+  }
+  .specialistNetCard {
+    align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .modalCard,
+  .bigCalendarModalCard {
+    padding: 20px 16px;
+    max-width: 100%;
+    border-radius: 18px;
+    box-sizing: border-box;
+  }
+  .calDaysGrid,
+  .calWeekGrid {
+    gap: 4px;
+  }
+  .calDayCell {
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .btnGroupRow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .categoryHeaderRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
 

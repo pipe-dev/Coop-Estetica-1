@@ -135,6 +135,94 @@ export const AGENTIC_TOOLS = [
         required: ['date']
       }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_transaction',
+      description: 'Pilar 2 (Finanzas): Registra un ingreso o egreso de caja en tiempo real en la base de datos PostgreSQL, calculando el balance neto diario.',
+      parameters: {
+        type: 'object',
+        properties: {
+          type: { type: 'string', enum: ['Ingreso', 'Egreso'], description: 'Tipo de movimiento: Ingreso o Egreso.' },
+          amount: { type: 'number', description: 'Monto de la transacción en Pesos Colombianos (COP).' },
+          description: { type: 'string', description: 'Descripción o concepto del movimiento (ej: "Pago de facial en efectivo", "Compra de insumos esmaltes", "Pago de arriendo").' },
+          category: { type: 'string', description: 'Categoría (ej: "Servicios", "Venta de Productos", "Insumos", "Nómina", "Gastos Generales", "Ajuste de Caja").' },
+          paymentMethod: { type: 'string', enum: ['Efectivo', 'Nequi', 'Daviplata', 'Tarjeta', 'Transferencia'], description: 'Método de pago utilizado.' }
+        },
+        required: ['type', 'amount', 'description']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_specialist',
+      description: 'Pilar 3 (Equipo): Registra a una nueva especialista en el equipo de la estética en PostgreSQL con su porcentaje de comisión neta.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Nombre completo de la especialista (ej: "Valentina Silva", "Camila Restrepo").' },
+          role: { type: 'string', description: 'Cargo o especialidad principal (ej: "Especialista en Uñas", "Cosmiatra", "Esteticista Facial", "Lashista & Cejas").' },
+          commissionRate: { type: 'number', description: 'Porcentaje de comisión neta (ej: 40, 45, 50). Por defecto 45%.' },
+          phone: { type: 'string', description: 'Teléfono o WhatsApp de la especialista.' },
+          experience: { type: 'string', description: 'Años de experiencia (ej: "4 años").' },
+          bio: { type: 'string', description: 'Breve perfil o descripción profesional.' }
+        },
+        required: ['name', 'role']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_service',
+      description: 'Pilar 3 (Catálogo): Crea y agrega un nuevo servicio o tratamiento al catálogo activo en PostgreSQL con precio y duración.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Nombre del servicio (ej: "Limpieza Facial Profunda", "Manicura Rusa Semipermanente", "Masaje Relajante con Piedras").' },
+          price: { type: 'number', description: 'Precio del servicio en Pesos Colombianos (COP).' },
+          duration: { type: 'integer', description: 'Duración estimada en minutos (ej: 45, 60, 90). Por defecto 60 min.' },
+          categoryName: { type: 'string', description: 'Categoría (ej: "Manos & Uñas", "Rostro", "Pies", "Cabello", "Cuerpo", "Maquillaje"). Si no existe, se crea automáticamente.' },
+          description: { type: 'string', description: 'Descripción o beneficios incluidos en el tratamiento.' }
+        },
+        required: ['name', 'price']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_client',
+      description: 'Pilar 4 (CRM): Registra o actualiza a una clienta en el CRM de PostgreSQL con su nombre, teléfono y notas estéticas (tipo de piel, alergias, preferencias).',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Nombre completo de la clienta.' },
+          phone: { type: 'string', description: 'Número de teléfono o celular (ej: "3001234567").' },
+          email: { type: 'string', description: 'Correo electrónico de la clienta (opcional).' },
+          notes: { type: 'string', description: 'Notas estéticas, tono de esmalte preferido, piel sensible o alergias.' }
+        },
+        required: ['name', 'phone']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'cancel_appointment',
+      description: 'Pilar 1 (Agenda): Cancela o anula una cita agendada en PostgreSQL, liberando el horario de la especialista.',
+      parameters: {
+        type: 'object',
+        properties: {
+          clientName: { type: 'string', description: 'Nombre de la clienta cuya cita se cancelará.' },
+          date: { type: 'string', description: 'Fecha de la cita en formato YYYY-MM-DD.' },
+          reason: { type: 'string', description: 'Motivo de la cancelación.' }
+        },
+        required: ['clientName']
+      }
+    }
   }
 ];
 
@@ -480,6 +568,243 @@ export class AiService implements OnModuleInit {
         }
       }
 
+      case 'create_transaction': {
+        try {
+          const activeSession = await this.prisma.cashSession.findFirst({
+            where: { status: 'Abierta' },
+            orderBy: { openedAt: 'desc' }
+          });
+
+          const rawAmount = parseFloat(args.amount as any) || 0;
+          const typeStr = (args.type || '').toLowerCase();
+          const isEgreso = typeStr.includes('egreso') || typeStr.includes('gasto');
+          const type = isEgreso ? 'Egreso' : 'Ingreso';
+          const description = args.description || (type === 'Ingreso' ? 'Ingreso registrado por Catheryne AI' : 'Gasto registrado por Catheryne AI');
+          const category = args.category || (type === 'Ingreso' ? 'Servicios' : 'Insumos');
+          const paymentMethod = args.paymentMethod || 'Efectivo';
+
+          const tx = await this.prisma.transaction.create({
+            data: {
+              sessionId: activeSession?.id || null,
+              type,
+              amount: rawAmount,
+              description,
+              category,
+              paymentMethod,
+              date: new Date()
+            }
+          });
+
+          return {
+            didMutate: true,
+            action: {
+              action: 'CREATE_TRANSACTION',
+              data: {
+                id: tx.id,
+                type: tx.type,
+                amount: tx.amount,
+                description: tx.description,
+                category: tx.category,
+                paymentMethod: tx.paymentMethod,
+                date: tx.date.toISOString().split('T')[0]
+              }
+            },
+            result: {
+              success: true,
+              mensaje: `Movimiento de caja registrado con éxito en PostgreSQL: ${tx.type} de $${tx.amount.toLocaleString()} COP (${tx.description}).`,
+              transaccion: tx
+            }
+          };
+        } catch (err: any) {
+          return {
+            didMutate: false,
+            result: { success: false, error: err?.message || 'Error registrando movimiento en caja.' }
+          };
+        }
+      }
+
+      case 'create_specialist': {
+        try {
+          const commissionRate = parseFloat(args.commissionRate as any) || 45;
+          const specialist = await this.prisma.teamMember.create({
+            data: {
+              name: args.name,
+              role: args.role || 'Especialista',
+              phone: args.phone || '',
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(args.name)}&background=D4AF37&color=fff`,
+              bio: args.bio || '',
+              experience: args.experience || '3 años',
+              color: '#D4AF37',
+              commissionRate,
+              active: true
+            }
+          });
+
+          return {
+            didMutate: true,
+            action: {
+              action: 'CREATE_SPECIALIST',
+              data: specialist
+            },
+            result: {
+              success: true,
+              mensaje: `Especialista "${specialist.name}" (${specialist.role}, comisión: ${specialist.commissionRate}%) registrada con éxito en PostgreSQL.`,
+              especialista: specialist
+            }
+          };
+        } catch (err: any) {
+          return {
+            didMutate: false,
+            result: { success: false, error: err?.message || 'Error registrando especialista en el equipo.' }
+          };
+        }
+      }
+
+      case 'create_service': {
+        try {
+          const categoryName = args.categoryName || 'Tratamientos Generales';
+          let category = await this.prisma.serviceCategory.findFirst({
+            where: { name: { equals: categoryName, mode: 'insensitive' } }
+          });
+
+          if (!category) {
+            category = await this.prisma.serviceCategory.create({
+              data: {
+                name: categoryName,
+                description: `Tratamientos de ${categoryName}`,
+                order: 0,
+                active: true
+              }
+            });
+          }
+
+          const price = parseFloat(args.price as any) || 50000;
+          const duration = parseInt(args.duration as any, 10) || 60;
+
+          const service = await this.prisma.service.create({
+            data: {
+              name: args.name,
+              categoryId: category.id,
+              price,
+              duration,
+              description: args.description || '',
+              active: true
+            }
+          });
+
+          return {
+            didMutate: true,
+            action: {
+              action: 'CREATE_SERVICE',
+              data: {
+                ...service,
+                categoryName: category.name
+              }
+            },
+            result: {
+              success: true,
+              mensaje: `Servicio "${service.name}" agregado con éxito al catálogo de PostgreSQL ($${service.price.toLocaleString()} COP, ${service.duration} min, categoría "${category.name}").`,
+              servicio: service
+            }
+          };
+        } catch (err: any) {
+          return {
+            didMutate: false,
+            result: { success: false, error: err?.message || 'Error creando servicio en el catálogo.' }
+          };
+        }
+      }
+
+      case 'create_client': {
+        try {
+          const phone = String(args.phone).trim();
+          const client = await this.prisma.client.upsert({
+            where: { phone },
+            update: {
+              name: args.name,
+              email: args.email || undefined,
+              notes: args.notes || undefined
+            },
+            create: {
+              name: args.name,
+              phone,
+              email: args.email || null,
+              notes: args.notes || ''
+            }
+          });
+
+          return {
+            didMutate: true,
+            action: {
+              action: 'CREATE_CLIENT',
+              data: client
+            },
+            result: {
+              success: true,
+              mensaje: `Clienta "${client.name}" (${client.phone}) registrada en el CRM de PostgreSQL.`,
+              clienta: client
+            }
+          };
+        } catch (err: any) {
+          return {
+            didMutate: false,
+            result: { success: false, error: err?.message || 'Error registrando clienta en el CRM.' }
+          };
+        }
+      }
+
+      case 'cancel_appointment': {
+        try {
+          const whereClause: any = { status: { notIn: ['Cancelada'] } };
+          if (args.clientName) {
+            whereClause.clientName = { contains: args.clientName, mode: 'insensitive' };
+          }
+          if (args.date) {
+            whereClause.date = args.date;
+          }
+
+          const targetApp = await this.prisma.appointment.findFirst({
+            where: whereClause,
+            orderBy: { createdAt: 'desc' }
+          });
+
+          if (!targetApp) {
+            return {
+              didMutate: false,
+              result: { success: false, error: `No se encontró ninguna cita activa para "${args.clientName || 'la clienta'}" en la fecha indicada.` }
+            };
+          }
+
+          const updated = await this.prisma.appointment.update({
+            where: { id: targetApp.id },
+            data: {
+              status: 'Cancelada',
+              cancelReason: args.reason || 'Cancelada por Catheryne AI a petición de la Propietaria',
+              canceledBy: 'Catheryne AI',
+              canceledAt: new Date()
+            }
+          });
+
+          return {
+            didMutate: true,
+            action: {
+              action: 'CANCEL_APPOINTMENT',
+              data: updated
+            },
+            result: {
+              success: true,
+              mensaje: `Cita de ${updated.clientName} (${updated.serviceName} el ${updated.date} a las ${updated.time}) ha sido cancelada en PostgreSQL.`,
+              cita: updated
+            }
+          };
+        } catch (err: any) {
+          return {
+            didMutate: false,
+            result: { success: false, error: err?.message || 'Error cancelando cita.' }
+          };
+        }
+      }
+
       default:
         return {
           didMutate: false,
@@ -501,15 +826,77 @@ export class AiService implements OnModuleInit {
     let didMutateOverall = false;
     let lastAction: any = null;
 
+    // Conteo en vivo de especialistas y servicios en PostgreSQL para saber si el sistema está en blanco
+    let teamCount = 0;
+    let servicesCount = 0;
+    try {
+      [teamCount, servicesCount] = await Promise.all([
+        this.prisma.teamMember.count({ where: { active: true } }),
+        this.prisma.service.count({ where: { active: true } })
+      ]);
+    } catch (e) {
+      // Ignorar si hay problema transitorio de conteo
+    }
+
+    const isSystemBlank = teamCount === 0 && servicesCount === 0;
+
     // Asegurar directiva de sistema para idioma y estilo de Catheryne
     const workingMessages = [...incomingMessages];
     if (!workingMessages.some(m => m.role === 'system')) {
       workingMessages.unshift({
         role: 'system',
-        content: `ERES "Catheryne AI", copiloto ejecutiva de Catheryne Ríos Estética.
-Hablas en español de Colombia ($ COP). Sé concisa, elegante y ejecutiva (máximo 2 a 3 párrafos cortos).
-Tienes acceso a herramientas de base de datos para consultar caja, citas agendadas, clientas y para agendar citas o productos.
-Usa las herramientas correspondientes para obtener datos reales o ejecutar acciones en el sistema.`
+        content: `ERES "Catheryne AI", copiloto ejecutiva y directora operativa de "Catheryne Ríos Estética".
+Hablas en español de Colombia ($ COP) con tono elegante, profesional, cálido, directivo y resolutivo.
+Estás conectada en tiempo real a la base de datos PostgreSQL para LEER Y ESCRIBIR datos directamente en todo el sistema sin intermediarios.
+
+ESTADO ACTUAL DE LA BASE DE DATOS:
+- Especialistas activas registradas: ${teamCount}
+- Servicios activos en catálogo: ${servicesCount}
+- Diagnóstico del sistema: ${isSystemBlank ? 'SISTEMA EN BLANCO (Sin especialistas ni servicios cargados aún).' : 'SISTEMA CON DATOS ACTIVOS.'}
+
+CUANDO CATHERYNE TE SALUDE, PREGUNTE CÓMO USARTE, PIDA UN RECORRIDO, O PREGUNTE QUÉ PUEDES HACER POR ELLA:
+Preséntate con orgullo y calidez como su copiloto integral para gestionar la estética sin fricciones, estructurando tu respuesta en tus 4 pilares de acción inmediata:
+
+"¡Claro, Catheryne! Soy tu copiloto integral para gestionar la estética sin fricciones. Aquí tienes mis 4 pilares de acción inmediata:
+
+1. **Agenda Inteligente**: Creo citas validando automáticamente clienta, servicio, especialista y disponibilidad para evitar dobles reservas.
+2. **Control Financiero**: Registro ingresos y gastos en tiempo real, calculando tu balance neto diario al instante.
+3. **Gestión de Equipo e Inventario**: Administro especialistas, comisiones, stock de productos y catálogo de servicios.
+4. **CRM y Fidelización**: Registro clientas, historial de tratamientos y fechas clave para mantenerlas activas.
+
+${isSystemBlank ? 'Dato clave: Actualmente tu sistema está "en blanco" (sin especialistas, servicios ni citas). Para empezar, lo ideal es que primero registremos a tu equipo y carguemos el catálogo de servicios. ¿Deseas que agreguemos a tu primera especialista o carguemos un servicio inicial?' : '¿En qué pilar deseas que nos enfoquemos hoy?'}"
+
+MODO TUTORIAL INTERACTIVO Y DEMOSTRACIÓN DE PODER:
+Si Catheryne te pide un tutorial, recorrido, o pregunta cómo usarte ("iniciar tutorial", "tutorial", "enséñame a usarte", "muéstrame tu poder", "cómo te uso", "¿qué puedes hacer por mí?"):
+Explícale con orgullo, elegancia y calidez ejecutiva que no eres un simple chat pasivo, sino su directora operativa con permisos de escritura y lectura directa en la base de datos PostgreSQL de su estética.
+Preséntale un tutorial estructurado, claro y con ejemplos reales que ella puede dictarte o escribirte:
+1. **Control Financiero**: Registra ingresos y egresos al instante en la caja viva y calcula el balance neto. Ejemplo: "Registra un gasto de 40.000 por insumos en efectivo" o "¿Cómo va el balance de hoy?".
+2. **Gestión de Equipo y Servicios**: Da de alta especialistas con su comisión y nuevos servicios en el catálogo. Ejemplo: "Agrega a Camila Gómez como especialista con 50% de comisión" o "Crea Limpieza Facial por 120.000".
+3. **Agenda Inteligente**: Crea o cancela citas validando horarios libres automáticamente para evitar dobles reservas. Ejemplo: "Agenda a María mañana a las 3pm con Camila" o "Cancela la cita de María".
+4. **CRM de Clientas**: Registra fichas de clientas con sus teléfonos y notas cosméticas. Ejemplo: "Registra a Laura con cel 3101234567 y nota: piel sensible".
+Cierra invitándola a darte su primera orden de prueba de inmediato por voz o texto: "¿Cuál de estos comandos deseas que ejecutemos ahora mismo para poner a prueba mi poder?"
+
+CAPACIDADES DE ESCRITURA DIRECTA EN BASE DE DATOS (POSTGRESQL):
+Tienes herramientas con permisos totales para escribir en PostgreSQL en tiempo real:
+- book_appointment: Agenda y guarda citas en DB validando disponibilidad.
+- cancel_appointment: Cancela citas en DB liberando el horario.
+- create_transaction: Registra ingresos y gastos en tiempo real, recalculando el balance neto diario.
+- create_specialist: Registra especialistas en el equipo con su % de comisión.
+- create_service: Agrega servicios y tratamientos al catálogo con precio y categoría.
+- create_product: Crea productos en el inventario con precio y stock.
+- create_client: Registra clientas en el CRM con notas estéticas y teléfono.
+- block_date: Bloquea días festivos o cierres administrativos.
+
+REGLAS DE OPERACIÓN:
+- Sé concisa, ejecutiva y elegante (máximo 2 a 3 párrafos cortos).
+- NO USES EMOJIS en tus respuestas ni en listas o viñetas. Mantén un estilo sobrio, limpio y profesional.
+- Si Catheryne te pide registrar un gasto ("registra un gasto de 30000 por insumos"), un ingreso, crear una especialista ("agrega a Valentina con 45% de comisión"), crear un servicio ("crea Limpieza Facial por 120000"), una clienta o una cita, EJECUTA DE INMEDIATO la herramienta correspondiente para que quede guardado en la base de datos PostgreSQL.
+- Nunca inventes citas ni datos si faltan campos obligatorios; indícale a Catheryne qué datos necesitas.
+
+MEMORIA ACTIVA Y CONTINUIDAD CONVERSACIONAL (REGLA DE CONTEXTO):
+- Tienes memoria perfecta del historial de la conversación en curso con Catheryne.
+- Analiza siempre los mensajes anteriores del diálogo: si Catheryne dice "agrégala a ella", "cancela esa cita", "cámbiale la comisión a 50%", "¿cuánto era el precio de ese servicio?", o "repíteme lo anterior", IDENTIFICA Y CONECTA INMEDIATAMENTE la persona, servicio, cita o tema al que se refiere sin pedirle que te lo repita.
+- Mantén coherencia: si acabas de registrar o consultar una especialista, cita o transacción en turnos previos, usa esos mismos datos en las respuestas siguientes.`
       });
     }
 

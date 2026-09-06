@@ -17,6 +17,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { FaWhatsapp, FaInstagram, FaFacebook, FaTiktok } from 'react-icons/fa6'
+import { useAdmin } from '../context/AdminContext'
 import styles from './Contact.module.css'
 
 const fadeInUp = {
@@ -141,6 +142,7 @@ const TypewriterTitle = () => {
 };
 
 function Contact() {
+  const { businessConfig } = useAdmin()
   const [introPhase, setIntroPhase] = useState('CENTER') // 'CENTER' | 'MOVING' | 'DONE'
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formSent, setFormSent] = useState(false)
@@ -148,9 +150,13 @@ function Contact() {
     name: '',
     phone: '',
     email: '',
-    projectType: 'Residencial',
+    projectType: 'Estética y Cuidado',
     message: ''
   })
+
+  const rawPhone = (businessConfig?.whatsappNumber || businessConfig?.phone || '').replace(/\D/g, '')
+  const sponsorPhone = rawPhone ? (rawPhone.startsWith('57') ? rawPhone : `57${rawPhone}`) : ''
+  const businessName = businessConfig?.businessName?.trim() || 'Catheryne Ríos Estética'
 
   useEffect(() => {
     // Step 1: Hold giant emblem at center on solid background for 1.8s
@@ -177,19 +183,24 @@ function Contact() {
     e.preventDefault()
     setFormSent(true)
 
-    const sponsorPhone = '573006269056'
+    if (!sponsorPhone) {
+      alert('La línea de WhatsApp oficial aún no ha sido configurada.')
+      setFormSent(false)
+      return
+    }
+
     const messageLines = [
-      '*SOLICITUD DE COTIZACIÓN - GRUPO SOL DEL RÍO*',
+      `*CONSULTA GENERAL - ${businessName.toUpperCase()}*`,
       '════════════════════════════',
       '',
       `► *Nombre:* ${formData.name}`,
       `► *Teléfono:* ${formData.phone}`,
       `► *Email:* ${formData.email}`,
-      `► *Tipo de Proyecto:* ${formData.projectType}`,
+      `► *Interés:* ${formData.projectType}`,
       formData.message ? `► *Detalles / Mensaje:* ${formData.message}` : '',
       '',
       '════════════════════════════',
-      '✦ _Enviado desde el portal web de Grupo Sol del Río_'
+      `✦ _Enviado desde el portal web oficial_`
     ].filter(Boolean).join('\n')
 
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${sponsorPhone}&text=${encodeURIComponent(messageLines)}`
@@ -198,7 +209,7 @@ function Contact() {
       window.open(whatsappUrl, '_blank')
       setFormSent(false)
       setIsModalOpen(false)
-      setFormData({ name: '', phone: '', email: '', projectType: 'Residencial', message: '' })
+      setFormData({ name: '', phone: '', email: '', projectType: 'Estética y Cuidado', message: '' })
     }, 1200)
   }
 
@@ -316,15 +327,17 @@ function Contact() {
                 <ChevronRight size={18} />
               </button>
 
-              <a
-                href="https://wa.me/573006269056?text=Hola,%20quisiera%20informaci%C3%B3n%20sobre%20sus%20proyectos%20de%20construcci%C3%B3n"
-                target="_blank"
-                rel="noreferrer"
-                className={styles.whatsappCtaBtn}
-              >
-                <FaWhatsapp size={18} />
-                <span>WhatsApp Directo</span>
-              </a>
+              {sponsorPhone && (
+                <a
+                  href={`https://wa.me/${sponsorPhone}?text=${encodeURIComponent('Hola! Me gustaría solicitar información en ' + businessName)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={styles.whatsappCtaBtn}
+                >
+                  <FaWhatsapp size={18} />
+                  <span>WhatsApp Directo</span>
+                </a>
+              )}
             </motion.div>
           </motion.div>
 
@@ -481,54 +494,60 @@ function Contact() {
           <TypewriterTitle />
 
           <div className={styles.contactInfoBar}>
-            <a href="tel:573006269056" className={styles.contactItem}>
-              <Phone size={18} className={styles.contactIcon} />
-              <span>300 626 9056</span>
-            </a>
+            {rawPhone && (
+              <>
+                <a href={`tel:${rawPhone}`} className={styles.contactItem}>
+                  <Phone size={18} className={styles.contactIcon} />
+                  <span>{businessConfig?.whatsappNumber || businessConfig?.phone}</span>
+                </a>
+                <span className={styles.divider}>|</span>
+              </>
+            )}
 
-            <span className={styles.divider}>|</span>
+            {businessConfig?.instagramUrl && (
+              <>
+                <a href={businessConfig.instagramUrl} target="_blank" rel="noreferrer" className={styles.contactItem}>
+                  <FaInstagram size={18} className={styles.contactIcon} />
+                  <span>Instagram</span>
+                </a>
+                <span className={styles.divider}>|</span>
+              </>
+            )}
 
-            <a href="https://gruposoldelrio.com" target="_blank" rel="noreferrer" className={styles.contactItem}>
-              <Globe size={18} className={styles.contactIcon} />
-              <span>gruposoldelrio.com</span>
-            </a>
+            {businessConfig?.facebookUrl && (
+              <>
+                <a href={businessConfig.facebookUrl} target="_blank" rel="noreferrer" className={styles.contactItem}>
+                  <FaFacebook size={18} className={styles.contactIcon} />
+                  <span>Facebook</span>
+                </a>
+                <span className={styles.divider}>|</span>
+              </>
+            )}
 
-            <span className={styles.divider}>|</span>
-
-            <a href="https://instagram.com/gruposoldelrio" target="_blank" rel="noreferrer" className={styles.contactItem}>
-              <FaInstagram size={18} className={styles.contactIcon} />
-              <span>@gruposoldelrio</span>
-            </a>
-
-            <span className={styles.divider}>|</span>
-
-            <a href="https://facebook.com/GrupoSolDelRio" target="_blank" rel="noreferrer" className={styles.contactItem}>
-              <FaFacebook size={18} className={styles.contactIcon} />
-              <span>/GrupoSolDelRio</span>
-            </a>
-
-            <span className={styles.divider}>|</span>
-
-            <a href="https://tiktok.com/@gruposoldelrio" target="_blank" rel="noreferrer" className={styles.contactItem}>
-              <FaTiktok size={18} className={styles.contactIcon} />
-              <span>@gruposoldelrio</span>
-            </a>
+            {businessConfig?.tiktokUrl && (
+              <a href={businessConfig.tiktokUrl} target="_blank" rel="noreferrer" className={styles.contactItem}>
+                <FaTiktok size={18} className={styles.contactIcon} />
+                <span>TikTok</span>
+              </a>
+            )}
           </div>
 
         </div>
       </footer>
 
       {/* ── FLOATING WHATSAPP BUTTON ── */}
-      <a
-        href="https://wa.me/573006269056?text=Hola,%20quisiera%20cotizar%20un%20proyecto%20con%20Grupo%20Sol%20del%20R%C3%ADo"
-        target="_blank"
-        rel="noreferrer"
-        className={styles.floatingWhatsapp}
-        aria-label="Contactar por WhatsApp"
-      >
-        <FaWhatsapp size={26} />
-        <span className={styles.whatsappTooltip}>¿Tienes un proyecto? Hablemos</span>
-      </a>
+      {sponsorPhone && (
+        <a
+          href={`https://wa.me/${sponsorPhone}?text=${encodeURIComponent('Hola! Me gustaría comunicarme con ' + businessName)}`}
+          target="_blank"
+          rel="noreferrer"
+          className={styles.floatingWhatsapp}
+          aria-label="Contactar por WhatsApp"
+        >
+          <FaWhatsapp size={26} />
+          <span className={styles.whatsappTooltip}>¿Tienes dudas? Escríbenos</span>
+        </a>
+      )}
 
       {/* ── QUOTE MODAL ── */}
       <AnimatePresence>

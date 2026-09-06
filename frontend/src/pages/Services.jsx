@@ -15,7 +15,7 @@ const getPlaceholderUrl = (url) => {
 }
 
 function Services() {
-  const { serviceCategories, memberships: adminMemberships } = useAdmin()
+  const { serviceCategories, memberships: adminMemberships, businessConfig } = useAdmin()
   const currentMemberships = adminMemberships || memberships
   const [activeCategory, setActiveCategory] = useState('all')
   const [hideUi, setHideUi] = useState(false)
@@ -201,26 +201,28 @@ function Services() {
               <p style={{ color: '#A3A3A3', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
                 Estamos renovando nuestra selecta carta de experiencias y tratamientos de autor para brindarte la máxima exclusividad. Puedes contactarnos directamente por WhatsApp para recibir asesoría personalizada.
               </p>
-              <a
-                href="https://wa.me/573006269056"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  background: 'linear-gradient(135deg, #D4AF37 0%, #AA820A 100%)',
-                  color: '#0D0D0D',
-                  padding: '12px 24px',
-                  borderRadius: 9999,
-                  fontWeight: 700,
-                  fontSize: 14,
-                  textDecoration: 'none'
-                }}
-              >
-                <MessageCircle size={18} />
-                <span>Consultar por WhatsApp</span>
-              </a>
+              {businessConfig?.whatsappNumber && (
+                <a
+                  href={`https://wa.me/57${businessConfig.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent('Hola! Me gustaría consultar sobre los servicios y agendar una cita en ' + (businessConfig?.businessName || 'Catheryne Ríos Estética'))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    background: 'linear-gradient(135deg, #D4AF37 0%, #AA820A 100%)',
+                    color: '#0D0D0D',
+                    padding: '12px 24px',
+                    borderRadius: 9999,
+                    fontWeight: 700,
+                    fontSize: 14,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <MessageCircle size={18} />
+                  <span>Consultar por WhatsApp</span>
+                </a>
+              )}
             </LiquidGlassIos26>
           </motion.div>
         ) : (

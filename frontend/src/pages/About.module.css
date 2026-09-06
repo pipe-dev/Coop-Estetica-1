@@ -575,6 +575,25 @@
   box-shadow: 0 8px 22px rgba(37, 211, 102, 0.5);
 }
 
+.actionBtnDisabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  width: 100%;
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  color: #888888;
+  background: rgba(0, 0, 0, 0.03);
+  box-sizing: border-box;
+  cursor: default;
+}
+
 .scheduleNotice {
   font-size: 0.72rem;
   color: var(--color-gold-dark);

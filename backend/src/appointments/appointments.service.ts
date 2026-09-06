@@ -1,6 +1,7 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as nodemailer from 'nodemailer';
+import { sanitizeString, sanitizePhone, sanitizeEmail } from '../common/utils/sanitizer';
 
 @Injectable()
 export class AppointmentsService {
@@ -14,7 +15,7 @@ export class AppointmentsService {
     const user = process.env.GMAIL_USER || process.env.MAIL_USER;
     const pass = process.env.GMAIL_APP_PASS || process.env.MAIL_PASS;
 
-    if (user && pass && !pass.includes('xxxx')) {
+    if (user && pass) {
       this.transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: { user, pass },
@@ -35,6 +36,19 @@ export class AppointmentsService {
     time: string;
     notes?: string;
   }) {
+    // S.H.I.E.L.D. Pillar 4: Input Sanitization (Anti-XSS & Anti-Bombing)
+    const cleanName = sanitizeString(data.clientName, 100);
+    const cleanPhone = sanitizePhone(data.clientPhone);
+    const cleanEmail = data.clientEmail ? sanitizeEmail(data.clientEmail) : null;
+    const cleanNotes = data.notes ? sanitizeString(data.notes, 500) : '';
+
+    if (!cleanName || cleanName.length < 2) {
+      throw new BadRequestException('Por favor proporciona un nombre válido.');
+    }
+    if (!cleanPhone || cleanPhone.length < 7) {
+      throw new BadRequestException('Por favor proporciona un número de teléfono válido.');
+    }
+
     // 1. Validate service
     const service = await this.prisma.service.findUnique({
       where: { id: data.serviceId },
@@ -71,24 +85,24 @@ export class AppointmentsService {
 
     // 5. Atomic Upsert of Client & Appointment in Supabase PostgreSQL
     const clientRecord = await this.prisma.client.upsert({
-      where: { phone: data.clientPhone.trim() },
+      where: { phone: cleanPhone },
       update: {
-        name: data.clientName,
-        email: data.clientEmail || undefined,
+        name: cleanName,
+        email: cleanEmail || undefined,
       },
       create: {
-        name: data.clientName,
-        phone: data.clientPhone.trim(),
-        email: data.clientEmail || null,
-        notes: data.notes || '',
+        name: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail || null,
+        notes: cleanNotes,
       },
     });
 
     const appointment = await this.prisma.appointment.create({
       data: {
-        clientName: data.clientName,
-        clientPhone: data.clientPhone.trim(),
-        clientEmail: data.clientEmail || null,
+        clientName: cleanName,
+        clientPhone: cleanPhone,
+        clientEmail: cleanEmail || null,
         clientId: clientRecord.id,
         serviceId: service.id,
         serviceName: service.name,
@@ -105,9 +119,9 @@ export class AppointmentsService {
     // 6. Despacho Asíncrono de Correos a las 4 Partes:
     // (1. Clienta, 2. Dueña, 3. Administradora, 4. Especialista asignada)
     this.dispatchAllAppointmentNotifications({
-      clientName: data.clientName,
-      clientPhone: data.clientPhone.trim(),
-      clientEmail: data.clientEmail || undefined,
+      clientName: cleanName,
+      clientPhone: cleanPhone,
+      clientEmail: cleanEmail || undefined,
       serviceName: service.name,
       specialistId: specialist.id,
       specialistName: specialist.name,
@@ -118,7 +132,9 @@ export class AppointmentsService {
       commissionAmount: netCommission,
     }).catch(err => console.warn('Aviso: Envío de correos omitido en desarrollo:', err.message));
 
-    return appointment;
+    // Retorno sanitizado: Omitir comisiones internas en la respuesta al cliente
+    const { commissionAmount, ...clientSafeAppointment } = appointment;
+    return clientSafeAppointment;
   }
 
   // ----------------------------------------------------
@@ -144,10 +160,10 @@ export class AppointmentsService {
       where: { id: 'singleton' },
     });
 
-    const ownerEmail = config?.ownerEmail || 'duena@catherynerios.com';
-    const adminEmail = config?.adminEmail || 'admin@catherynerios.com';
-    const businessAddress = config?.address || 'Calle 123 #45-67, Barrio El Prado';
-    const businessPhone = config?.whatsappNumber || '3006269056';
+    const ownerEmail = config?.ownerEmail?.trim() || '';
+    const adminEmail = config?.adminEmail?.trim() || '';
+    const businessAddress = config?.address?.trim() || '';
+    const businessPhone = config?.whatsappNumber?.trim() || '';
 
     // Obtener correo de la especialista si no venía en el objeto
     let specialistEmail = details.specialistEmail;
@@ -172,14 +188,14 @@ export class AppointmentsService {
     }
 
     // 2. CORREO A LA DUEÑA (Notificación Ejecutiva de Ingresos)
-    if (ownerEmail) {
+    if (ownerEmail && ownerEmail.includes('@')) {
       mailPromises.push(
         this.sendOwnerNotificationEmail(ownerEmail, details)
       );
     }
 
     // 3. CORREO A LA ADMINISTRADORA (Control Operativo de Agenda)
-    if (adminEmail && adminEmail !== ownerEmail) {
+    if (adminEmail && adminEmail.includes('@') && adminEmail !== ownerEmail) {
       mailPromises.push(
         this.sendAdminNotificationEmail(adminEmail, details)
       );
@@ -280,7 +296,7 @@ export class AppointmentsService {
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0E0E0E; color: #FFFFFF; padding: 30px; border-radius: 16px; max-width: 560px; margin: 0 auto; border: 1px solid #D4AF37;">
         <div style="border-bottom: 1px solid #2A2A2A; padding-bottom: 16px; margin-bottom: 20px;">
           <span style="background: rgba(212, 175, 55, 0.2); color: #D4AF37; font-size: 11px; font-weight: bold; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase;">
-            Panel de la Dueña
+            Panel de la Propietaria
           </span>
           <h2 style="color: #FFFFFF; font-size: 20px; margin: 10px 0 4px;">Nueva Cita Agendada en la Web</h2>
           <p style="color: #888888; font-size: 13px; margin: 0;">Registro automático en la base de datos PostgreSQL.</p>
@@ -510,9 +526,13 @@ export class AppointmentsService {
     };
   }
 
-  async updateStatus(id: string, newStatus: string) {
+  async updateStatus(id: string, newStatus: string, user?: any) {
     const app = await this.prisma.appointment.findUnique({ where: { id } });
     if (!app) throw new NotFoundException('Cita no encontrada.');
+
+    if (user?.role === 'SPECIALIST' && (!user.teamMemberId || app.specialistId !== user.teamMemberId)) {
+      throw new ForbiddenException('Acceso denegado: No estás autorizada para modificar citas de otra especialista.');
+    }
 
     return this.prisma.appointment.update({
       where: { id },
@@ -520,9 +540,13 @@ export class AppointmentsService {
     });
   }
 
-  async cancelAppointment(id: string, cancelData: { reason?: string; details?: string; canceledBy?: string }) {
+  async cancelAppointment(id: string, cancelData: { reason?: string; details?: string; canceledBy?: string }, user?: any) {
     const app = await this.prisma.appointment.findUnique({ where: { id } });
     if (!app) throw new NotFoundException('Cita no encontrada.');
+
+    if (user?.role === 'SPECIALIST' && (!user.teamMemberId || app.specialistId !== user.teamMemberId)) {
+      throw new ForbiddenException('Acceso denegado: No estás autorizada para cancelar citas de otra especialista.');
+    }
 
     return this.prisma.appointment.update({
       where: { id },

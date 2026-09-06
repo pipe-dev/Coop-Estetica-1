@@ -351,13 +351,15 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
   padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modalCard {
@@ -366,8 +368,28 @@
   border-radius: var(--radius-2xl);
   padding: 26px;
   width: 100%;
-  max-width: 480px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: auto;
+}
+
+.modalCard::-webkit-scrollbar {
+  width: 6px;
+}
+.modalCard::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 999px;
+}
+.modalCard::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 999px;
+}
+.modalCard::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
 }
 
 .modalCard h3 {

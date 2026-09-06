@@ -52,7 +52,11 @@ model BusinessConfig {
   promoBanner    String?   @default("")
   ownerEmail     String?   @default("")
   adminEmail     String?   @default("")
-  masterPinHash  String?   // Hash Bcrypt/Argon2 del PIN de 4-6 dígitos de la dueña
+  masterPinHash  String?   // Hash Bcrypt/Argon2 del PIN de 6 dígitos de la dueña
+  masterPin      String?   @default("202626") // PIN de la Dueña (Acceso Total - 6 dígitos)
+  adminPin       String?   @default("123456") // PIN de la Administradora (Recepción - 6 dígitos)
+  specialistPin  String?   @default("777777") // PIN de Especialistas (Agenda y Monto Neto - 6 dígitos)
+  telemetryPin   String?   @default("5214")   // PIN de Telemetría y Logs del Sistema (4 dígitos)
   updatedAt      DateTime  @updatedAt
 }
 
@@ -232,7 +236,7 @@ model PayrollRecord {
   grossRevenue        Float      // Total bruto generado
   netCommissionTotal  Float      // Total neto a pagar a la especialista
   status              String     @default("Pagado")
-  authorizedBy        String     @default("Catheryne Ríos (Dueña)")
+  authorizedBy        String     @default("Catheryne Ríos (Propietaria)")
   authorizedAt        DateTime   @default(now())
 }
 
@@ -288,5 +292,29 @@ model ClosedDate {
   reason    String
   type      String   @default("Festivo")
   createdAt DateTime @default(now())
+}
+
+// ----------------------------------------------------
+// 14. TELEMETRÍA, LOGS DEL SISTEMA Y AUDITORÍA DE ERRORES
+// ----------------------------------------------------
+model SystemLog {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+  level       String   // 'info' | 'warning' | 'error' | 'critical'
+  source      String   // 'appointments' | 'ai' | 'auth' | 'cash' | 'email' | 'database' | 'client-runtime' | 'system'
+  action      String   // Nombre del método, endpoint o controlador
+  message     String
+  stackTrace  String?
+  metadata    String?  // JSON serializado y sanitizado
+  version     String   @default("Versión 2.0")
+  commit      String?  @default("main-prod")
+  environment String   @default("production")
+  clientIp    String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([level])
+  @@index([source])
+  @@index([timestamp])
 }
 

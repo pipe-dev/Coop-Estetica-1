@@ -20,13 +20,11 @@ const fadeInUp = {
 }
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
-const getEsteticaStatus = () => {
-  const now = new Date()
-  const day = now.getDay()
-  const hour = now.getHours()
-  if (day === 0) return { isOpen: false, text: 'Cerrado los Domingos' }
-  if (hour >= 9 && hour < 19) return { isOpen: true, text: 'Abierto ahora (hasta 7:00 PM)' }
-  return { isOpen: false, text: 'Cerrado ahora (Abre 9:00 AM)' }
+const getEsteticaStatus = (config) => {
+  if (config?.openingHours && config.openingHours.trim() !== '') {
+    return { isOpen: true, text: config.openingHours }
+  }
+  return { isOpen: true, text: 'Atención exclusiva con reserva previa' }
 }
 
 const baseImages = [
@@ -48,7 +46,7 @@ function About() {
   const [selectedMember, setSelectedMember] = useState(null)
   const [lightbox, setLightbox] = useState(null)
 
-  const esteticaStatus = getEsteticaStatus()
+  const esteticaStatus = getEsteticaStatus(businessConfig)
 
   // Close lightbox on scroll
   useEffect(() => {
@@ -190,16 +188,27 @@ function About() {
                   <span className={styles.cardBadge}>Nuestra Sede</span>
                 </div>
                 <h3 className={styles.cardTitle}>Ubicación</h3>
-                <p className={styles.cardDesc}>{businessConfig?.address || 'Calle 123 #45-67, Barrio El Prado'}</p>
-                <a
-                  href={`https://maps.google.com/?q=${encodeURIComponent(businessConfig?.address || 'Catheryne Rios Estetica')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.actionBtnPrimary}
-                >
-                  <Navigation size={14} />
-                  <span>Cómo Llegar (Maps)</span>
-                </a>
+                <p className={styles.cardDesc}>
+                  {businessConfig?.address && businessConfig.address.trim() !== '' 
+                    ? businessConfig.address 
+                    : 'Dirección pendiente de registrar en el panel de administración.'}
+                </p>
+                {businessConfig?.address && businessConfig.address.trim() !== '' ? (
+                  <a
+                    href={`https://maps.google.com/?q=${encodeURIComponent(businessConfig.address)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.actionBtnPrimary}
+                  >
+                    <Navigation size={14} />
+                    <span>Cómo Llegar (Maps)</span>
+                  </a>
+                ) : (
+                  <span className={styles.actionBtnDisabled}>
+                    <Navigation size={14} />
+                    <span>Sede en Preparación</span>
+                  </span>
+                )}
               </div>
 
               {/* 2. TELÉFONO Y WHATSAPP */}
@@ -209,21 +218,36 @@ function About() {
                   <span className={styles.cardBadge}>Atención Inmediata</span>
                 </div>
                 <h3 className={styles.cardTitle}>Teléfono & WhatsApp</h3>
-                <p className={styles.cardDesc}>+57 {businessConfig?.phone || '300 626 9056'}</p>
+                <p className={styles.cardDesc}>
+                  {businessConfig?.phone && businessConfig.phone.trim() !== ''
+                    ? `+57 ${businessConfig.phone}`
+                    : businessConfig?.whatsappNumber && businessConfig.whatsappNumber.trim() !== ''
+                      ? `+57 ${businessConfig.whatsappNumber}`
+                      : 'Línea de contacto pendiente de registrar en el panel.'}
+                </p>
                 <div className={styles.btnGroup}>
-                  <a href={`tel:${businessConfig?.phone || '3006269056'}`} className={styles.actionBtnSecondary}>
-                    <Phone size={14} />
-                    <span>Llamar</span>
-                  </a>
-                  <a
-                    href={`https://wa.me/57${businessConfig?.whatsappNumber || '3006269056'}?text=${encodeURIComponent('Hola! Me gustaría solicitar información o reservar una cita en ' + (businessConfig?.businessName || 'Catheryne Ríos Estética'))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.actionBtnGold}
-                  >
-                    <FaWhatsapp size={15} />
-                    <span>WhatsApp</span>
-                  </a>
+                  {businessConfig?.phone && businessConfig.phone.trim() !== '' && (
+                    <a href={`tel:${businessConfig.phone.replace(/\D/g, '')}`} className={styles.actionBtnSecondary}>
+                      <Phone size={14} />
+                      <span>Llamar</span>
+                    </a>
+                  )}
+                  {businessConfig?.whatsappNumber && businessConfig.whatsappNumber.trim() !== '' ? (
+                    <a
+                      href={`https://wa.me/57${businessConfig.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent('Hola! Me gustaría solicitar información o reservar una cita en ' + (businessConfig?.businessName || 'Catheryne Ríos Estética'))}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.actionBtnGold}
+                    >
+                      <FaWhatsapp size={15} />
+                      <span>WhatsApp</span>
+                    </a>
+                  ) : (
+                    <span className={styles.actionBtnDisabled}>
+                      <FaWhatsapp size={15} />
+                      <span>Sin WhatsApp registrado</span>
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -234,7 +258,11 @@ function About() {
                   <span className={styles.cardBadge}>Horarios</span>
                 </div>
                 <h3 className={styles.cardTitle}>Horario de Atención</h3>
-                <p className={styles.cardDesc}>{businessConfig?.openingHours || 'Lun - Sáb: 8:00 AM - 7:00 PM'}</p>
+                <p className={styles.cardDesc}>
+                  {businessConfig?.openingHours && businessConfig.openingHours.trim() !== ''
+                    ? businessConfig.openingHours
+                    : 'Horario de atención por definir en el panel.'}
+                </p>
                 <Link to="/servicios" className={styles.actionBtnPrimary}>
                   <Calendar size={14} />
                   <span>Agendar solo con cita</span>
@@ -245,20 +273,32 @@ function About() {
             {/* SOCIAL MEDIA HUB */}
             <div className={styles.socialHub}>
               <span className={styles.socialHubTitle}>Síguenos en Redes Sociales</span>
-              <div className={styles.socialButtonsGroup}>
-                <a href={businessConfig?.instagramUrl || 'https://instagram.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.igPill}`} aria-label="Instagram">
-                  <FaInstagram size={16} />
-                  <span>Instagram</span>
-                </a>
-                <a href={businessConfig?.facebookUrl || 'https://facebook.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.fbPill}`} aria-label="Facebook">
-                  <FaFacebookF size={15} />
-                  <span>Facebook</span>
-                </a>
-                <a href={businessConfig?.tiktokUrl || 'https://tiktok.com'} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.ttPill}`} aria-label="TikTok">
-                  <FaTiktok size={15} />
-                  <span>TikTok</span>
-                </a>
-              </div>
+              {Boolean(businessConfig?.instagramUrl || businessConfig?.facebookUrl || businessConfig?.tiktokUrl) ? (
+                <div className={styles.socialButtonsGroup}>
+                  {businessConfig?.instagramUrl && (
+                    <a href={businessConfig.instagramUrl} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.igPill}`} aria-label="Instagram">
+                      <FaInstagram size={16} />
+                      <span>Instagram</span>
+                    </a>
+                  )}
+                  {businessConfig?.facebookUrl && (
+                    <a href={businessConfig.facebookUrl} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.fbPill}`} aria-label="Facebook">
+                      <FaFacebookF size={15} />
+                      <span>Facebook</span>
+                    </a>
+                  )}
+                  {businessConfig?.tiktokUrl && (
+                    <a href={businessConfig.tiktokUrl} target="_blank" rel="noopener noreferrer" className={`${styles.socialPill} ${styles.ttPill}`} aria-label="TikTok">
+                      <FaTiktok size={15} />
+                      <span>TikTok</span>
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <p style={{ color: '#737373', fontSize: 13, textAlign: 'center', marginTop: 8 }}>
+                  Redes sociales oficiales pendientes de enlazar desde el panel de administración.
+                </p>
+              )}
             </div>
           </motion.div>
         </div>

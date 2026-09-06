@@ -250,9 +250,14 @@ function renderFormattedMessage(content) {
 
 const INITIAL_GREETING = {
   role: 'assistant',
-  content: `¡Hola Catheryne! Soy **Catheryne AI**, tu copiloto ejecutiva.\n\n` +
-           `Estoy lista para ayudarte con caja, agenda de citas, liquidaciones de especialistas e inventario.\n\n` +
-           `Pregúntame lo que necesites o pulsa una sugerencia rápida abajo:`,
+  content: `¡Claro, Catheryne! Soy tu copiloto integral para gestionar la estética sin fricciones.\n\n` +
+           `Aquí tienes mis **4 pilares de acción inmediata**:\n\n` +
+           `1. **Agenda Inteligente**: Creo citas validando automáticamente clienta, servicio, especialista y disponibilidad para evitar dobles reservas.\n` +
+           `2. **Control Financiero**: Registro ingresos y gastos en tiempo real, calculando tu balance neto diario al instante.\n` +
+           `3. **Gestión de Equipo e Inventario**: Administro especialistas, comisiones, stock de productos y catálogo de servicios.\n` +
+           `4. **CRM y Fidelización**: Registro clientas, historial de tratamientos y fechas clave para mantenerlas activas.\n\n` +
+           `**Dato clave:** Actualmente tu sistema está "en blanco" (sin especialistas, servicios ni citas). Para empezar, lo ideal es que primero registremos a tu equipo y carguemos el catálogo de servicios.\n\n` +
+           `¿Deseas que iniciemos un breve tutorial interactivo para mostrarte todo mi potencial, o prefieres que agreguemos a tu primera especialista directamente?`,
   timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
@@ -261,37 +266,47 @@ const getDynamicSuggestions = (messages) => {
 
   if (messages.length <= 1) {
     return [
-      '¿Qué puedes hacer por mí y por mi estética?',
-      '¿Cómo va el reporte de caja de hoy?',
-      '¿Qué día es hoy?'
+      'Iniciar tutorial del copiloto',
+      '¿Qué puedes hacer por mí?',
+      'Registrar especialista en equipo',
+      'Cargar servicio al catálogo'
     ]
   }
 
-  if (lastMsg.includes('paso 1: flujo de caja') || lastMsg.includes('5 pilares clave') || lastMsg.includes('empezamos explorando el paso 1')) {
+  if (lastMsg.includes('tutorial') || lastMsg.includes('recorrido') || lastMsg.includes('potencial') || lastMsg.includes('cómo te uso') || lastMsg.includes('pruébame')) {
     return [
-      '1. Explícame el Flujo de Caja y Finanzas',
-      '2. Explícame la Liquidación de Especialistas',
+      'Pruébame: Agrega a Camila con 50% comisión',
+      'Pruébame: Registra gasto de 35000 por insumos',
+      'Pruébame: Crea servicio Limpieza Facial por 120000',
+      '¿Cómo va el balance de caja hoy?'
+    ]
+  }
+
+  if (lastMsg.includes('paso 1: flujo de caja') || lastMsg.includes('5 pilares') || lastMsg.includes('4 pilares')) {
+    return [
+      '1. Explícame el Control Financiero',
+      '2. Explícame la Gestión de Equipo',
       '¿Cómo va el reporte de caja de hoy?'
     ]
   }
 
   if (lastMsg.includes('paso 1: control de caja') || lastMsg.includes('¿lista para pasar al paso 2')) {
     return [
-      '2. Explícame la Liquidación de Especialistas',
-      '¿Cómo registro un movimiento de caja?',
+      '2. Explícame la Gestión de Equipo',
+      '¿Cómo registro un gasto en caja?',
       '¿Cómo va el balance neto hoy?'
     ]
   }
 
   if (lastMsg.includes('paso 2: liquidación') || lastMsg.includes('¿avanzamos al paso 3')) {
     return [
-      '3. Explícame cómo Agendar Citas por Voz o Texto',
+      '3. Explícame cómo Agendar Citas por Voz',
       '¿Cuánto se le debe pagar a las especialistas hoy?',
       '¿Cómo se configuran las comisiones?'
     ]
   }
 
-  if (lastMsg.includes('paso 3: agenda inteligente') || lastMsg.includes('¿continuamos con el paso 4')) {
+  if (lastMsg.includes('paso 3: agenda') || lastMsg.includes('¿continuamos con el paso 4')) {
     return [
       '4. Explícame el Inventario y Boutique',
       '¿Qué citas tenemos programadas para hoy?',
@@ -301,43 +316,103 @@ const getDynamicSuggestions = (messages) => {
 
   if (lastMsg.includes('paso 4: inventario') || lastMsg.includes('¿vamos al paso 5')) {
     return [
-      '5. Explícame el CRM de Clientas y Festivos',
+      '5. Explícame el CRM de Clientas',
       '¿Qué productos tenemos en stock?',
       'Crea un producto nuevo'
-    ]
-  }
-
-  if (lastMsg.includes('hemos completado el recorrido') || lastMsg.includes('felicitaciones')) {
-    return [
-      '¿Cómo va el reporte de caja de hoy?',
-      '¿Qué citas tenemos programadas para hoy?',
-      '¿Qué día es hoy?',
-      'Bloquear un festivo o cierre'
     ]
   }
 
   return [
     '¿Cómo va el reporte de caja de hoy?',
     '¿Qué citas tenemos programadas para hoy?',
-    '¿Qué día es hoy?',
-    '¿Qué puedes hacer por mí y por mi estética?'
+    'Registrar especialista en equipo',
+    'Cargar servicio al catálogo'
   ]
 }
 
 export default function AdminAiCopilot() {
   const adminState = useAdmin()
   const {
+    currentUserRole,
     addAppointment,
     addProduct,
     addClosedDate,
+    addTransaction,
+    addTeamMember,
+    addService,
+    addCategory,
+    addClient,
+    cancelAppointment,
     updateClient,
     teamMembers = [],
     serviceCategories = [],
     refreshData
   } = adminState
 
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState([INITIAL_GREETING])
+  // Restricción de seguridad por rol: ÚNICAMENTE visible y accesible para la Dueña (OWNER)
+  if (currentUserRole !== 'OWNER') {
+    return null
+  }
+
+  const [isOpen, setIsOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem('spa_copilot_is_open') === 'true'
+    } catch (e) {
+      return false
+    }
+  })
+
+  // Memoria continua persistente de interacciones con Catheryne AI
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('spa_copilot_chat_history')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Limpiar emojis de mensajes previos para consistencia
+          return parsed.map(m => {
+            if (typeof m.content === 'string') {
+              let clean = m.content
+                .replace(/1\.\s*📅\s*\*\*Agenda Inteligente\*\*/g, '1. **Agenda Inteligente**')
+                .replace(/2\.\s*📊\s*\*\*Control Financiero\*\*/g, '2. **Control Financiero**')
+                .replace(/3\.\s*👥\s*\*\*Gestión de Equipo e Inventario\*\*/g, '3. **Gestión de Equipo e Inventario**')
+                .replace(/4\.\s*📇\s*\*\*CRM y Fidelización\*\*/g, '4. **CRM y Fidelización**')
+                .replace(/💡\s*\*\*Dato clave:\*\*/g, '**Dato clave:**')
+                .replace(/📅\s*Agenda Inteligente/g, 'Agenda Inteligente')
+                .replace(/📊\s*Control Financiero/g, 'Control Financiero')
+                .replace(/👥\s*Gestión de Equipo/g, 'Gestión de Equipo')
+                .replace(/📇\s*CRM y Fidelización/g, 'CRM y Fidelización')
+                .replace(/💡\s*Dato clave/g, 'Dato clave')
+              return { ...m, content: clean }
+            }
+            return m
+          })
+        }
+      }
+    } catch (e) {
+      console.warn('Error recuperando memoria de Catheryne AI:', e)
+    }
+    return [INITIAL_GREETING]
+  })
+
+  // Sincronización continua de la memoria conversacional en localStorage (hasta 50 mensajes)
+  useEffect(() => {
+    try {
+      if (messages && messages.length > 0) {
+        localStorage.setItem('spa_copilot_chat_history', JSON.stringify(messages.slice(-50)))
+      }
+    } catch (e) {
+      console.warn('Error guardando memoria en localStorage:', e)
+    }
+  }, [messages])
+
+  // Preservar estado abierto/cerrado del drawer al navegar entre secciones del admin
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('spa_copilot_is_open', isOpen ? 'true' : 'false')
+    } catch (e) {}
+  }, [isOpen])
+
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isListening, setIsListening] = useState(false)
@@ -603,103 +678,203 @@ export default function AdminAiCopilot() {
   // EJECUTOR DE ACCIONES EN LA BASE DE DATOS / ESTADO
   // ----------------------------------------------------
   const executeAction = (actionObj) => {
+    if (!actionObj) return
     const { action, data } = actionObj
 
-    if (action === 'CREATE_APPOINTMENT' && data) {
-      const allServices = serviceCategories.flatMap(c => c.services || [])
-
-      // 1. Validar especialistas registradas
-      if (!teamMembers || teamMembers.length === 0) {
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: '⚠️ **No se pudo procesar la cita**: Actualmente no hay especialistas registradas en el sistema. Por favor registra a tu equipo en la sección de Especialistas antes de agendar.',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ])
-        return
+    // 1. PILAR 2: CONTROL FINANCIERO (Ingresos y Egresos)
+    if (action === 'CREATE_TRANSACTION' && data) {
+      if (!data.id) {
+        addTransaction({
+          type: data.type || 'Egreso',
+          amount: parseFloat(data.amount) || 0,
+          description: data.description || 'Movimiento de caja',
+          category: data.category || (data.type === 'Ingreso' ? 'Servicios' : 'Insumos'),
+          paymentMethod: data.paymentMethod || 'Efectivo',
+          date: data.date || new Date().toISOString().split('T')[0]
+        })
       }
-
-      // 2. Validar que la especialista solicitada exista en el equipo
-      const requestedSpName = (data.specialistName || '').trim().toLowerCase()
-      const matchedSp = teamMembers.find(t => t.name.toLowerCase().includes(requestedSpName))
-
-      if (!matchedSp) {
-        const teamNames = teamMembers.map(t => t.name).join(', ')
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: `⚠️ **No se pudo procesar la cita**: No encontramos a ninguna especialista llamada **"${data.specialistName || 'desconocida'}"** en tu equipo.\n\nEspecialistas disponibles: **${teamNames}**.`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ])
-        return
-      }
-
-      // 3. Validar servicio del catálogo
-      const requestedSrvName = (data.serviceName || '').trim().toLowerCase()
-      const isInvalidSrv = !requestedSrvName || requestedSrvName.includes('no especificado') || requestedSrvName === 'tratamiento estética' || requestedSrvName === 'indefinido'
-      const matchedSrv = allServices.find(s => s.name.toLowerCase().includes(requestedSrvName))
-
-      if (isInvalidSrv || !matchedSrv) {
-        setMessages(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: '⚠️ **No se pudo procesar la cita**: Falta especificar qué servicio o tratamiento del catálogo se va a realizar.',
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }
-        ])
-        return
-      }
-
-      // 4. Todo verificado y conforme al flujo de negocio: crear cita
-      const newAppointment = {
-        clientName: data.clientName || 'Clienta',
-        clientPhone: data.clientPhone || '3000000000',
-        serviceId: matchedSrv.id,
-        serviceName: matchedSrv.name,
-        specialistId: matchedSp.id,
-        specialistName: matchedSp.name,
-        date: data.date || new Date().toISOString().split('T')[0],
-        time: data.time || '10:00 AM',
-        price: matchedSrv.price || 0,
-        status: 'Reservada'
-      }
-
-      addAppointment(newAppointment)
       setLastActionExecuted({
-        type: 'Cita Agendada',
-        details: `${newAppointment.clientName} - ${newAppointment.serviceName} (${newAppointment.date} a las ${newAppointment.time}) con ${newAppointment.specialistName}`
+        type: `Transacción (${data.type || 'Movimiento'})`,
+        details: `${data.description || 'Movimiento de caja'} - $${(parseFloat(data.amount) || 0).toLocaleString()} COP`
       })
     }
 
-    if (action === 'CREATE_PRODUCT' && data) {
-      addProduct({
-        name: data.name,
-        price: parseFloat(data.price) || 50000,
-        stock: parseInt(data.stock, 10) || 10,
-        category: data.category || 'facial',
-        brand: 'Catheryne Ríos Luxury'
+    // 2. PILAR 3: GESTIÓN DE EQUIPO (Especialistas)
+    if (action === 'CREATE_SPECIALIST' && data) {
+      if (!data.id) {
+        addTeamMember({
+          name: data.name,
+          role: data.role || 'Especialista',
+          commissionRate: parseFloat(data.commissionRate) || 45,
+          phone: data.phone || '',
+          experience: data.experience || '3 años',
+          bio: data.bio || ''
+        })
+      }
+      setLastActionExecuted({
+        type: 'Especialista Registrada',
+        details: `${data.name} (${data.role || 'Especialista'}, ${data.commissionRate || 45}% comisión)`
       })
+    }
+
+    // 3. PILAR 3: CATÁLOGO DE SERVICIOS
+    if (action === 'CREATE_SERVICE' && data) {
+      if (!data.id) {
+        const catName = (data.categoryName || '').toLowerCase()
+        const targetCat = serviceCategories.find(c => c.name.toLowerCase().includes(catName)) || serviceCategories[0]
+        const catId = targetCat?.id || (serviceCategories[0]?.id || 'cat-general')
+        addService(catId, {
+          name: data.name,
+          price: parseFloat(data.price) || 50000,
+          duration: parseInt(data.duration, 10) || 60,
+          description: data.description || ''
+        })
+      }
+      setLastActionExecuted({
+        type: 'Servicio Creado',
+        details: `${data.name} ($${(parseFloat(data.price) || 0).toLocaleString()} COP, ${data.duration || 60} min)`
+      })
+    }
+
+    // 4. PILAR 4: CRM Y FIDELIZACIÓN (Clientas)
+    if (action === 'CREATE_CLIENT' && data) {
+      if (!data.id) {
+        addClient({
+          name: data.name,
+          phone: data.phone,
+          email: data.email || '',
+          notes: data.notes || ''
+        })
+      }
+      setLastActionExecuted({
+        type: 'Clienta Registrada',
+        details: `${data.name} (Tel: ${data.phone})${data.notes ? ` - ${data.notes}` : ''}`
+      })
+    }
+
+    // 5. PILAR 1: CANCELACIÓN DE CITA
+    if (action === 'CANCEL_APPOINTMENT' && data) {
+      if (data.id) {
+        cancelAppointment(data.id, {
+          reason: data.cancelReason || data.reason || 'Cancelada por Catheryne AI',
+          responsibleName: 'Catheryne AI'
+        })
+      }
+      setLastActionExecuted({
+        type: 'Cita Cancelada',
+        details: `Cita de ${data.clientName || 'la clienta'} cancelada en agenda.`
+      })
+    }
+
+    // 6. PILAR 1: AGENDA INTELIGENTE (Agendamiento)
+    if (action === 'CREATE_APPOINTMENT' && data) {
+      if (data.id) {
+        setLastActionExecuted({
+          type: 'Cita Agendada',
+          details: `${data.clientName} - ${data.serviceName} (${data.date} a las ${data.time}) con ${data.specialistName}`
+        })
+      } else {
+        const allServices = serviceCategories.flatMap(c => c.services || [])
+
+        if (!teamMembers || teamMembers.length === 0) {
+          setMessages(prev => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: '⚠️ **No se pudo procesar la cita**: Actualmente no hay especialistas registradas en el sistema. Por favor registra a tu equipo en la sección de Especialistas antes de agendar.',
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ])
+          return
+        }
+
+        const requestedSpName = (data.specialistName || '').trim().toLowerCase()
+        const matchedSp = teamMembers.find(t => t.name.toLowerCase().includes(requestedSpName))
+
+        if (!matchedSp) {
+          const teamNames = teamMembers.map(t => t.name).join(', ')
+          setMessages(prev => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: `⚠️ **No se pudo procesar la cita**: No encontramos a ninguna especialista llamada **"${data.specialistName || 'desconocida'}"** en tu equipo.\n\nEspecialistas disponibles: **${teamNames}**.`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ])
+          return
+        }
+
+        const requestedSrvName = (data.serviceName || '').trim().toLowerCase()
+        const isInvalidSrv = !requestedSrvName || requestedSrvName.includes('no especificado') || requestedSrvName === 'tratamiento estética' || requestedSrvName === 'indefinido'
+        const matchedSrv = allServices.find(s => s.name.toLowerCase().includes(requestedSrvName))
+
+        if (isInvalidSrv || !matchedSrv) {
+          setMessages(prev => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: '⚠️ **No se pudo procesar la cita**: Falta especificar qué servicio o tratamiento del catálogo se va a realizar.',
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ])
+          return
+        }
+
+        const newAppointment = {
+          clientName: data.clientName || 'Clienta',
+          clientPhone: data.clientPhone || '3000000000',
+          serviceId: matchedSrv.id,
+          serviceName: matchedSrv.name,
+          specialistId: matchedSp.id,
+          specialistName: matchedSp.name,
+          date: data.date || new Date().toISOString().split('T')[0],
+          time: data.time || '10:00 AM',
+          price: matchedSrv.price || 0,
+          status: 'Reservada'
+        }
+
+        addAppointment(newAppointment)
+        setLastActionExecuted({
+          type: 'Cita Agendada',
+          details: `${newAppointment.clientName} - ${newAppointment.serviceName} (${newAppointment.date} a las ${newAppointment.time}) con ${newAppointment.specialistName}`
+        })
+      }
+    }
+
+    // 7. INVENTARIO & BOUTIQUE
+    if (action === 'CREATE_PRODUCT' && data) {
+      if (!data.id) {
+        addProduct({
+          name: data.name,
+          price: parseFloat(data.price) || 50000,
+          stock: parseInt(data.stock, 10) || 10,
+          category: data.category || 'facial',
+          brand: 'Catheryne Ríos Luxury'
+        })
+      }
       setLastActionExecuted({
         type: 'Producto Creado',
-        details: `${data.name} ($${(data.price || 0).toLocaleString()} COP, ${data.stock || 10} unidades)`
+        details: `${data.name} ($${(parseFloat(data.price) || 0).toLocaleString()} COP, ${data.stock || 10} unidades)`
       })
     }
 
+    // 8. CIERRES & FESTIVOS
     if (action === 'BLOCK_DATE' && data) {
-      addClosedDate({
-        date: data.date,
-        reason: data.reason || 'Cierre Administrativo',
-        type: data.type || 'Festivo'
-      })
+      if (!data.id) {
+        addClosedDate({
+          date: data.date,
+          reason: data.reason || 'Cierre Administrativo',
+          type: data.type || 'Festivo'
+        })
+      }
       setLastActionExecuted({
         type: 'Fecha Bloqueada',
         details: `${data.date} (${data.reason})`
       })
+    }
+
+    if (refreshData) {
+      setTimeout(() => refreshData(), 250)
     }
   }
 
@@ -786,23 +961,29 @@ export default function AdminAiCopilot() {
   }
 
   const handleResetChat = () => {
+    stopSpeaking()
     setMessages([INITIAL_GREETING])
     setLastActionExecuted(null)
+    try {
+      localStorage.removeItem('spa_copilot_chat_history')
+    } catch (e) {}
   }
 
   return (
     <>
-      {/* BOTÓN FLOTANTE DORADO */}
+      {/* BOTÓN FLOTANTE DORADO (DUEÑA / OWNER) */}
       <button 
         type="button" 
         className={styles.floatingTrigger}
         onClick={() => setIsOpen(true)}
         title="Abrir Copiloto IA de Administración (Ctrl+K)"
+        aria-label="Abrir Copiloto IA de Administración"
       >
-        <Sparkles size={18} />
-        <span>Catheryne AI</span>
+        <Sparkles size={18} className={styles.sparkleIcon} />
+        <span className={styles.desktopBrandName}>Catheryne AI</span>
         <span className={styles.triggerBadge}>IA 120B</span>
         <span className={styles.shortcutHint}>Ctrl+K</span>
+        <span className={styles.mobileIaText}>IA</span>
       </button>
 
       {/* MODAL / DRAWER LATERAL */}

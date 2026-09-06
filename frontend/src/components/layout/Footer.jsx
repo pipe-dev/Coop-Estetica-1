@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FaInstagram, FaFacebookF, FaTiktok, FaWhatsapp } from 'react-icons/fa6';
+import { useAdmin } from '../../context/AdminContext';
 import styles from './Footer.module.css';
 
 /**
  * Footer con 4 columnas: About, Links, Horario, Contacto.
- * Para la ruta /tienda muestra un diseño minimalista.
+ * Lee dinámicamente de la base de datos (businessConfig).
  */
 const Footer = () => {
   const location = useLocation();
+  const { businessConfig } = useAdmin();
   const isShop = location.pathname === '/tienda';
   const isHome = location.pathname === '/';
 
@@ -27,12 +29,6 @@ const Footer = () => {
     { to: '/nosotros', label: 'Nosotros' },
     { to: '/contacto', label: 'Contacto' },
     { to: '/reservar', label: 'Reservar Cita' },
-  ];
-
-  const schedule = [
-    { day: 'Lunes – Viernes', hours: '9:00 – 20:00' },
-    { day: 'Sábados', hours: '10:00 – 18:00' },
-    { day: 'Domingos', hours: '10:00 – 14:00' },
   ];
 
   const isServices = location.pathname === '/servicios';
@@ -77,42 +73,50 @@ const Footer = () => {
               renovar cuerpo, mente y espíritu.
             </p>
             <div className={styles.socials}>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.socialLink}
-                aria-label="Instagram"
-              >
-                <FaInstagram size={18} />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.socialLink}
-                aria-label="Facebook"
-              >
-                <FaFacebookF size={18} />
-              </a>
-              <a
-                href="https://tiktok.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.socialLink}
-                aria-label="TikTok"
-              >
-                <FaTiktok size={18} />
-              </a>
-              <a
-                href="https://wa.me/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.socialLink}
-                aria-label="WhatsApp"
-              >
-                <FaWhatsapp size={18} />
-              </a>
+              {businessConfig?.instagramUrl && (
+                <a
+                  href={businessConfig.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.socialLink}
+                  aria-label="Instagram"
+                >
+                  <FaInstagram size={18} />
+                </a>
+              )}
+              {businessConfig?.facebookUrl && (
+                <a
+                  href={businessConfig.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.socialLink}
+                  aria-label="Facebook"
+                >
+                  <FaFacebookF size={18} />
+                </a>
+              )}
+              {businessConfig?.tiktokUrl && (
+                <a
+                  href={businessConfig.tiktokUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.socialLink}
+                  aria-label="TikTok"
+                >
+                  <FaTiktok size={18} />
+                </a>
+              )}
+              {businessConfig?.whatsappNumber && (
+                <a
+                  href={`https://wa.me/57${businessConfig.whatsappNumber.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.socialLink}
+                  aria-label="WhatsApp"
+                >
+                  <FaWhatsapp size={18} />
+                </a>
+              )}
             </div>
           </div>
 
@@ -133,14 +137,15 @@ const Footer = () => {
           {/* Columna 3: Horario */}
           <div className={styles.column}>
             <h4 className={styles.heading}>Horario</h4>
-            <ul className={styles.scheduleList}>
-              {schedule.map((item) => (
-                <li key={item.day} className={styles.scheduleItem}>
-                  <span className={styles.day}>{item.day}</span>
-                  <span className={styles.hours}>{item.hours}</span>
-                </li>
-              ))}
-            </ul>
+            {businessConfig?.openingHours && businessConfig.openingHours.trim() !== '' ? (
+              <p style={{ color: 'var(--color-gray-400)', fontSize: '0.88rem', lineHeight: 1.6 }}>
+                {businessConfig.openingHours}
+              </p>
+            ) : (
+              <p style={{ color: 'var(--color-gray-500)', fontSize: '0.82rem', fontStyle: 'italic' }}>
+                Horarios por definir en el panel
+              </p>
+            )}
           </div>
 
           {/* Columna 4: Contacto */}
@@ -149,19 +154,35 @@ const Footer = () => {
             <ul className={styles.contactList}>
               <li className={styles.contactItem}>
                 <span className={styles.contactIcon}>📍</span>
-                <span>Calle Ejemplo 123, Ciudad, País</span>
+                <span>
+                  {businessConfig?.address && businessConfig.address.trim() !== ''
+                    ? businessConfig.address
+                    : 'Dirección no registrada'}
+                </span>
               </li>
               <li className={styles.contactItem}>
                 <span className={styles.contactIcon}>📞</span>
-                <a href="tel:+0000000000" className={styles.link}>
-                  +00 000 000 000
-                </a>
+                {businessConfig?.phone && businessConfig.phone.trim() !== '' ? (
+                  <a href={`tel:${businessConfig.phone.replace(/\D/g, '')}`} className={styles.link}>
+                    +57 {businessConfig.phone}
+                  </a>
+                ) : businessConfig?.whatsappNumber && businessConfig.whatsappNumber.trim() !== '' ? (
+                  <a href={`https://wa.me/57${businessConfig.whatsappNumber.replace(/\D/g, '')}`} className={styles.link} target="_blank" rel="noreferrer">
+                    +57 {businessConfig.whatsappNumber}
+                  </a>
+                ) : (
+                  <span>Teléfono no registrado</span>
+                )}
               </li>
               <li className={styles.contactItem}>
                 <span className={styles.contactIcon}>✉️</span>
-                <a href="mailto:info@catheryneriosestetica.com" className={styles.link}>
-                  info@catheryneriosestetica.com
-                </a>
+                {businessConfig?.ownerEmail || businessConfig?.adminEmail ? (
+                  <a href={`mailto:${businessConfig.ownerEmail || businessConfig.adminEmail}`} className={styles.link}>
+                    {businessConfig.ownerEmail || businessConfig.adminEmail}
+                  </a>
+                ) : (
+                  <span>Correo no registrado</span>
+                )}
               </li>
             </ul>
           </div>

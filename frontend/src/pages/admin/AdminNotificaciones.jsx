@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, Megaphone, Smartphone, Calendar, Clock, CheckCircle2, Send, Copy, Sparkles, User, AlertCircle, ExternalLink, MessageCircle } from 'lucide-react'
+import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, Megaphone, Calendar, Clock, CheckCircle2, Send, Copy, Sparkles, User, AlertCircle, ExternalLink } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { useAdmin } from '../../context/AdminContext'
 import { getLocalDateString } from '../../utils/currencyUtils'
 import styles from './AdminNotificaciones.module.css'
@@ -48,6 +49,30 @@ export default function AdminNotificaciones() {
     if (app.status === 'Cancelada') return false
     return app.date === activeFilterDate
   })
+
+  // Helper to format friendly dates (e.g. "Mañana, Jueves 10 de sep" or "Mañana, Domingo 6 de sep")
+  const formatFriendlyDate = (dateStr, mode) => {
+    if (!dateStr) return ''
+    const parts = dateStr.split('-').map(Number)
+    if (parts.length !== 3) return dateStr
+    const [year, month, day] = parts
+    const d = new Date(year, month - 1, day, 12, 0, 0)
+
+    const weekday = d.toLocaleDateString('es-CO', { weekday: 'long' })
+    const dayNum = d.getDate()
+    const monthName = d.toLocaleDateString('es-CO', { month: 'short' }).replace('.', '')
+
+    const capWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1)
+    const baseDate = `${capWeekday} ${dayNum} de ${monthName}`
+
+    if (mode === 'tomorrow' || dateStr === tomorrowStr) {
+      return `Mañana, ${baseDate}`
+    }
+    if (mode === 'today' || dateStr === todayStr) {
+      return `Hoy, ${baseDate}`
+    }
+    return baseDate
+  }
 
   // Calculate metrics
   const totalRemindersCount = targetAppointments.length
@@ -134,11 +159,6 @@ Por favor responde a este mensaje con un *“CONFIRMO”* para asegurar tu espac
       
       {/* MAIN HEADER & TAB SWITCHER */}
       <div className={styles.header}>
-        <div>
-          <h2>🔔 Comunicaciones & Notificaciones</h2>
-          <p className={styles.subtitle}>Despacho de recordatorios oficiales por WhatsApp y avisos para clientas</p>
-        </div>
-
         {/* TOP TAB BUTTONS */}
         <div className={styles.tabSwitcher}>
           <button
@@ -146,7 +166,7 @@ Por favor responde a este mensaje con un *“CONFIRMO”* para asegurar tu espac
             className={`${styles.tabBtn} ${activeTab === 'reminders' ? styles.tabBtnActive : ''}`}
             onClick={() => setActiveTab('reminders')}
           >
-            <Smartphone size={16} />
+            <FaWhatsapp size={16} />
             <span>Recordatorios WhatsApp</span>
             {targetAppointments.length > 0 && (
               <span className={styles.tabBadge}>{targetAppointments.length}</span>
@@ -216,7 +236,7 @@ Por favor responde a este mensaje con un *“CONFIRMO”* para asegurar tu espac
             <div className={styles.metricCard}>
               <span className={styles.metricLabel}>Fecha Consultada</span>
               <span className={styles.metricValueDate}>
-                {reminderMode === 'tomorrow' ? `Mañana (${tomorrowStr})` : reminderMode === 'today' ? `Hoy (${todayStr})` : activeFilterDate}
+                {formatFriendlyDate(activeFilterDate, reminderMode)}
               </span>
             </div>
 
@@ -239,19 +259,16 @@ Por favor responde a este mensaje con un *“CONFIRMO”* para asegurar tu espac
           {/* APPOINTMENTS DISPATCH LIST */}
           <div className={styles.remindersSection}>
             <div className={styles.sectionHeader}>
-              <h3>
-                {reminderMode === 'tomorrow' ? '📋 Citas de Mañana para Confirmar Asistencia' : reminderMode === 'today' ? '⏰ Citas de Hoy para Aviso de Puntualidad' : `📅 Citas del ${activeFilterDate}`}
-              </h3>
-              <span className={styles.sectionSubtext}>
-                Toca "Enviar WhatsApp" para abrir el chat con el mensaje pre-cargado de Catheryne Ríos Estética.
-              </span>
+              <p className={styles.sectionSubtext}>
+                Toca "Enviar WhatsApp" para abrir el chat con el mensaje de Catheryne Ríos Estética.
+              </p>
             </div>
 
             {targetAppointments.length === 0 ? (
               <div className={styles.emptyStateBox}>
                 <Calendar size={42} className={styles.emptyIcon} />
                 <h4>No hay citas programadas para esta fecha</h4>
-                <p>No se encontraron citas agendadas en la fecha seleccionada ({activeFilterDate}).</p>
+                <p>No se encontraron citas agendadas para {formatFriendlyDate(activeFilterDate, reminderMode)}.</p>
               </div>
             ) : (
               <div className={styles.appointmentsList}>
@@ -311,7 +328,7 @@ Por favor responde a este mensaje con un *“CONFIRMO”* para asegurar tu espac
                           className={styles.sendWhatsAppBtn}
                           onClick={() => handleSendWhatsApp(app)}
                         >
-                          <MessageCircle size={16} />
+                          <FaWhatsapp size={16} />
                           <span>Enviar WhatsApp</span>
                         </button>
                       </div>

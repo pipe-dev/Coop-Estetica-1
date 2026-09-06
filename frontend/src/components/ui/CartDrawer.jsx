@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ShoppingBag, X, Plus, Minus, Trash2, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { useCart } from '../../context/CartContext'
+import { useAdmin } from '../../context/AdminContext'
 import styles from './CartDrawer.module.css'
 
 export default function CartDrawer() {
@@ -17,6 +18,8 @@ export default function CartDrawer() {
     toastMessage
   } = useCart()
 
+  const { businessConfig } = useAdmin()
+
   const freeShippingThreshold = 250000
   const shippingProgress = Math.min(100, (totalAmount / freeShippingThreshold) * 100)
   const remainingForFreeShipping = freeShippingThreshold - totalAmount
@@ -24,7 +27,13 @@ export default function CartDrawer() {
   const handleCheckoutWhatsApp = () => {
     if (cartItems.length === 0) return
 
-    const sponsorPhone = '573006269056'
+    const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
+    if (!cleanPhone) {
+      alert('La línea de WhatsApp de la estética aún no ha sido registrada en el panel de administración.')
+      return
+    }
+
+    const sponsorPhone = '57' + cleanPhone
     const itemsList = cartItems
       .map((item, index) => `${index + 1}. *${item.name}* (x${item.quantity}) - $${(item.price * item.quantity).toLocaleString()}`)
       .join('\n')

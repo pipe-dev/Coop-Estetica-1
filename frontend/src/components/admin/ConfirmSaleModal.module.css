@@ -96,10 +96,11 @@
 }
 
 .totalAmount {
-  font-family: var(--font-heading);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--color-gold);
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.5px;
 }
 
@@ -178,7 +179,8 @@
   font-size: 1.25rem;
   font-weight: 700;
   outline: none;
-  font-family: var(--font-heading);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  font-variant-numeric: tabular-nums;
   width: 100%;
   box-sizing: border-box;
 }
@@ -238,9 +240,10 @@
 }
 
 .changeAmount {
-  font-family: var(--font-heading);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
   font-size: 1.15rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .formGroup input[type="text"] {
@@ -389,10 +392,11 @@
 }
 
 .receiptTotalValue {
-  font-family: var(--font-heading);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
   font-size: 1.3rem;
   font-weight: 800;
   color: #10B981;
+  font-variant-numeric: tabular-nums;
 }
 
 .whatsappActionBtn {
@@ -406,9 +410,9 @@
   color: #FFFFFF;
   border: none;
   border-radius: 999px;
-  font-family: var(--font-heading);
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   box-shadow: 0 4px 20px rgba(37, 211, 102, 0.35);
@@ -453,7 +457,7 @@
   color: #0E0E0E;
   border: none;
   border-radius: 999px;
-  font-family: var(--font-heading);
+  font-family: var(--font-body, 'Inter', -apple-system, sans-serif);
   font-size: 0.85rem;
   font-weight: 800;
   cursor: pointer;

@@ -54,29 +54,63 @@ export class AuthService {
     };
   }
 
-  async verifyPin(pin: string): Promise<boolean> {
+  async verifyPin(pin: string): Promise<{ valid: boolean; role?: 'OWNER' | 'ADMIN' | 'SPECIALIST'; accessToken?: string }> {
     const config = await this.prisma.businessConfig.findUnique({
       where: { id: 'singleton' },
     });
 
-    if (!config?.masterPinHash) {
-      return pin === '2026';
+    const trimmed = String(pin).trim();
+
+    // 1. Validar Dueña (masterPin / masterPinHash)
+    let isOwner = false;
+    if (config?.masterPinHash) {
+      isOwner = await bcrypt.compare(trimmed, config.masterPinHash);
+    } else {
+      isOwner = trimmed === (config?.masterPin || '202626');
     }
 
-    return bcrypt.compare(String(pin), config.masterPinHash);
+    let matchedRole: 'OWNER' | 'ADMIN' | 'SPECIALIST' | null = null;
+    let sub = 'admin-owner';
+    let name = 'Catheryne Ríos (Propietaria)';
+
+    if (isOwner) {
+      matchedRole = 'OWNER';
+      sub = 'admin-owner';
+      name = 'Catheryne Ríos (Propietaria)';
+    } else if (trimmed === (config?.adminPin || '123456')) {
+      matchedRole = 'ADMIN';
+      sub = 'staff-admin';
+      name = 'Administradora Recepción';
+    } else if (trimmed === (config?.specialistPin || '777777')) {
+      matchedRole = 'SPECIALIST';
+      sub = 'staff-specialist';
+      name = 'Especialista';
+    }
+
+    if (matchedRole) {
+      const payload = {
+        sub,
+        name,
+        role: matchedRole,
+      };
+      const token = this.jwtService.sign(payload);
+      return { valid: true, role: matchedRole, accessToken: token };
+    }
+
+    return { valid: false };
   }
 
   async updateMasterPin(currentPin: string, newPin: string) {
-    const isValid = await this.verifyPin(currentPin);
-    if (!isValid) {
+    const verification = await this.verifyPin(currentPin);
+    if (!verification.valid || verification.role !== 'OWNER') {
       throw new UnauthorizedException('El PIN actual no es correcto.');
     }
 
-    if (!newPin || newPin.length < 4 || newPin.length > 8) {
-      throw new BadRequestException('El nuevo PIN debe tener entre 4 y 8 dígitos.');
+    if (!newPin || !/^\d{6}$/.test(String(newPin).trim())) {
+      throw new BadRequestException('El nuevo PIN debe tener exactamente 6 dígitos numéricos.');
     }
 
-    const hashed = await bcrypt.hash(String(newPin), 10);
+    const hashed = await bcrypt.hash(String(newPin).trim(), 10);
 
     await this.prisma.businessConfig.upsert({
       where: { id: 'singleton' },

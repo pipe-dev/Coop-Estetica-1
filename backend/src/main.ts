@@ -19,13 +19,26 @@ async function bootstrap() {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
     res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; frame-ancestors 'none'; object-src 'none';");
     next();
   });
 
-  // CORS Hardening
+  // S.H.I.E.L.D. Pillar 2: CORS & Origin Hardening
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://localhost:4000',
+  ].filter(Boolean) as string[];
+
   app.enableCors({
     origin: (origin, callback) => {
-      callback(null, true);
+      if (!origin || allowedOrigins.some((allowed) => origin.startsWith(allowed) || allowed.startsWith(origin))) {
+        callback(null, true);
+      } else {
+        callback(new Error('Acceso bloqueado por política de seguridad CORS (S.H.I.E.L.D.)'));
+      }
     },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

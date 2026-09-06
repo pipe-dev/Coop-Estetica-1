@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, DollarSign, Calculator, AlertTriangle, CreditCard, Banknote, Smartphone, Share2, Printer, Check, ArrowRight } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { formatCOPInput, parseCOPInput, getLocalDateString } from '../../utils/currencyUtils'
 import styles from './ConfirmSaleModal.module.css'
 
@@ -283,7 +284,8 @@ Esperamos verte pronto para seguir realzando tu belleza y bienestar.`
               rel="noopener noreferrer"
               className={styles.whatsappActionBtn}
             >
-              <span>📲 Enviar Recibo Oficial por WhatsApp</span>
+              <FaWhatsapp size={18} />
+              <span>Enviar Recibo Oficial por WhatsApp</span>
             </a>
 
             {/* SECONDARY ACTIONS */}

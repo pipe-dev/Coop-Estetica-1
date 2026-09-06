@@ -88,10 +88,7 @@ export default function AdminEquipo() {
       
       {/* HEADER ROW */}
       <div className={styles.topRow}>
-        <div>
-          <h3>Equipo, Nómina & Comisiones</h3>
-          <p className={styles.subtext}>Administra los porcentajes de comisión, liquidación directa a caja y altas de especialistas.</p>
-        </div>
+        <p className={styles.subtext}>Administra los porcentajes de comisión, liquidación directa a caja y altas de especialistas.</p>
 
         <div className={styles.headerBtns}>
           <button

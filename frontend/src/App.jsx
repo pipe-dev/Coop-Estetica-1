@@ -15,7 +15,6 @@ import Shop from './pages/Shop'
 import AdManager from './components/ui/AdManager'
 import CartDrawer from './components/ui/CartDrawer'
 
-import { AdminProvider } from './context/AdminContext'
 import AdminLayout from './components/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminAgenda from './pages/admin/AdminAgenda'
@@ -28,6 +27,11 @@ import AdminHistorial from './pages/admin/AdminHistorial'
 import AdminClientes from './pages/admin/AdminClientes'
 import AdminProductos from './pages/admin/AdminProductos'
 import AdminConfiguracion from './pages/admin/AdminConfiguracion'
+import AdminTelemetria from './pages/admin/AdminTelemetria'
+import { initGlobalErrorTelemetry } from './services/telemetry'
+
+// Inicializar telemetría global de runtime en cliente
+initGlobalErrorTelemetry()
 
 function App() {
   const location = useLocation()
@@ -60,7 +64,7 @@ function App() {
   const showNavbar = (!isPatrocinador || showDelayedNav) && !isAdmin
 
   return (
-    <AdminProvider>
+    <>
       <ScrollToTop />
       {showNavbar && <Navbar />}
       <AnimatePresence mode="wait">
@@ -85,13 +89,14 @@ function App() {
             <Route path="productos" element={<AdminProductos />} />
             <Route path="notificaciones" element={<AdminNotificaciones />} />
             <Route path="configuracion" element={<AdminConfiguracion />} />
+            <Route path="telemetria" element={<AdminTelemetria />} />
           </Route>
         </Routes>
       </AnimatePresence>
       {!isPatrocinador && !isBooking && !isAdmin && <Footer />}
       {!isPatrocinador && !isBooking && !isAdmin && <AdManager />}
       {!isAdmin && <CartDrawer />}
-    </AdminProvider>
+    </>
   )
 }
 

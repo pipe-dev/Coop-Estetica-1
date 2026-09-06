@@ -250,13 +250,23 @@
   background: #141414;
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 18px;
-  color: #E5E5E5;
-  font-weight: 500;
+  text-align: center;
 }
 .emptyIcon {
   color: var(--color-gold);
   opacity: 0.4;
   margin-bottom: 12px;
+}
+.emptyTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #A3A3A3;
+  margin: 0 0 6px 0;
+}
+.emptySubtitle {
+  font-size: 0.82rem;
+  color: #71717A;
+  margin: 0;
 }
 
 .productCard {
@@ -581,3 +591,48 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+/* ========================================================== */
+/* RESPONSIVE DESIGN MOBILE (< 900px)                         */
+/* ========================================================== */
+@media (max-width: 900px) {
+  .toolbarRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .searchFilterGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  .searchBox,
+  .filterBox {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .actionBtnsGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  .exportInventoryBtn,
+  .saleActionBtn,
+  .addProductBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .formRowTwo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .modalCard {
+    padding: 20px 16px;
+    max-width: 100%;
+    border-radius: 18px;
+  }
+}
+

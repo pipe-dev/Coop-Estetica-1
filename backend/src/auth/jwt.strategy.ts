@@ -13,7 +13,30 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string; role: string; teamMemberId?: string }) {
+  async validate(payload: { sub: string; email?: string; role: string; name?: string; teamMemberId?: string }) {
+    if (payload.sub === 'admin-owner' || payload.sub === 'admin-developer') {
+      return {
+        id: payload.sub,
+        name: payload.name || (payload.sub === 'admin-owner' ? 'Catheryne Ríos (Propietaria)' : 'Desarrollador / Telemetría'),
+        role: 'OWNER',
+      };
+    }
+    if (payload.sub === 'staff-admin') {
+      return {
+        id: 'staff-admin',
+        name: payload.name || 'Administración Recepción',
+        role: 'ADMIN',
+      };
+    }
+    if (payload.sub === 'staff-specialist') {
+      return {
+        id: 'staff-specialist',
+        name: payload.name || 'Especialista',
+        role: 'SPECIALIST',
+        teamMemberId: payload.teamMemberId || '2',
+      };
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       include: { teamMember: true },
