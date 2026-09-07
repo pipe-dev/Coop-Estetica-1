@@ -44,6 +44,8 @@ async function bootstrap() {
       if (
         !origin ||
         isWildcardAllowed ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.onrender.com') ||
         allowedOrigins.some((allowed) => origin === allowed || origin.startsWith(allowed) || allowed.startsWith(origin))
       ) {
         callback(null, true);

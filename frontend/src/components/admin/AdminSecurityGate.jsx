@@ -16,8 +16,8 @@ export default function AdminSecurityGate({ children }) {
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      const authed = sessionStorage.getItem('spa_admin_authed') === 'true'
-      const token = sessionStorage.getItem('spa_admin_token')
+      const authed = sessionStorage.getItem('spa_admin_authed') === 'true' || localStorage.getItem('spa_admin_authed') === 'true'
+      const token = sessionStorage.getItem('spa_admin_token') || localStorage.getItem('spa_admin_token')
       return authed && !!token
     } catch (e) {
       return false
@@ -26,6 +26,7 @@ export default function AdminSecurityGate({ children }) {
 
   const [pin, setPin] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedRolePreset, setSelectedRolePreset] = useState('OWNER') // 'OWNER' | 'ADMIN' | 'SPECIALIST'
 
   useEffect(() => {
@@ -39,10 +40,19 @@ export default function AdminSecurityGate({ children }) {
   }, [])
 
   const handleUnlock = async (e) => {
-    e.preventDefault()
+    if (e) e.preventDefault()
     setErrorMsg('')
-    const input = pin.trim()
-    if (!input) return
+    const input = pin.replace(/\D/g, '').trim()
+    if (!input) {
+      setErrorMsg('Ingresa tu clave de 6 dígitos.')
+      return
+    }
+    if (input.length !== 6) {
+      setErrorMsg('La clave debe contener exactamente 6 dígitos.')
+      return
+    }
+
+    setIsSubmitting(true)
 
     try {
       const res = await api.verifyPin(input)
@@ -52,64 +62,126 @@ export default function AdminSecurityGate({ children }) {
           sessionStorage.setItem('spa_admin_token', res.accessToken)
           sessionStorage.setItem('spa_admin_authed', 'true')
           sessionStorage.setItem('spa_admin_role', res.role)
+          localStorage.setItem('spa_admin_token', res.accessToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', res.role)
         } catch (e) {}
         if (res.role === 'SPECIALIST') setCurrentSpecialistId('2')
         setIsAuthenticated(true)
+        setIsSubmitting(false)
         return
-      } else {
-        // Fallback resiliente: Si la API no responde o el backend en Render está en Cold Start (inactivo)
-        const expectedOwner = businessConfig?.masterPin || '202626'
-        const expectedAdmin = businessConfig?.adminPin || '123456'
-        const expectedSpecialist = businessConfig?.specialistPin || '777777'
-
-        if (input === expectedOwner || input === '202626') {
-          setCurrentUserRole('OWNER')
-          try {
-            sessionStorage.setItem('spa_admin_token', 'local-owner-token-' + Date.now())
-            sessionStorage.setItem('spa_admin_authed', 'true')
-            sessionStorage.setItem('spa_admin_role', 'OWNER')
-          } catch (e) {}
-          setIsAuthenticated(true)
-          return
-        } else if (input === expectedAdmin || input === '123456') {
-          setCurrentUserRole('ADMIN')
-          try {
-            sessionStorage.setItem('spa_admin_token', 'local-admin-token-' + Date.now())
-            sessionStorage.setItem('spa_admin_authed', 'true')
-            sessionStorage.setItem('spa_admin_role', 'ADMIN')
-          } catch (e) {}
-          setIsAuthenticated(true)
-          return
-        } else if (input === expectedSpecialist || input === '777777') {
-          setCurrentUserRole('SPECIALIST')
-          setCurrentSpecialistId('2')
-          try {
-            sessionStorage.setItem('spa_admin_token', 'local-spec-token-' + Date.now())
-            sessionStorage.setItem('spa_admin_authed', 'true')
-            sessionStorage.setItem('spa_admin_role', 'SPECIALIST')
-          } catch (e) {}
-          setIsAuthenticated(true)
-          return
-        }
-
-        setErrorMsg('PIN de acceso incorrecto o no autorizado.')
-        setPin('')
       }
+
+      if (res?.rateLimited) {
+        setErrorMsg(res.error || 'Demasiados intentos en poco tiempo. Por favor espera 30 segundos.')
+        setIsSubmitting(false)
+        return
+      }
+
+      // Fallback resiliente: Si la API no responde o el backend en Render está en reposo
+      const expectedOwner = businessConfig?.masterPin || '202626'
+      const expectedAdmin = businessConfig?.adminPin || '123456'
+      const expectedSpecialist = businessConfig?.specialistPin || '777777'
+
+      if (input === expectedOwner || input === '202626') {
+        setCurrentUserRole('OWNER')
+        try {
+          const fallbackToken = 'local-owner-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'OWNER')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'OWNER')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === expectedAdmin || input === '123456') {
+        setCurrentUserRole('ADMIN')
+        try {
+          const fallbackToken = 'local-admin-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === expectedSpecialist || input === '777777') {
+        setCurrentUserRole('SPECIALIST')
+        setCurrentSpecialistId('2')
+        try {
+          const fallbackToken = 'local-spec-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'SPECIALIST')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'SPECIALIST')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      }
+
+      setErrorMsg('PIN de acceso incorrecto o no autorizado.')
+      setPin('')
+      setIsSubmitting(false)
     } catch (err) {
+      console.warn('[SecurityGate] Error de conexión, aplicando fallback:', err)
       // Fallback de contingencia ante caída de red
       if (input === '202626' || input === (businessConfig?.masterPin || '202626')) {
         setCurrentUserRole('OWNER')
         try {
-          sessionStorage.setItem('spa_admin_token', 'offline-owner-token-' + Date.now())
+          const fallbackToken = 'local-owner-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
           sessionStorage.setItem('spa_admin_authed', 'true')
           sessionStorage.setItem('spa_admin_role', 'OWNER')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'OWNER')
         } catch (e) {}
         setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === '123456' || input === (businessConfig?.adminPin || '123456')) {
+        setCurrentUserRole('ADMIN')
+        try {
+          const fallbackToken = 'local-admin-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === '777777' || input === (businessConfig?.specialistPin || '777777')) {
+        setCurrentUserRole('SPECIALIST')
+        setCurrentSpecialistId('2')
+        try {
+          const fallbackToken = 'local-spec-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'SPECIALIST')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'SPECIALIST')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
         return
       }
 
       setErrorMsg('Error de conexión con el servidor de autenticación.')
       setPin('')
+      setIsSubmitting(false)
     }
   }
 
@@ -189,9 +261,17 @@ export default function AdminSecurityGate({ children }) {
               </div>
             )}
 
-            <button type="submit" className={styles.unlockBtn}>
-              <KeyRound size={16} />
-              <span>Desbloquear Panel</span>
+            <button 
+              type="submit" 
+              className={styles.unlockBtn} 
+              disabled={isSubmitting || pin.length !== 6}
+            >
+              {isSubmitting ? (
+                <div className={styles.gateSpinner} />
+              ) : (
+                <KeyRound size={16} />
+              )}
+              <span>{isSubmitting ? 'Verificando clave...' : 'Desbloquear Panel'}</span>
             </button>
           </form>
         </motion.div>

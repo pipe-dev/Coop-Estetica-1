@@ -1,5 +1,15 @@
 // Cliente de conexión HTTP y sincronización viva con PostgreSQL para Catheryne Ríos Estética
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://coop-estetica-1-backe.onrender.com/api'
+    }
+  }
+  return 'http://localhost:4000/api'
+}
+const API_BASE_URL = getApiBaseUrl()
 
 export const purgeAdminAuth = (reason = 'Sesión no válida o expirada') => {
   if (typeof window !== 'undefined') {
@@ -8,6 +18,8 @@ export const purgeAdminAuth = (reason = 'Sesión no válida o expirada') => {
       sessionStorage.removeItem('spa_admin_authed')
       sessionStorage.removeItem('spa_admin_role')
       localStorage.removeItem('spa_admin_token')
+      localStorage.removeItem('spa_admin_authed')
+      localStorage.removeItem('spa_admin_current_role')
     } catch (e) {}
     window.dispatchEvent(new CustomEvent('spa_auth_ejected', { detail: { reason } }))
   }
@@ -21,6 +33,17 @@ export const getAdminHeaders = () => {
 }
 
 export const authFetch = async (url, options = {}) => {
+  const token = typeof window !== 'undefined' ? (sessionStorage.getItem('spa_admin_token') || localStorage.getItem('spa_admin_token')) : null
+  
+  // En modo contingencia local (token local-...), no llamar a endpoints remotos que causen 401
+  if (token && token.startsWith('local-')) {
+    console.warn('[authFetch] Modo contingencia local activo para:', url)
+    return new Response(JSON.stringify({ offline: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
   const adminHeaders = getAdminHeaders()
   const headers = {
     ...adminHeaders,
@@ -68,11 +91,17 @@ export const api = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin: String(pin).trim() }),
       })
-      if (!res.ok) return { valid: false }
+      if (res.status === 429) {
+        return { valid: false, rateLimited: true, error: 'Demasiados intentos. Espera 30 segundos antes de reintentar.' }
+      }
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        return { valid: false, error: errData.message || 'PIN no válido' }
+      }
       return await res.json()
     } catch (e) {
       console.error('Fallo al validar PIN con el servidor:', e)
-      return { valid: false, error: 'Servidor no disponible' }
+      return { valid: false, error: 'Servidor no disponible', networkError: true }
     }
   },
 

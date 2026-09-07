@@ -15,8 +15,8 @@ export class AuthController {
     return this.authService.login(body.email, password);
   }
 
-  // S.H.I.E.L.D. Pillar 5 & 13: Anti-Brute-Force PIN (Máximo 5 intentos por minuto)
-  @Throttle({ short: { limit: 5, ttl: 60000 }, medium: { limit: 10, ttl: 300000 } })
+  // S.H.I.E.L.D. Pillar 5 & 13: Anti-Brute-Force PIN (Permite reintentos legítimos hasta 30/min)
+  @Throttle({ short: { limit: 30, ttl: 60000 }, medium: { limit: 60, ttl: 300000 } })
   @Post('verify-pin')
   async verifyPin(@Body() body: { pin: string }) {
     return this.authService.verifyPin(body.pin);
