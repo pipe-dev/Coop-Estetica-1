@@ -153,6 +153,16 @@ function Home() {
   const introCoverOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0])
   const introTextScale = useTransform(scrollYProgress, [0, 0.08], [1, 0.9])
 
+  useEffect(() => {
+    if (isReturningUser && videoRef.current) {
+      videoRef.current.play().catch(error => {
+        if (error.name !== 'AbortError') {
+          console.error("Error al reproducir video:", error);
+        }
+      });
+    }
+  }, [isReturningUser]);
+
   return (
     <main className={styles.home}>
       {/* ===== HERO SECTION ===== */}
@@ -162,7 +172,6 @@ function Home() {
             {isReturningUser ? (
               <video
                 ref={videoRef}
-                src="/videos/hero.mp4"
                 poster="/images/hero_poster.webp"
                 className={styles.heroImage}
                 muted
@@ -170,7 +179,9 @@ function Home() {
                 preload="auto"
                 autoPlay
                 loop={false}
-              />
+              >
+                <source src="/videos/hero.mp4" type="video/mp4" />
+              </video>
             ) : (
               <HeroCanvas progress={scrollYProgress} />
             )}
