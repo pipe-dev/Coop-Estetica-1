@@ -70,6 +70,44 @@ function Home() {
     }
   }, [])
 
+  // Ping-pong video reverse loop for returning users using original ALL-I video (forward -> backward -> forward...)
+  useEffect(() => {
+    if (!isReturningUser || !videoRef.current) return;
+
+    const video = videoRef.current;
+    let animId;
+    let playingForward = true;
+    let lastTime = 0;
+
+    const handleEnded = () => {
+      playingForward = false;
+    };
+
+    const reverseStep = (timestamp) => {
+      if (!playingForward && video) {
+        if (timestamp - lastTime >= 33) { // 30fps
+          lastTime = timestamp;
+          if (video.currentTime > 0.08) {
+            video.currentTime = Math.max(0, video.currentTime - 0.04);
+          } else {
+            video.currentTime = 0;
+            playingForward = true;
+            video.play().catch(() => {});
+          }
+        }
+      }
+      animId = requestAnimationFrame(reverseStep);
+    };
+
+    video.addEventListener('ended', handleEnded);
+    animId = requestAnimationFrame(reverseStep);
+
+    return () => {
+      video.removeEventListener('ended', handleEnded);
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isReturningUser]);
+
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end']
@@ -124,14 +162,14 @@ function Home() {
             {isReturningUser ? (
               <video
                 ref={videoRef}
-                src="/videos/hero_loop_1080p.mp4"
+                src="/videos/hero.mp4"
                 poster="/images/hero_poster.webp"
                 className={styles.heroImage}
                 muted
                 playsInline
                 preload="auto"
                 autoPlay
-                loop
+                loop={false}
               />
             ) : (
               <HeroCanvas progress={scrollYProgress} />
