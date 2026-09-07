@@ -9,14 +9,8 @@
 
 .hero {
   position: relative;
-  height: 260vh; /* Optimized scroll distance for smooth storytelling and fast performance */
+  height: 450vh; /* creates the scroll distance for the video and storytelling panels */
   background: var(--color-black);
-}
-
-@media (max-width: 768px) {
-  .hero {
-    height: 200vh;
-  }
 }
 
 .heroSticky {
@@ -679,37 +673,12 @@
 .introCoverScreen {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.38) 0%, rgba(0, 0, 0, 0.75) 100%);
+  background: #000000;
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 var(--container-padding);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-}
-
-.skipIntroBtn {
-  margin-top: var(--space-md);
-  background: rgba(212, 175, 55, 0.18);
-  border: 1px solid rgba(212, 175, 55, 0.5);
-  color: #FFFFFF;
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 8px 20px;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-.skipIntroBtn:hover, .skipIntroBtn:active {
-  background: rgba(212, 175, 55, 0.4);
-  border-color: var(--color-gold);
-  transform: translateY(-2px);
 }
 
 .introCoverContent {
