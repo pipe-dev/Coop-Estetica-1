@@ -33,6 +33,7 @@ const Card = ({
             alt={title}
             className={styles.image}
             loading="lazy"
+            decoding="async"
           />
         )}
         <div className={styles.overlay} />

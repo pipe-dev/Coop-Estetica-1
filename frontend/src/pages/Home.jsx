@@ -43,64 +43,38 @@ function Home() {
     }
     return false;
   })
-
-  useEffect(() => {
-    // GSAP Animation for E-commerce CTA
-    if (ctaButtonRef.current) {
-      gsap.to(ctaButtonRef.current, {
-        scale: 1.03,
-        boxShadow: "0px 0px 20px 5px rgba(212,175,55,0.4)",
-        duration: 1.2,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
-      })
-    }
-    
-    // Constant slow beat for the "Agendar Cita" button (Returning User Hero)
-    const beatTarget = document.getElementById('beat-btn');
-    if (beatTarget) {
-      gsap.to(beatTarget, {
-        scale: 1.05,
-        duration: 1.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      })
-    }
-  }, [])
-
-  // Ping-pong video reverse loop for returning users using original ALL-I video (forward -> backward -> forward...)
+  // Ping-pong video reverse loop optimizado para ultra baja latencia y 0% CPU en reproducción hacia adelante
   useEffect(() => {
     if (!isReturningUser || !videoRef.current) return;
 
     const video = videoRef.current;
-    let animId;
-    let playingForward = true;
+    let animId = null;
     let lastTime = 0;
 
-    const handleEnded = () => {
-      playingForward = false;
+    const reverseStep = (timestamp) => {
+      if (!video) return;
+      if (timestamp - lastTime >= 33) { // 30fps
+        lastTime = timestamp;
+        if (video.currentTime > 0.08) {
+          video.currentTime = Math.max(0, video.currentTime - 0.04);
+          animId = requestAnimationFrame(reverseStep);
+        } else {
+          video.currentTime = 0;
+          video.play().catch(() => {});
+          // Reversa completada: detenemos rAF y dejamos que el reproductor nativo siga hacia adelante
+          animId = null;
+        }
+      } else {
+        animId = requestAnimationFrame(reverseStep);
+      }
     };
 
-    const reverseStep = (timestamp) => {
-      if (!playingForward && video) {
-        if (timestamp - lastTime >= 33) { // 30fps
-          lastTime = timestamp;
-          if (video.currentTime > 0.08) {
-            video.currentTime = Math.max(0, video.currentTime - 0.04);
-          } else {
-            video.currentTime = 0;
-            playingForward = true;
-            video.play().catch(() => {});
-          }
-        }
-      }
+    const handleEnded = () => {
+      lastTime = 0;
       animId = requestAnimationFrame(reverseStep);
     };
 
     video.addEventListener('ended', handleEnded);
-    animId = requestAnimationFrame(reverseStep);
 
     return () => {
       video.removeEventListener('ended', handleEnded);

@@ -1,10 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { deviceCapability } from '../../utils/deviceCapability';
 import styles from './HeroCanvas.module.css';
 
-const TOTAL_FRAMES = 75;
+const { isLowEnd, maxDpr, maxCanvasFrames, canvasStep } = deviceCapability;
+const TOTAL_FRAMES = maxCanvasFrames; // 25 en gama ultra-baja (3.8MB), 75 en gama alta
 
-const getFramePath = (index) => {
-  const padded = String(index + 1).padStart(3, '0');
+const getFramePath = (logicalIndex) => {
+  // Mapear el índice lógico (0..TOTAL_FRAMES-1) al archivo real frame_001..frame_075
+  const originalFileIndex = Math.min(74, logicalIndex * canvasStep);
+  const padded = String(originalFileIndex + 1).padStart(3, '0');
   return `/frames/hero/frame_${padded}.webp`;
 };
 
@@ -14,39 +18,69 @@ export const HeroCanvas = ({ progress }) => {
   const [loadedCount, setLoadedCount] = useState(0);
   const lastDrawnIndexRef = useRef(-1);
 
-  // 1. Precarga incremental de los 75 fotogramas WebP
+  // 1. Precarga inteligente y escalonada (Priority Staged Preload)
   useEffect(() => {
     let isCancelled = false;
-    const images = [];
+    const images = new Array(TOTAL_FRAMES);
 
-    for (let i = 0; i < TOTAL_FRAMES; i++) {
+    const loadSingleFrame = (index) => {
+      if (isCancelled || images[index]) return;
       const img = new Image();
-      img.src = getFramePath(i);
+      img.decoding = 'async';
+      img.src = getFramePath(index);
       img.onload = () => {
         if (!isCancelled) {
           setLoadedCount((prev) => prev + 1);
         }
       };
-      images.push(img);
-    }
+      images[index] = img;
+    };
+
+    // Prioridad 1: Fotograma 0 (crítico para renderizado inmediato)
+    loadSingleFrame(0);
+
+    // Prioridad 2: Primeros 4 fotogramas para inicio de scroll fluido
+    const timer1 = setTimeout(() => {
+      if (isCancelled) return;
+      for (let i = 1; i < Math.min(5, TOTAL_FRAMES); i++) {
+        loadSingleFrame(i);
+      }
+    }, 20);
+
+    // Prioridad 3: Resto de fotogramas en lotes ligeros de 5 para no colapsar la CPU ni red móvil
+    const timer2 = setTimeout(() => {
+      if (isCancelled) return;
+      let currentIndex = 5;
+      const interval = setInterval(() => {
+        if (isCancelled || currentIndex >= TOTAL_FRAMES) {
+          clearInterval(interval);
+          return;
+        }
+        for (let j = 0; j < 5 && currentIndex < TOTAL_FRAMES; j++, currentIndex++) {
+          loadSingleFrame(currentIndex);
+        }
+      }, isLowEnd ? 80 : 30);
+    }, 80);
 
     imagesRef.current = images;
 
     return () => {
       isCancelled = true;
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       imagesRef.current = [];
     };
   }, []);
 
-  // 2. Función de renderizado en Canvas adaptando a 'cover'
+  // 2. Función de renderizado en Canvas adaptando a 'cover' con DPR controlado
   const drawFrame = (frameIndex) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false }); // alpha: false acelera el pipeline GPU
     if (!ctx) return;
 
     let usableImg = imagesRef.current[frameIndex];
-    // Fallback: si el fotograma actual no ha terminado de cargar, buscar el más cercano cargado
+    // Fallback: si el fotograma no ha terminado de cargar, buscar el más cercano disponible
     if (!usableImg || !usableImg.complete) {
       for (let offset = 1; offset < TOTAL_FRAMES; offset++) {
         const prev = imagesRef.current[frameIndex - offset];
@@ -70,18 +104,17 @@ export const HeroCanvas = ({ progress }) => {
     const drawX = (canvasWidth - drawWidth) / 2;
     const drawY = (canvasHeight - drawHeight) / 2;
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.drawImage(usableImg, drawX, drawY, drawWidth, drawHeight);
     lastDrawnIndexRef.current = frameIndex;
   };
 
-  // 3. Manejo de redimensionamiento con DPR optimizado (máx 1.5 para ahorrar VRAM)
+  // 3. Manejo de redimensionamiento con DPR optimizado según capacidad del dispositivo
   useEffect(() => {
     const handleResize = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       canvas.width = Math.floor(window.innerWidth * dpr);
       canvas.height = Math.floor(window.innerHeight * dpr);
       canvas.style.width = '100%';
@@ -94,7 +127,7 @@ export const HeroCanvas = ({ progress }) => {
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     handleResize();
 
     return () => window.removeEventListener('resize', handleResize);

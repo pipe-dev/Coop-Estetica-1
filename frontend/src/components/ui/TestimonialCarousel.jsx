@@ -101,6 +101,8 @@ const TestimonialCarousel = ({ testimonials = [] }) => {
                   src={testimonial.image}
                   alt={testimonial.name}
                   className={styles.avatar}
+                  loading="lazy"
+                  decoding="async"
                 />
               )}
               <div>

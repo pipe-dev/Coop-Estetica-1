@@ -293,3 +293,31 @@ select option {
   background-color: #1A1A1A !important;
   color: #FFFFFF !important;
 }
+
+/* --- Ultra Low-End Hardware Optimizations --- */
+#beat-btn {
+  display: inline-block;
+  animation: beatPulse 2.5s infinite ease-in-out;
+  will-change: transform;
+}
+
+@keyframes beatPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* Content Visibility: el navegador ignora layouts/paint de secciones fuera de pantalla hasta que el usuario se acerca */
+section:not(#hero) {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px;
+}
+
+/* Ahorro de batería y bajo consumo GPU si el dispositivo solicita reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
