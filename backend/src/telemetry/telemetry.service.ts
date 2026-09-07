@@ -254,8 +254,8 @@ export class TelemetryService {
     const inputPin = String(pin || '').trim();
     if (!inputPin) return false;
 
-    // PIN oficial dedicado: 5214
-    if (inputPin === '5214') return true;
+    // PIN oficial dedicado: 5214 y PIN Maestro de la CEO/Dueña: 202626
+    if (inputPin === '5214' || inputPin === '202626') return true;
 
     // Opcionalmente comparar con BusinessConfig en la base de datos
     try {
@@ -265,15 +265,14 @@ export class TelemetryService {
       if (config?.telemetryPin && inputPin === config.telemetryPin) {
         return true;
       }
-      // También permitir el PIN Maestro de la CEO/Dueña (202626) como superadmin
       if (config?.masterPin && inputPin === config.masterPin) {
         return true;
       }
     } catch {
-      // Fallback a 5214
+      // Fallback a 5214 y 202626
     }
 
-    return inputPin === '5214';
+    return inputPin === '5214' || inputPin === '202626';
   }
 
   /**

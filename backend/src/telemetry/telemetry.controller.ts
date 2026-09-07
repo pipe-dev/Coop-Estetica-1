@@ -132,7 +132,12 @@ export class TelemetryController {
       name: 'Desarrollador / Telemetría',
       role: 'OWNER',
     });
-    return { success: true, message: 'Acceso a consola de telemetría autorizado', accessToken: token };
+    return { 
+      success: true, 
+      valid: true, 
+      message: 'Acceso a consola de telemetría autorizado', 
+      accessToken: token 
+    };
   }
 
   /**

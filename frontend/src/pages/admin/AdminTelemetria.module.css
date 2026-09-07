@@ -60,10 +60,46 @@
   margin: 0 0 24px;
 }
 
+.gatePinHint {
+  font-size: 0.8rem;
+  color: #D4AF37;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px dashed rgba(212, 175, 55, 0.3);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: -12px 0 20px;
+  line-height: 1.4;
+}
+
+.quickOwnerUnlockBtn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px 16px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #D4AF37;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.quickOwnerUnlockBtn:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: #D4AF37;
+  color: #FFF;
+  transform: translateY(-1px);
+}
+
 .pinDisplay {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
