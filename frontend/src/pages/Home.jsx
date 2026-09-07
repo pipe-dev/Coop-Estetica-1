@@ -5,6 +5,7 @@ import gsap from 'gsap'
 import { ShoppingCart, Gift, Calendar, ShoppingBag, Sparkles, Gem } from 'lucide-react'
 import SectionTitle from '../components/ui/SectionTitle'
 import Button from '../components/ui/Button'
+import HeroCanvas from '../components/ui/HeroCanvas'
 import styles from './Home.module.css'
 
 /* ⚠️ NOTA: "Catheryne Ríos Estética" es placeholder. Cambiar por el nombre real del negocio. */
@@ -69,44 +70,6 @@ function Home() {
     }
   }, [])
 
-  // Ping-pong video reverse loop for returning users (forward -> backward -> forward...)
-  useEffect(() => {
-    if (!isReturningUser || !videoRef.current) return;
-
-    const video = videoRef.current;
-    let animId;
-    let playingForward = true;
-    let lastTime = 0;
-
-    const handleEnded = () => {
-      playingForward = false;
-    };
-
-    const reverseStep = (timestamp) => {
-      if (!playingForward && video) {
-        if (timestamp - lastTime >= 33) { // 30fps for stability
-          lastTime = timestamp;
-          if (video.currentTime > 0.08) {
-            video.currentTime = Math.max(0, video.currentTime - 0.04);
-          } else {
-            video.currentTime = 0;
-            playingForward = true;
-            video.play().catch(() => {});
-          }
-        }
-      }
-      animId = requestAnimationFrame(reverseStep);
-    };
-
-    video.addEventListener('ended', handleEnded);
-    animId = requestAnimationFrame(reverseStep);
-
-    return () => {
-      video.removeEventListener('ended', handleEnded);
-      if (animId) cancelAnimationFrame(animId);
-    };
-  }, [isReturningUser]);
-
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end']
@@ -118,10 +81,6 @@ function Home() {
     }
 
     if (isReturningUser) return;
-
-    if (videoRef.current && !isNaN(videoRef.current.duration)) {
-      videoRef.current.currentTime = latest * videoRef.current.duration;
-    }
 
     if (latest < 0.08) {
       setActiveScene(-1) // Pitch black cover screen
@@ -162,17 +121,21 @@ function Home() {
       <section className={styles.hero} ref={heroRef} id="hero" style={isReturningUser ? { height: '100vh', minHeight: '100vh' } : {}}>
         <div className={styles.heroSticky}>
           <div className={styles.heroImageWrapper}>
-            <video
-              ref={videoRef}
-              src="/videos/hero.mp4"
-              poster="/images/hero_poster.webp"
-              className={styles.heroImage}
-              muted
-              playsInline
-              preload="auto"
-              autoPlay={isReturningUser}
-              loop={false}
-            />
+            {isReturningUser ? (
+              <video
+                ref={videoRef}
+                src="/videos/hero_loop_1080p.mp4"
+                poster="/images/hero_poster.webp"
+                className={styles.heroImage}
+                muted
+                playsInline
+                preload="auto"
+                autoPlay
+                loop
+              />
+            ) : (
+              <HeroCanvas progress={scrollYProgress} />
+            )}
           </div>
 
           {!isReturningUser && (
