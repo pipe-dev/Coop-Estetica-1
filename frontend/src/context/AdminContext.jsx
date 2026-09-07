@@ -168,40 +168,67 @@ export function AdminProvider({ children }) {
   // Sincronización Viva con PostgreSQL en Supabase
   const refreshData = async () => {
     try {
+      const hasAuth = typeof window !== 'undefined' && (
+        (sessionStorage.getItem('spa_admin_authed') === 'true' || localStorage.getItem('spa_admin_authed') === 'true') &&
+        Boolean(sessionStorage.getItem('spa_admin_token') || localStorage.getItem('spa_admin_token'))
+      )
+
+      // 1. Datos públicos (siempre accesibles por clientas y visitantes sin token)
       const [
         liveConfig, 
         liveMemberships, 
         liveClosedDates, 
         liveCategories, 
         liveProducts, 
-        liveTeam,
-        liveClients,
-        liveSessions,
-        liveTxs,
-        liveApps
+        liveTeam
       ] = await Promise.all([
-        api.getAdminConfig ? api.getAdminConfig() : api.getConfig(),
+        api.getConfig(),
         api.getMemberships(),
         api.getClosedDates(),
         api.getCategories(),
         api.getProducts(),
-        api.getTeam(),
-        api.getClients(),
-        api.getCashSessions(),
-        api.getCashTransactions(),
-        api.getAppointments()
+        api.getTeam()
       ])
 
-      if (liveConfig) setBusinessConfig(liveConfig)
-      if (liveCategories) setServiceCategories(liveCategories)
-      if (liveMemberships) setMemberships(liveMemberships)
-      if (liveClosedDates) setClosedDates(liveClosedDates)
-      if (liveProducts) setProducts(liveProducts)
-      if (liveTeam) setTeamMembers(liveTeam)
-      if (liveClients) setClients(liveClients)
-      if (liveSessions) setCashSessions(liveSessions)
-      if (liveTxs) setTransactions(liveTxs)
-      if (liveApps && liveApps.appointments) setAppointments(liveApps.appointments)
+      if (liveConfig && !liveConfig.offline && !liveConfig.unauthenticated) {
+        setBusinessConfig(prev => ({ ...prev, ...liveConfig }))
+      }
+      if (liveCategories && Array.isArray(liveCategories)) setServiceCategories(liveCategories)
+      if (liveMemberships && Array.isArray(liveMemberships)) setMemberships(liveMemberships)
+      if (liveClosedDates && Array.isArray(liveClosedDates)) setClosedDates(liveClosedDates)
+      if (liveProducts && Array.isArray(liveProducts)) setProducts(liveProducts)
+      if (liveTeam && Array.isArray(liveTeam)) setTeamMembers(liveTeam)
+
+      // 2. Datos administrativos (solo si el usuario ya se autenticó como administrador con su PIN)
+      if (hasAuth) {
+        try {
+          const [
+            liveAdminConfig,
+            liveClients,
+            liveSessions,
+            liveTxs,
+            liveApps
+          ] = await Promise.all([
+            api.getAdminConfig ? api.getAdminConfig() : null,
+            api.getClients ? api.getClients() : null,
+            api.getCashSessions ? api.getCashSessions() : null,
+            api.getCashTransactions ? api.getCashTransactions() : null,
+            api.getAppointments ? api.getAppointments() : null
+          ])
+
+          if (liveAdminConfig && !liveAdminConfig.offline && !liveAdminConfig.unauthenticated) {
+            setBusinessConfig(prev => ({ ...prev, ...liveAdminConfig }))
+          }
+          if (liveClients && Array.isArray(liveClients)) setClients(liveClients)
+          if (liveSessions && Array.isArray(liveSessions)) setCashSessions(liveSessions)
+          if (liveTxs && Array.isArray(liveTxs)) setTransactions(liveTxs)
+          if (liveApps && liveApps.appointments && Array.isArray(liveApps.appointments)) {
+            setAppointments(liveApps.appointments)
+          }
+        } catch (adminErr) {
+          console.warn('Sincronización administrativa en espera:', adminErr)
+        }
+      }
 
       // S.H.I.E.L.D. Pillar 20: Auto-Backup silencioso
       runSilentAutoBackup({
@@ -211,10 +238,10 @@ export function AdminProvider({ children }) {
         closedDates: liveClosedDates || closedDates,
         teamMembers: liveTeam || teamMembers,
         products: liveProducts || products,
-        clients: liveClients || clients,
-        appointments: (liveApps && liveApps.appointments) || appointments,
-        cashSessions: liveSessions || cashSessions,
-        transactions: liveTxs || transactions,
+        clients,
+        appointments,
+        cashSessions,
+        transactions,
       })
     } catch (e) {
       console.warn('Conexión a PostgreSQL en segundo plano:', e)

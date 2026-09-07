@@ -35,8 +35,16 @@ export const getAdminHeaders = () => {
 export const authFetch = async (url, options = {}) => {
   const token = typeof window !== 'undefined' ? (sessionStorage.getItem('spa_admin_token') || localStorage.getItem('spa_admin_token')) : null
   
-  // En modo contingencia local (token local-...), no llamar a endpoints remotos que causen 401
-  if (token && token.startsWith('local-')) {
+  // Si no hay token de autenticación, evitar llamadas protegidas y no expulsar sesión
+  if (!token) {
+    return new Response(JSON.stringify({ unauthenticated: true }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
+
+  // En modo contingencia local (token local-...), responder localmente sin llamar a servidor remoto
+  if (token.startsWith('local-')) {
     console.warn('[authFetch] Modo contingencia local activo para:', url)
     return new Response(JSON.stringify({ offline: true }), {
       status: 200,
@@ -51,6 +59,7 @@ export const authFetch = async (url, options = {}) => {
   }
   const res = await fetch(url, { ...options, headers })
   if (res.status === 401 || res.status === 403) {
+    // Solo expulsar si el usuario tenía un token real que expiró o fue revocado
     purgeAdminAuth('Acceso denegado: Token no válido, manipulado o expirado. Se ha cerrado la sesión por seguridad.')
     throw new Error('401 Unauthorized: Sesión expulsada')
   }
