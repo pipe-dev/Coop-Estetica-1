@@ -24,17 +24,28 @@ async function bootstrap() {
   });
 
   // S.H.I.E.L.D. Pillar 2: CORS & Origin Hardening
-  const allowedOrigins = [
-    process.env.FRONTEND_URL,
+  const envCors = (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const localOrigins = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
     'http://localhost:4000',
-  ].filter(Boolean) as string[];
+  ];
+
+  const allowedOrigins = [...envCors, ...localOrigins];
+  const isWildcardAllowed = envCors.includes('*');
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.some((allowed) => origin.startsWith(allowed) || allowed.startsWith(origin))) {
+      if (
+        !origin ||
+        isWildcardAllowed ||
+        allowedOrigins.some((allowed) => origin === allowed || origin.startsWith(allowed) || allowed.startsWith(origin))
+      ) {
         callback(null, true);
       } else {
         callback(new Error('Acceso bloqueado por política de seguridad CORS (S.H.I.E.L.D.)'));
