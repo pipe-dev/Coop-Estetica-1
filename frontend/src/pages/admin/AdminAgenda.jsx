@@ -30,21 +30,33 @@ export default function AdminAgenda() {
     reactivateAppointment, 
     addTransaction,
     currentUserRole,
-    currentSpecialistId
+    currentSpecialistId,
+    setCurrentSpecialistId
   } = useAdmin()
 
   const isSpecialist = currentUserRole === 'SPECIALIST'
-  const activeSpecialistObj = teamMembers.find(m => m.id === (currentSpecialistId || '2'))
+  const activeSpecialistObj = teamMembers.find(m => String(m.id) === String(currentSpecialistId)) || teamMembers[0]
 
   const [selectedDate, setSelectedDate] = useState(getLocalDateString())
-  const [selectedSpecialist, setSelectedSpecialist] = useState(isSpecialist ? (currentSpecialistId || '2') : 'all')
+  const [selectedSpecialist, setSelectedSpecialist] = useState(() => {
+    if (isSpecialist) {
+      return currentSpecialistId || (teamMembers[0]?.id ? String(teamMembers[0].id) : '')
+    }
+    return 'all'
+  })
 
   // Auto-sync filter if specialist role is active
   React.useEffect(() => {
     if (isSpecialist) {
-      setSelectedSpecialist(currentSpecialistId || '2')
+      const activeId = currentSpecialistId || (teamMembers[0]?.id ? String(teamMembers[0].id) : '')
+      if (activeId) {
+        setSelectedSpecialist(activeId)
+        if (!currentSpecialistId) {
+          setCurrentSpecialistId(activeId)
+        }
+      }
     }
-  }, [isSpecialist, currentSpecialistId])
+  }, [isSpecialist, currentSpecialistId, teamMembers, setCurrentSpecialistId])
 
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState(null)
 
@@ -288,7 +300,9 @@ export default function AdminAgenda() {
   const filteredAppointments = appointments
     .filter(a => {
       const matchDate = activeDates.includes(a.date)
-      const matchSpec = selectedSpecialist === 'all' || a.specialistId === selectedSpecialist
+      const matchSpec = selectedSpecialist === 'all' || 
+                        String(a.specialistId) === String(selectedSpecialist) || 
+                        (activeSpecialistObj?.name && a.specialistName === activeSpecialistObj.name)
       return matchDate && matchSpec
     })
     .sort((a, b) => {
@@ -346,35 +360,48 @@ export default function AdminAgenda() {
     setSelectedAppointmentForSale(null)
   }
 
+  const activeSpecId = currentSpecialistId || activeSpecialistObj?.id
+
   const specialistNetToday = React.useMemo(() => {
     if (!isSpecialist) return 0
-    const specApps = appointments.filter(a => a.specialistId === (currentSpecialistId || '2') && a.date === selectedDate && a.status !== 'Cancelada')
-    const specRate = activeSpecialistObj?.commissionRate || 45
+    const specApps = appointments.filter(a => 
+      (String(a.specialistId) === String(activeSpecId) || (activeSpecialistObj?.name && a.specialistName === activeSpecialistObj.name)) && 
+      a.date === selectedDate && 
+      a.status !== 'Cancelada'
+    )
+    const specRate = activeSpecialistObj?.commissionRate || 40
     return specApps.reduce((sum, a) => {
-      const net = a.commissionAmount !== undefined ? a.commissionAmount : (a.price * specRate) / 100
+      const net = a.commissionAmount !== undefined ? a.commissionAmount : Math.round((Number(a.price || 0) * specRate) / 100)
       return sum + net
     }, 0)
-  }, [isSpecialist, appointments, currentSpecialistId, selectedDate, activeSpecialistObj])
+  }, [isSpecialist, appointments, activeSpecId, selectedDate, activeSpecialistObj])
+
+  const specialistNetMonth = React.useMemo(() => {
+    if (!isSpecialist) return 0
+    const currentMonthPrefix = selectedDate ? selectedDate.substring(0, 7) : getLocalDateString().substring(0, 7)
+    const specApps = appointments.filter(a => 
+      (String(a.specialistId) === String(activeSpecId) || (activeSpecialistObj?.name && a.specialistName === activeSpecialistObj.name)) && 
+      a.date && a.date.startsWith(currentMonthPrefix) && 
+      (a.status === 'Pagada' || a.status === 'Finalizada' || a.status === 'Completada' || a.status === 'En Atención')
+    )
+    const specRate = activeSpecialistObj?.commissionRate || 40
+    return specApps.reduce((sum, a) => {
+      const net = a.commissionAmount !== undefined ? a.commissionAmount : Math.round((Number(a.price || 0) * specRate) / 100)
+      return sum + net
+    }, 0)
+  }, [isSpecialist, appointments, activeSpecId, selectedDate, activeSpecialistObj])
+
+  const specialistTodayCount = React.useMemo(() => {
+    if (!isSpecialist) return 0
+    return appointments.filter(a => 
+      (String(a.specialistId) === String(activeSpecId) || (activeSpecialistObj?.name && a.specialistName === activeSpecialistObj.name)) && 
+      a.date === selectedDate && 
+      a.status !== 'Cancelada'
+    ).length
+  }, [isSpecialist, appointments, activeSpecId, selectedDate, activeSpecialistObj])
 
   return (
     <div className={styles.agendaContainer}>
-      
-      {/* SPECIALIST NET EARNINGS BANNER */}
-      {isSpecialist && (
-        <div className={styles.specialistBanner}>
-          <div className={styles.specialistBannerInfo}>
-            <span className={styles.specialistBadge}>Agenda de Especialista: {activeSpecialistObj?.name || 'Especialista'}</span>
-            <p className={styles.specialistBannerSub}>
-              Consulta tu horario asignado y el cálculo automático de tus honorarios netos correspondientes a los servicios del día.
-            </p>
-          </div>
-          <div className={styles.specialistNetCard}>
-            <span className={styles.specialistNetLabel}>Acumulado Neto Hoy</span>
-            <span className={styles.specialistNetValue}>${specialistNetToday.toLocaleString()} COP</span>
-            <small className={styles.specialistRateLabel}>Comisión: {activeSpecialistObj?.commissionRate || 45}%</small>
-          </div>
-        </div>
-      )}
 
       {/* FILTER BAR */}
       <div className={styles.filterBar}>
@@ -397,15 +424,20 @@ export default function AdminAgenda() {
             <select
               className={styles.selectInput}
               value={selectedSpecialist}
-              onChange={e => setSelectedSpecialist(e.target.value)}
-              disabled={isSpecialist}
+              onChange={e => {
+                const newId = e.target.value
+                setSelectedSpecialist(newId)
+                if (isSpecialist) {
+                  setCurrentSpecialistId(newId)
+                }
+              }}
             >
               {!isSpecialist && <option value="all">Todas las Especialistas</option>}
-              {teamMembers
-                .filter(m => !isSpecialist || m.id === (currentSpecialistId || '2'))
-                .map(m => (
-                  <option key={m.id} value={m.id}>{m.name}</option>
-                ))}
+              {teamMembers.map(m => (
+                <option key={m.id} value={String(m.id)}>
+                  {isSpecialist ? `Perfil: ${m.name}` : m.name} ({m.role || 'Especialista'})
+                </option>
+              ))}
             </select>
           </div>
 
@@ -581,12 +613,19 @@ export default function AdminAgenda() {
                           </div>
 
                           <div className={styles.infoRow}>
-                            <span className={styles.label}>{isSpecialist ? 'Tu Monto Neto:' : 'Valor Oficial:'}</span>
-                            <span className={styles.priceValue}>
-                              ${(isSpecialist 
-                                  ? (app.commissionAmount !== undefined ? app.commissionAmount : (app.price * (activeSpecialistObj?.commissionRate || 45)) / 100) 
-                                  : app.price
-                                ).toLocaleString()} COP
+                            <span className={styles.label}>{isSpecialist ? 'Tu Ganancia Neta:' : 'Valor Oficial:'}</span>
+                            <span className={isSpecialist ? styles.specialistPriceHighlight : styles.priceValue}>
+                              {isSpecialist ? (
+                                <>
+                                  +${(app.commissionAmount !== undefined 
+                                      ? app.commissionAmount 
+                                      : Math.round((Number(app.price || 0) * (activeSpecialistObj?.commissionRate || 40)) / 100)
+                                    ).toLocaleString()} COP
+                                  <span className={styles.rateSmallBadge}> ({activeSpecialistObj?.commissionRate || 40}%)</span>
+                                </>
+                              ) : (
+                                `$${Number(app.price || 0).toLocaleString()} COP`
+                              )}
                             </span>
                           </div>
                         </div>
@@ -642,6 +681,46 @@ export default function AdminAgenda() {
           })
         )}
       </div>
+
+      {/* SPECIALIST NET EARNINGS BANNER — Below agenda, as requested */}
+      {isSpecialist && (
+        <div className={styles.specialistBanner}>
+          <div className={styles.specialistBannerHeader}>
+            <div className={styles.specialistAvatarCircle} style={{ borderColor: activeSpecialistObj?.color || '#D4AF37' }}>
+              {activeSpecialistObj?.name ? activeSpecialistObj.name.charAt(0).toUpperCase() : 'E'}
+            </div>
+            <div className={styles.specialistBannerInfo}>
+              <div className={styles.specialistTitleRow}>
+                <span className={styles.specialistBadge}>Mis Ganancias: {activeSpecialistObj?.name || 'Especialista'}</span>
+                <span className={styles.specialistRateTag}>Comisión: {activeSpecialistObj?.commissionRate || 40}%</span>
+              </div>
+              <p className={styles.specialistBannerSub}>
+                {activeSpecialistObj?.role || 'Especialista'} • Cálculo automático de honorarios netos.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.specialistMetricsRow}>
+            <div className={styles.specialistKpiCard}>
+              <span className={styles.specialistKpiLabel}>Ganancia Neta Hoy</span>
+              <strong className={styles.specialistKpiValue}>${specialistNetToday.toLocaleString()} COP</strong>
+              <small className={styles.specialistKpiSub}>{specialistTodayCount} cita{specialistTodayCount !== 1 ? 's' : ''} en la fecha</small>
+            </div>
+
+            <div className={styles.specialistKpiCard}>
+              <span className={styles.specialistKpiLabel}>Ganancia Neta Este Mes</span>
+              <strong className={styles.specialistKpiValueGold}>${specialistNetMonth.toLocaleString()} COP</strong>
+              <small className={styles.specialistKpiSub}>Honorarios acumulados mes</small>
+            </div>
+
+            <div className={styles.specialistKpiCard}>
+              <span className={styles.specialistKpiLabel}>Tu Porcentaje</span>
+              <strong className={styles.specialistKpiValue}>{activeSpecialistObj?.commissionRate || 40}%</strong>
+              <small className={styles.specialistKpiSub}>Pago por servicio</small>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MANUAL BOOKING MODAL */}
       {showAddModal && (

@@ -58,8 +58,11 @@ export default function AdminLayout() {
   const location = useLocation()
   const mainContentRef = useRef(null)
   const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const [showSpecialistPickerModal, setShowSpecialistPickerModal] = useState(false)
 
-  const { activeCashSession, currentUserRole } = useAdmin()
+  const { activeCashSession, currentUserRole, currentSpecialistId, setCurrentSpecialistId, teamMembers = [] } = useAdmin()
+
+  const activeSpecialistObj = teamMembers.find(m => String(m.id) === String(currentSpecialistId)) || teamMembers[0]
 
   // Reset scroll to top on route change & close mobile more sheet
   useEffect(() => {
@@ -71,20 +74,33 @@ export default function AdminLayout() {
     setIsMoreOpen(false)
   }, [location.pathname])
 
+  // Guardia de ruta estricta: Las especialistas SOLO pueden acceder a /admin/agenda y /admin/historial
+  useEffect(() => {
+    if (currentUserRole === 'SPECIALIST') {
+      if (location.pathname !== '/admin/agenda' && location.pathname !== '/admin/historial') {
+        navigate('/admin/agenda', { replace: true })
+      }
+    }
+  }, [currentUserRole, location.pathname, navigate])
+
   const handleLogout = () => {
     try {
       sessionStorage.removeItem('spa_admin_authed')
       sessionStorage.removeItem('spa_admin_role')
       sessionStorage.removeItem('spa_admin_token')
+      sessionStorage.removeItem('spa_specialist_id')
       localStorage.removeItem('spa_admin_token')
+      localStorage.removeItem('spa_admin_current_role')
+      localStorage.removeItem('spa_admin_current_specialist_id')
     } catch (e) {}
     window.location.reload()
   }
 
   // Filtrado estricto de navegación según el rol autenticado
+  // Especialista: ÚNICAMENTE Agenda e Historial (Gestión de servicios eliminada)
   const visibleNavItems = navItems.filter(item => {
     if (currentUserRole === 'SPECIALIST') {
-      return item.path === '/admin/agenda' || item.path === '/admin/servicios' || item.path === '/admin/historial'
+      return item.path === '/admin/agenda' || item.path === '/admin/historial'
     }
     if (currentUserRole === 'ADMIN') {
       return item.path !== '/admin/configuracion' && item.path !== '/admin/telemetria'
@@ -96,7 +112,7 @@ export default function AdminLayout() {
   const isSpecialist = currentUserRole === 'SPECIALIST'
   
   const primaryMobilePaths = isSpecialist 
-    ? ['/admin/agenda', '/admin/servicios', '/admin/historial']
+    ? ['/admin/agenda', '/admin/historial']
     : ['/admin', '/admin/agenda', '/admin/caja', '/admin/clientes']
 
   const primaryMobileItems = visibleNavItems.filter(item => primaryMobilePaths.includes(item.path))
@@ -146,10 +162,16 @@ export default function AdminLayout() {
             </div>
           )}
           {currentUserRole === 'SPECIALIST' && (
-            <div className={styles.roleHeaderBadgeSpecialist}>
+            <button
+              type="button"
+              className={styles.roleHeaderBadgeSpecialistBtn}
+              onClick={() => setShowSpecialistPickerModal(true)}
+              title="Toca para cambiar de especialista"
+            >
               <Scissors size={13} />
-              <span>Especialista</span>
-            </div>
+              <span>{activeSpecialistObj?.name || 'Especialista'}</span>
+              {teamMembers.length > 1 && <span className={styles.changeProfileHint}>▾</span>}
+            </button>
           )}
 
           <div className={styles.dateBadge}>
@@ -294,6 +316,66 @@ export default function AdminLayout() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL PARA CAMBIAR PERFIL DE ESPECIALISTA */}
+      <AnimatePresence>
+        {showSpecialistPickerModal && (
+          <div className={styles.profileModalOverlay} onClick={() => setShowSpecialistPickerModal(false)}>
+            <motion.div 
+              className={styles.profileModalCard} 
+              onClick={e => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className={styles.profileModalHeader}>
+                <h3>Seleccionar Perfil de Especialista</h3>
+                <button 
+                  type="button" 
+                  className={styles.profileModalClose} 
+                  onClick={() => setShowSpecialistPickerModal(false)}
+                  aria-label="Cerrar modal"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p className={styles.profileModalSubtitle}>
+                Elige tu perfil entre las especialistas para ver tu agenda personal y calcular tus honorarios:
+              </p>
+
+              <div className={styles.profileModalList}>
+                {teamMembers && teamMembers.length > 0 ? (
+                  teamMembers.map(m => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={`${styles.profileModalItem} ${String(m.id) === String(currentSpecialistId) ? styles.profileModalItemActive : ''}`}
+                      onClick={() => {
+                        setCurrentSpecialistId(String(m.id))
+                        setShowSpecialistPickerModal(false)
+                      }}
+                    >
+                      <div className={styles.profileModalAvatar} style={{ borderColor: m.color || '#D4AF37' }}>
+                        {m.name ? m.name.charAt(0).toUpperCase() : 'E'}
+                      </div>
+                      <div className={styles.profileModalInfo}>
+                        <strong className={styles.profileModalName}>{m.name}</strong>
+                        <span className={styles.profileModalRole}>{m.role || 'Especialista'}</span>
+                      </div>
+                      <span className={styles.profileModalRate}>{m.commissionRate || 40}% Comisión</span>
+                    </button>
+                  ))
+                ) : (
+                  <p style={{ fontSize: '0.8rem', color: '#A3A3A3', textAlign: 'center', margin: '15px 0' }}>
+                    No hay especialistas registradas en el sistema actualmente.
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

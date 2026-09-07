@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Scissors, 
@@ -22,6 +23,7 @@ import styles from './AdminServicios.module.css'
 
 export default function AdminServicios() {
   const { 
+    currentUserRole,
     serviceCategories, 
     addCategory, 
     updateCategory, 
@@ -31,6 +33,11 @@ export default function AdminServicios() {
     deleteService, 
     toggleServiceActive 
   } = useAdmin()
+
+  // Las especialistas NO gestionan servicios (rol exclusivo de Dueña o Administradora)
+  if (currentUserRole === 'SPECIALIST') {
+    return <Navigate to="/admin/agenda" replace />
+  }
 
   const [activeTab, setActiveTab] = useState('servicios') // 'servicios' | 'categorias'
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all')

@@ -248,3 +248,54 @@ export function exportProductsInventory(products) {
     filename: `Inventario_Productos_Tienda_${dateStamp}.csv`
   })
 }
+
+/**
+ * Export Formatter: Historial de Servicios & Honorarios de Especialista
+ */
+export function exportSpecialistHistory(appointments, specialist) {
+  const specRate = specialist?.commissionRate || 40
+  const headers = [
+    'ID Cita',
+    'Fecha',
+    'Hora',
+    'Clienta',
+    'Teléfono',
+    'Servicio',
+    'Estado',
+    'Valor Servicio ($ COP)',
+    'Porcentaje Comisión (%)',
+    'Ganancia Neta ($ COP)'
+  ]
+
+  const rows = appointments.map(a => {
+    const net = a.commissionAmount !== undefined ? a.commissionAmount : Math.round((Number(a.price || 0) * specRate) / 100)
+    return [
+      a.id || '',
+      a.date || '',
+      a.time || '',
+      a.clientName || '',
+      a.clientPhone || '',
+      a.serviceName || '',
+      a.status || '',
+      `$${Number(a.price || 0).toLocaleString('es-CO')} COP`,
+      `${specRate}%`,
+      `$${Number(net).toLocaleString('es-CO')} COP`
+    ]
+  })
+
+  const totalNet = appointments.reduce((acc, a) => {
+    const net = a.commissionAmount !== undefined ? a.commissionAmount : Math.round((Number(a.price || 0) * specRate) / 100)
+    return acc + net
+  }, 0)
+
+  rows.push(['---', '---', '---', '---', '---', '---', '---', '---', '---', '---'])
+  rows.push(['TOTALES', '', '', '', '', `${appointments.length} Servicios`, '', '', 'TOTAL GANADO', `$${totalNet.toLocaleString('es-CO')} COP`])
+
+  const dateStamp = new Date().toISOString().split('T')[0]
+  const specName = (specialist?.name || 'Especialista').replace(/\s+/g, '_')
+  downloadCSV({
+    headers,
+    rows,
+    filename: `Historial_Honorarios_${specName}_${dateStamp}.csv`
+  })
+}

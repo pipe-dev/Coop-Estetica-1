@@ -115,6 +115,169 @@
   color: #C4B5FD;
 }
 
+.roleHeaderBadgeSpecialistBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #C4B5FD;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.roleHeaderBadgeSpecialistBtn:hover {
+  background: rgba(139, 92, 246, 0.22);
+  border-color: #8B5CF6;
+  transform: translateY(-1px);
+}
+
+.changeProfileHint {
+  font-size: 0.68rem;
+  color: #A78BFA;
+  font-weight: 500;
+  margin-left: 2px;
+}
+
+/* PROFILE MODAL POPUP */
+.profileModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.profileModalCard {
+  width: 100%;
+  max-width: 440px;
+  background: #141414;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  color: #FFFFFF;
+}
+
+.profileModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.profileModalHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+}
+
+.profileModalClose {
+  background: transparent;
+  border: none;
+  color: #A3A3A3;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profileModalClose:hover {
+  color: #FFFFFF;
+}
+
+.profileModalSubtitle {
+  font-size: 0.78rem;
+  color: #A3A3A3;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.profileModalList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.profileModalItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.profileModalItem:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.profileModalItemActive {
+  background: rgba(212, 175, 55, 0.16) !important;
+  border-color: var(--color-gold) !important;
+}
+
+.profileModalAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.15);
+  border: 2px solid var(--color-gold);
+  color: var(--color-gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.profileModalInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileModalName {
+  font-size: 0.88rem;
+  color: #FFFFFF;
+}
+
+.profileModalRole {
+  font-size: 0.74rem;
+  color: #D4AF37;
+}
+
+.profileModalRate {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #34D399;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
 .logoutHeaderBtn {
   display: inline-flex;
   align-items: center;

@@ -76,7 +76,22 @@ export function AdminProvider({ children }) {
     } catch (e) { return 'OWNER' }
   })
 
-  const [currentSpecialistId, setCurrentSpecialistId] = useState('')
+  const [currentSpecialistId, setCurrentSpecialistIdState] = useState(() => {
+    try {
+      return localStorage.getItem('spa_admin_current_specialist_id') || ''
+    } catch (e) { return '' }
+  })
+
+  const setCurrentSpecialistId = (id) => {
+    setCurrentSpecialistIdState(id)
+    try {
+      if (id) {
+        localStorage.setItem('spa_admin_current_specialist_id', id)
+      } else {
+        localStorage.removeItem('spa_admin_current_specialist_id')
+      }
+    } catch (e) {}
+  }
 
   // 3. Categorías y Servicios
   const [serviceCategories, setServiceCategories] = useState(() => {

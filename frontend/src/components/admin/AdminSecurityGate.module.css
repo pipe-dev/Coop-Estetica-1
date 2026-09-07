@@ -237,3 +237,194 @@
     transform: rotate(360deg);
   }
 }
+
+/* SPECIALIST PROFILE SELECTOR SCREEN */
+.specialistSelectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.specialistSelectHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.specialistSelectHeader h2 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  color: #FFFFFF;
+  margin: 0 0 6px;
+}
+
+.specialistSelectHeader p {
+  font-size: 0.8rem;
+  color: #A3A3A3;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.specialistGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 2px;
+}
+
+.specialistCardBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 14px;
+  color: #FFFFFF;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.specialistCardBtn:hover {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+}
+
+.specialistAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.15);
+  border: 2px solid var(--color-gold);
+  color: var(--color-gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.specialistMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.specialistName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.specialistRole {
+  font-size: 0.76rem;
+  color: #D4AF37;
+  font-weight: 500;
+}
+
+.specialistCommissionBadge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+.specialistArrow {
+  color: #737373;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.specialistCardBtn:hover .specialistArrow {
+  color: var(--color-gold);
+  transform: translateX(3px);
+}
+
+.emptyTeamWarning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 14px;
+  padding: 16px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.warningIcon {
+  color: #F59E0B;
+}
+
+.emptyTeamWarning h4 {
+  font-size: 0.95rem;
+  color: #FCD34D;
+  margin: 0;
+}
+
+.emptyTeamWarning p {
+  font-size: 0.78rem;
+  color: #D4D4D8;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.emptyActionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.provisionalBtn {
+  padding: 10px;
+  background: rgba(212, 175, 55, 0.2);
+  border: 1px solid var(--color-gold);
+  border-radius: 10px;
+  color: var(--color-gold-light);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.provisionalBtn:hover {
+  background: var(--color-gold);
+  color: #000000;
+}
+
+.backToPinBtn, .cancelSelectBtn {
+  padding: 9px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: #A3A3A3;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backToPinBtn:hover, .cancelSelectBtn:hover {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
