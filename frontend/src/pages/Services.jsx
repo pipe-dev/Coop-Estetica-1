@@ -30,12 +30,14 @@ function Services() {
     )
   }, [serviceCategories])
 
-  // Build filter categories dynamically
+  // Build filter categories dynamically (sin duplicar ni admitir categorías 'todos' o 'all')
   const filterCategories = useMemo(() => {
-    return (serviceCategories || []).map(cat => ({
-      id: cat.id,
-      name: cat.name,
-    }))
+    return (serviceCategories || [])
+      .filter(cat => cat && cat.id && cat.id !== 'all' && cat.name && cat.name.trim().toLowerCase() !== 'todos')
+      .map(cat => ({
+        id: cat.id,
+        name: cat.name.trim(),
+      }))
   }, [serviceCategories])
 
   // Make the entire browser body black for this page
@@ -85,55 +87,36 @@ function Services() {
       <InteractiveBackground variant="blue" />
       <div className={styles.servicesOverlay} />
       
-      {/* HORIZONTAL PILL FILTERS - SMART AUTO HIDE */}
-      <motion.nav 
-        className={styles.filterContainer}
-        initial={{ opacity: 1, y: 0 }}
-        animate={{ 
-          opacity: hideUi ? 0 : 1, 
-          y: hideUi ? -90 : 0 
-        }}
-        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{ pointerEvents: hideUi ? 'none' : 'auto' }}
-      >
-        <div className={styles.filterWrapper}>
-          {/* Top Row: 5 Filters */}
-          <ul className={styles.filterRow}>
+      {/* HORIZONTAL PILL FILTERS - SMART AUTO HIDE (SOLO SI HAY CATEGORÍAS CREADAS) */}
+      {filterCategories.length > 0 && (
+        <motion.nav 
+          className={styles.filterContainer}
+          initial={{ opacity: 1, y: 0 }}
+          animate={{ 
+            opacity: hideUi ? 0 : 1, 
+            y: hideUi ? -90 : 0 
+          }}
+          transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ pointerEvents: hideUi ? 'none' : 'auto' }}
+        >
+          <ul className={styles.filterList}>
             <li onClick={() => setActiveCategory('all')}>
               <LiquidGlassIos26 
-                scale={0.03}
-                baseFrequency={0.1}
-                numOctaves={3}
                 centerBlur={16}
                 bevelBlur={32}
-                bevelWidth={16}
-                saturate={150}
-                brightness={1.5}
-                glassTintOpacity={0.3}
-                tint="light"
                 borderRadius={9999}
-                disableContentFilter={true}
                 className={`${styles.filterPill} ${activeCategory === 'all' ? styles.active : ''}`}
               >
                 {activeCategory === 'all' && <span className={styles.activeDot}>•</span>}
                 <span>Todos</span>
               </LiquidGlassIos26>
             </li>
-            {filterCategories.slice(0, 4).map(cat => (
+            {filterCategories.map(cat => (
               <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
                 <LiquidGlassIos26 
-                  scale={0.03}
-                  baseFrequency={0.1}
-                  numOctaves={3}
                   centerBlur={16}
                   bevelBlur={32}
-                  bevelWidth={16}
-                  saturate={150}
-                  brightness={1.5}
-                  glassTintOpacity={0.3}
-                  tint="light"
                   borderRadius={9999}
-                  disableContentFilter={true}
                   className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
                 >
                   {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
@@ -142,34 +125,8 @@ function Services() {
               </li>
             ))}
           </ul>
-
-          {/* Bottom Row: 2 Filters Centered */}
-          <ul className={styles.filterRow}>
-            {filterCategories.slice(4).map(cat => (
-              <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
-                <LiquidGlassIos26 
-                  scale={0.03}
-                  baseFrequency={0.1}
-                  numOctaves={3}
-                  centerBlur={16}
-                  bevelBlur={32}
-                  bevelWidth={16}
-                  saturate={150}
-                  brightness={1.5}
-                  glassTintOpacity={0.3}
-                  tint="light"
-                  borderRadius={9999}
-                  disableContentFilter={true}
-                  className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
-                >
-                  {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
-                  <span>{cat.name}</span>
-                </LiquidGlassIos26>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </motion.nav>
+        </motion.nav>
+      )}
 
       {/* EDITORIAL SERVICE GRID (same structure as Shop product grid) */}
       <main className={styles.mainContent}>

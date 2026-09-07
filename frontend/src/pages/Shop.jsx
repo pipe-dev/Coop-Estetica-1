@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ShoppingBag, Sparkles, MessageCircle } from 'lucide-react'
-import { products as defaultProducts, categories } from '../data/products'
+import { products as defaultProducts } from '../data/products'
 import styles from './Shop.module.css'
 import LiquidGlassIos26 from '../components/ui/LiquidGlassIos26'
 import ProgressiveImage from '../components/ui/ProgressiveImage'
@@ -23,6 +23,22 @@ function Shop() {
   const { addToCart, openCart, totalCount } = useCart()
   const adminCtx = useAdmin()
   const liveProducts = adminCtx?.products && adminCtx.products.length > 0 ? adminCtx.products : defaultProducts
+
+  // Extraer categorías dinámicamente de los productos reales creados en el sistema
+  const dynamicCategories = useMemo(() => {
+    if (!liveProducts || liveProducts.length === 0) return []
+    const map = new Map()
+    liveProducts.forEach(p => {
+      if (p.category && p.category !== 'all' && p.category.toLowerCase() !== 'todos') {
+        const catId = p.category.trim()
+        if (!map.has(catId)) {
+          const displayName = p.categoryName || (catId.charAt(0).toUpperCase() + catId.slice(1))
+          map.set(catId, { id: catId, name: displayName })
+        }
+      }
+    })
+    return Array.from(map.values())
+  }, [liveProducts])
 
   // Make the entire browser body black for this page
   useEffect(() => {
@@ -77,62 +93,46 @@ function Shop() {
         {totalCount > 0 && <span className={styles.cartBadge}>{totalCount}</span>}
       </button>
       
-      {/* HORIZONTAL PILL FILTERS - SMART AUTO HIDE */}
-      <motion.nav 
-        className={styles.filterContainer}
-        initial={{ opacity: 1, y: 0 }}
-        animate={{ 
-          opacity: hideUi ? 0 : 1, 
-          y: hideUi ? -90 : 0 
-        }}
-        transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-        style={{ pointerEvents: hideUi ? 'none' : 'auto' }}
-      >
-        <ul className={styles.filterList}>
-          <li onClick={() => setActiveCategory('all')}>
-            <LiquidGlassIos26 
-              scale={0.03}
-              baseFrequency={0.1}
-              numOctaves={3}
-              centerBlur={16}
-              bevelBlur={32}
-              bevelWidth={16}
-              saturate={150}
-              brightness={1.5}
-              glassTintOpacity={0.3}
-              tint="light"
-              borderRadius={9999}
-              disableContentFilter={true}
-              className={`${styles.filterPill} ${activeCategory === 'all' ? styles.active : ''}`}
-            >
-              {activeCategory === 'all' && <span className={styles.activeDot}>•</span>}
-              <span>Todos</span>
-            </LiquidGlassIos26>
-          </li>
-          {categories.map(cat => (
-            <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
+      {/* HORIZONTAL PILL FILTERS - SMART AUTO HIDE (SOLO SI HAY CATEGORÍAS CREADAS) */}
+      {dynamicCategories.length > 0 && (
+        <motion.nav 
+          className={styles.filterContainer}
+          initial={{ opacity: 1, y: 0 }}
+          animate={{ 
+            opacity: hideUi ? 0 : 1, 
+            y: hideUi ? -90 : 0 
+          }}
+          transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
+          style={{ pointerEvents: hideUi ? 'none' : 'auto' }}
+        >
+          <ul className={styles.filterList}>
+            <li onClick={() => setActiveCategory('all')}>
               <LiquidGlassIos26 
-                scale={0.03}
-                baseFrequency={0.1}
-                numOctaves={3}
                 centerBlur={16}
                 bevelBlur={32}
-                bevelWidth={16}
-                saturate={150}
-                brightness={1.5}
-                glassTintOpacity={0.3}
-                tint="light"
                 borderRadius={9999}
-                disableContentFilter={true}
-                className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
+                className={`${styles.filterPill} ${activeCategory === 'all' ? styles.active : ''}`}
               >
-                {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
-                <span>{cat.name}</span>
+                {activeCategory === 'all' && <span className={styles.activeDot}>•</span>}
+                <span>Todos</span>
               </LiquidGlassIos26>
             </li>
-          ))}
-        </ul>
-      </motion.nav>
+            {dynamicCategories.map(cat => (
+              <li key={cat.id} onClick={() => setActiveCategory(cat.id)}>
+                <LiquidGlassIos26 
+                  centerBlur={16}
+                  bevelBlur={32}
+                  borderRadius={9999}
+                  className={`${styles.filterPill} ${activeCategory === cat.id ? styles.active : ''}`}
+                >
+                  {activeCategory === cat.id && <span className={styles.activeDot}>•</span>}
+                  <span>{cat.name}</span>
+                </LiquidGlassIos26>
+              </li>
+            ))}
+          </ul>
+        </motion.nav>
+      )}
 
       {/* EDITORIAL PRODUCT GRID */}
       <main className={styles.mainContent}>

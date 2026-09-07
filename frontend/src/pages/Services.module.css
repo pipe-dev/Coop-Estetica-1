@@ -111,6 +111,18 @@
   max-width: 100%;
 }
 
+.filterList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;
+  list-style: none;
+  padding: 2px 8px;
+  margin: 0 auto;
+  max-width: 600px;
+}
+
 .filterRow {
   display: flex;
   justify-content: center;
