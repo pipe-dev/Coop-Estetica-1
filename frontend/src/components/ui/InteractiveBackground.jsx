@@ -194,19 +194,26 @@ const InteractiveBackground = ({ variant = 'gold' }) => {
     let mouse = { x: 0, y: 0 };
     let targetMouse = { x: 0, y: 0 };
     
-    // FPS Throttling for low-end devices (Cap at 30 FPS)
+    // Low-end device detection (CPU cores <= 4 or device memory <= 4GB)
+    const isMobile = window.innerWidth < 768;
+    const isLowEnd = typeof navigator !== 'undefined' && (
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+      (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+      isMobile
+    );
+    
+    // FPS Throttling: 24 FPS for low-end/mobile, 30 FPS for desktop
     let lastRenderTime = 0;
-    const fpsInterval = 1000 / 30; // 33.33ms
+    const targetFps = isLowEnd ? 24 : 30;
+    const fpsInterval = 1000 / targetFps;
 
     // Resize handler
     const resizeCanvas = () => {
-      // [PERFORMANCE] Downscale resolution for mobile to save GPU fill rate
-      const isMobile = window.innerWidth < 768;
-      // Use 0.75 for mobile (tostadoras), 1 for desktop. Never go above 1.
-      const dpr = isMobile ? 0.75 : 1;
+      // Downscale resolution for mobile and low-end devices to conserve GPU fill rate
+      const dpr = isMobile ? 0.6 : (isLowEnd ? 0.75 : 1);
       
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      canvas.width = Math.floor(window.innerWidth * dpr);
+      canvas.height = Math.floor(window.innerHeight * dpr);
       canvas.style.width = window.innerWidth + 'px';
       canvas.style.height = window.innerHeight + 'px';
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -217,29 +224,29 @@ const InteractiveBackground = ({ variant = 'gold' }) => {
 
     // Mouse handler
     const handleMouseMove = (e) => {
-      const isMobile = window.innerWidth < 768;
-      const dpr = isMobile ? 0.75 : 1;
-      // Flip Y axis for WebGL
+      const dpr = isMobile ? 0.6 : (isLowEnd ? 0.75 : 1);
       targetMouse.x = e.clientX * dpr;
       targetMouse.y = (window.innerHeight - e.clientY) * dpr;
     };
     
     // For touch devices
     const handleTouchMove = (e) => {
-        if (e.touches.length > 0) {
-            const isMobile = window.innerWidth < 768;
-            const dpr = isMobile ? 0.75 : 1;
-            targetMouse.x = e.touches[0].clientX * dpr;
-            targetMouse.y = (window.innerHeight - e.touches[0].clientY) * dpr;
-        }
+      if (e.touches.length > 0) {
+        const dpr = isMobile ? 0.6 : (isLowEnd ? 0.75 : 1);
+        targetMouse.x = e.touches[0].clientX * dpr;
+        targetMouse.y = (window.innerHeight - e.touches[0].clientY) * dpr;
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
 
     // Render loop
     const render = (now) => {
       animationFrameId = requestAnimationFrame(render);
+      
+      // Pause completely if tab is hidden in background
+      if (document.hidden) return;
       
       // Calculate elapsed time since last render
       const elapsed = now - lastRenderTime;

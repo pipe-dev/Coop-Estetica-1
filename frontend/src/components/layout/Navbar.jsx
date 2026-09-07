@@ -97,7 +97,8 @@ function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const isCollapsed = isHero && !showFullNavInHero;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isCollapsed = !isMobile && isHero && !showFullNavInHero;
   const isCatalogPage = location.pathname === '/tienda' || location.pathname === '/servicios' || location.pathname === '/reservar';
   const shouldHideNav = isHiddenByModal || (isCatalogPage && scrollHidden && !isHovered);
   
@@ -126,13 +127,12 @@ function Navbar() {
           setIsHovered(false)
         }}
         onClick={() => {
-          // Extra seguridad para móviles
           setIsHovered(true)
           setShowFullNavInHero(true)
         }}
       >
         {/* Hit area padding to make it easier to hover/tap the collapsed pill */}
-        <div style={{ padding: '30px 20px', marginTop: '-10px' }}>
+        <div style={{ padding: isMobile ? '0' : '30px 20px', marginTop: isMobile ? '0' : '-10px' }}>
           <motion.div
             className={styles.desktopNav}
             initial={false}
@@ -157,8 +157,8 @@ function Navbar() {
             }
             transition={
               isCollapsed 
-                ? { duration: 1, ease: [0.25, 1, 0.5, 1] } // Lento (1 segundo) para aplastarse
-                : { duration: 0.4, ease: "easeOut" }       // Rápido (400ms) para mostrarse
+                ? { duration: 1, ease: [0.25, 1, 0.5, 1] }
+                : { duration: 0.4, ease: "easeOut" }
             }
           >
             <motion.div
@@ -172,15 +172,11 @@ function Navbar() {
               style={{ pointerEvents: isCollapsed ? 'none' : 'auto', width: '100%', display: 'flex', justifyContent: 'center' }}
             >
               <LiquidGlassIos26 
-                scale={0.05}
-                baseFrequency={0.08}
-                numOctaves={3}
-                centerBlur={2}
-                bevelBlur={16}
-                bevelWidth={22}
-                saturate={200}
-                brightness={isLightBackground ? 1.2 : 1.15}
-                glassTintOpacity={isLightBackground ? 0.92 : 0.002}
+                centerBlur={16}
+                bevelBlur={18}
+                saturate={180}
+                brightness={isLightBackground ? 1.15 : 1.1}
+                glassTintOpacity={isLightBackground ? 0.92 : 0.08}
                 glassBg={isLightBackground ? 'linear-gradient(135deg, rgba(13, 13, 13, 0.90) 0%, rgba(26, 26, 26, 0.95) 100%)' : null}
                 className={`${styles.navGlass} ${isLightBackground ? styles.navGlassDark : styles.navGlassLight}`}
               >

@@ -6,7 +6,7 @@ import styles from "./SlideTabs.module.css";
 import { Home, Gem, Users, Image as ImageIcon, Briefcase, ShoppingBag } from 'lucide-react';
 
 const getTabIcon = (path, isActive, isHovered) => {
-  const iconProps = { size: 16, strokeWidth: 2.2, style: { flexShrink: 0 } };
+  const iconProps = { size: 18, strokeWidth: 2, style: { flexShrink: 0, display: 'block' } };
   
   switch (path) {
     case '/':

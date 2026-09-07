@@ -69,46 +69,6 @@ function Home() {
     }
   }, [])
 
-  // Throttled Ping-pong video reverse loop (forward -> backward -> forward...)
-  useEffect(() => {
-    if (!isReturningUser || !videoRef.current) return;
-
-    const video = videoRef.current;
-    let animId;
-    let playingForward = true;
-    let lastTime = 0;
-
-    const handleEnded = () => {
-      playingForward = false;
-    };
-
-    const reverseStep = (timestamp) => {
-      if (!playingForward && video) {
-        if (timestamp - lastTime >= 33) { // Throttled to 30fps for hardware decoding stability
-          lastTime = timestamp;
-          if (video.currentTime > 0.08) {
-            video.currentTime = Math.max(0, video.currentTime - 0.04);
-          } else {
-            video.currentTime = 0;
-            playingForward = true;
-            video.play().catch(() => {});
-          }
-        }
-      }
-      animId = requestAnimationFrame(reverseStep);
-    };
-
-    video.addEventListener('ended', handleEnded);
-    animId = requestAnimationFrame(reverseStep);
-
-    return () => {
-      video.removeEventListener('ended', handleEnded);
-      if (animId) cancelAnimationFrame(animId);
-    };
-  }, [isReturningUser]);
-  
-
-
   const { scrollYProgress } = useScroll({
     target: heroRef,
     offset: ['start start', 'end end']
@@ -121,32 +81,24 @@ function Home() {
 
     if (isReturningUser) return;
 
-    if (videoRef.current && !isNaN(videoRef.current.duration)) {
-      videoRef.current.currentTime = latest * videoRef.current.duration;
-    }
-
-    if (latest < 0.08) {
-      setActiveScene(-1) // Pitch black cover screen
+    if (latest < 0.10) {
+      setActiveScene(-1) // Cover screen visible
       setStoryWord("")
       setShowCtas(false)
-    } else if (latest < 0.30) {
-      setActiveScene(0)
+    } else if (latest < 0.35) {
+      setActiveScene(0) // Bienvenida
       setStoryWord("")
       setShowCtas(false)
-    } else if (latest < 0.55) {
-      setActiveScene(1)
+    } else if (latest < 0.60) {
+      setActiveScene(1) // El lujo de decidir cuidarte
       setStoryWord("")
       setShowCtas(false)
-    } else if (latest < 0.75) {
-      setActiveScene(-1) // Empty screen
-      setStoryWord("")
-      setShowCtas(false)
-    } else if (latest < 0.91) {
-      setActiveScene(2)
+    } else if (latest < 0.82) {
+      setActiveScene(2) // Para engrandecer tu belleza
       setStoryWord("")
       setShowCtas(false)
     } else {
-      setActiveScene(3)
+      setActiveScene(3) // quiérete en: + CTAs
       setStoryWord("quiérete en:")
       setShowCtas(true)
     }
@@ -167,12 +119,13 @@ function Home() {
             <video
               ref={videoRef}
               src="/videos/hero.mp4"
+              poster="/images/hero_poster.webp"
               className={styles.heroImage}
               muted
               playsInline
               preload="auto"
-              autoPlay={isReturningUser}
-              loop={false}
+              autoPlay
+              loop
             />
           </div>
 
@@ -192,15 +145,25 @@ function Home() {
                 <div className={styles.scrollInstructionIcon}>
                   <div className={styles.scrollInstructionDot} />
                 </div>
+                <button
+                  type="button"
+                  className={styles.skipIntroBtn}
+                  onClick={() => {
+                    localStorage.setItem('hasSeenIntro', 'true');
+                    setIsReturningUser(true);
+                  }}
+                >
+                  Agendar Cita Directamente &rarr;
+                </button>
               </motion.div>
             </motion.div>
           )}
 
           {isReturningUser ? (
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1, delay: 0.5 }}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
               className={styles.sideDockContainer}
             >
               <div id="beat-btn">
