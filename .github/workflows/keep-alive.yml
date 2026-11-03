@@ -1,0 +1,15 @@
+name: Keep Alive Supabase & Backend
+
+on:
+  schedule:
+    # 1 sola vez al día a las 7:00 AM hora Colombia (12:00 UTC)
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Despertar backend y base de datos
+        run: |
+          curl -s -o /dev/null -w "Estado: %{http_code}\n" https://coop-estetica-1-backe.onrender.com/api/products
