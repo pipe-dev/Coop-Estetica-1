@@ -5,8 +5,20 @@ import { PrismaService } from '../prisma/prisma.service';
 export class TeamService {
   constructor(private prisma: PrismaService) {}
 
+  // Micro-Caché en memoria RAM para alta concurrencia (TTL: 60s)
+  private teamCache: { data: any[]; timestamp: number } | null = null;
+  private readonly CACHE_TTL_MS = 60 * 1000;
+
+  private invalidateCache() {
+    this.teamCache = null;
+  }
+
   async getAllPublic() {
-    return this.prisma.teamMember.findMany({
+    const now = Date.now();
+    if (this.teamCache && now - this.teamCache.timestamp < this.CACHE_TTL_MS) {
+      return this.teamCache.data;
+    }
+    const data = await this.prisma.teamMember.findMany({
       where: { active: true },
       select: {
         id: true,
@@ -19,6 +31,8 @@ export class TeamService {
       },
       orderBy: { name: 'asc' },
     });
+    this.teamCache = { data, timestamp: now };
+    return data;
   }
 
   async getAllAdmin() {
@@ -40,6 +54,7 @@ export class TeamService {
     color?: string;
     commissionRate?: number;
   }) {
+    this.invalidateCache();
     return this.prisma.teamMember.create({
       data: {
         name: data.name,
@@ -59,6 +74,7 @@ export class TeamService {
     const exists = await this.prisma.teamMember.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Especialista no encontrada.');
 
+    this.invalidateCache();
     return this.prisma.teamMember.update({
       where: { id },
       data: {
@@ -69,6 +85,7 @@ export class TeamService {
   }
 
   async delete(id: string) {
+    this.invalidateCache();
     return this.prisma.teamMember.delete({ where: { id } });
   }
 }

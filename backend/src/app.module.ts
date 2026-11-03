@@ -24,12 +24,12 @@ import { AppController } from './app.controller';
       {
         name: 'short',
         ttl: 1000,
-        limit: 20, // 20 requests per second per IP max
+        limit: 40, // 40 peticiones por segundo
       },
       {
         name: 'medium',
         ttl: 60000,
-        limit: 150, // 150 requests per minute per IP
+        limit: 600, // 600 peticiones por minuto (soporta múltiples clientes en la misma IP de red móvil)
       },
     ]),
     PrismaModule,

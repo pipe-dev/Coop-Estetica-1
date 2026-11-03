@@ -5,11 +5,28 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ServicesService {
   constructor(private prisma: PrismaService) {}
 
+  // Micro-Caché en memoria RAM para alta concurrencia (TTL: 60s)
+  private categoriesCache: { data: any[]; timestamp: number } | null = null;
+  private servicesCache: { data: any[]; timestamp: number } | null = null;
+  private readonly CACHE_TTL_MS = 60 * 1000;
+
+  private invalidateCache() {
+    this.categoriesCache = null;
+    this.servicesCache = null;
+  }
+
   // ----------------------------------------------------
   // CATEGORÍAS
   // ----------------------------------------------------
   async getAllCategories(includeInactive = false) {
-    return this.prisma.serviceCategory.findMany({
+    if (!includeInactive) {
+      const now = Date.now();
+      if (this.categoriesCache && now - this.categoriesCache.timestamp < this.CACHE_TTL_MS) {
+        return this.categoriesCache.data;
+      }
+    }
+
+    const data = await this.prisma.serviceCategory.findMany({
       where: includeInactive ? {} : { active: true },
       include: {
         services: {
@@ -19,9 +36,15 @@ export class ServicesService {
       },
       orderBy: { order: 'asc' },
     });
+
+    if (!includeInactive) {
+      this.categoriesCache = { data, timestamp: Date.now() };
+    }
+    return data;
   }
 
   async createCategory(data: { name: string; description?: string; image?: string; order?: number }) {
+    this.invalidateCache();
     return this.prisma.serviceCategory.create({
       data: {
         name: data.name,
@@ -37,6 +60,7 @@ export class ServicesService {
     const exists = await this.prisma.serviceCategory.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Categoría no encontrada.');
 
+    this.invalidateCache();
     return this.prisma.serviceCategory.update({
       where: { id },
       data,
@@ -44,6 +68,7 @@ export class ServicesService {
   }
 
   async deleteCategory(id: string) {
+    this.invalidateCache();
     return this.prisma.serviceCategory.delete({
       where: { id },
     });
@@ -53,7 +78,14 @@ export class ServicesService {
   // SERVICIOS
   // ----------------------------------------------------
   async getAllServices(includeInactive = false) {
-    return this.prisma.service.findMany({
+    if (!includeInactive) {
+      const now = Date.now();
+      if (this.servicesCache && now - this.servicesCache.timestamp < this.CACHE_TTL_MS) {
+        return this.servicesCache.data;
+      }
+    }
+
+    const data = await this.prisma.service.findMany({
       where: includeInactive ? {} : { active: true },
       include: {
         category: {
@@ -62,6 +94,11 @@ export class ServicesService {
       },
       orderBy: { name: 'asc' },
     });
+
+    if (!includeInactive) {
+      this.servicesCache = { data, timestamp: Date.now() };
+    }
+    return data;
   }
 
   async getServiceById(id: string) {
@@ -82,6 +119,7 @@ export class ServicesService {
     includes?: string;
     image?: string;
   }) {
+    this.invalidateCache();
     return this.prisma.service.create({
       data: {
         name: data.name,
@@ -112,6 +150,7 @@ export class ServicesService {
     const exists = await this.prisma.service.findUnique({ where: { id } });
     if (!exists) throw new NotFoundException('Servicio no encontrado.');
 
+    this.invalidateCache();
     return this.prisma.service.update({
       where: { id },
       data: {
@@ -123,6 +162,7 @@ export class ServicesService {
   }
 
   async toggleServiceActive(id: string) {
+    this.invalidateCache();
     const service = await this.getServiceById(id);
     return this.prisma.service.update({
       where: { id },
@@ -131,6 +171,7 @@ export class ServicesService {
   }
 
   async deleteService(id: string) {
+    this.invalidateCache();
     return this.prisma.service.delete({
       where: { id },
     });

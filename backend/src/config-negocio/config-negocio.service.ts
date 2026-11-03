@@ -6,10 +6,27 @@ import * as bcrypt from 'bcryptjs';
 export class ConfigNegocioService {
   constructor(private prisma: PrismaService) {}
 
+  // Micro-Caché en memoria RAM para alta concurrencia (TTL: 60s)
+  private configCache: { data: any; timestamp: number } | null = null;
+  private membershipsCache: { data: any[]; timestamp: number } | null = null;
+  private closedDatesCache: { data: any[]; timestamp: number } | null = null;
+  private readonly CACHE_TTL_MS = 60 * 1000;
+
+  private invalidateCache() {
+    this.configCache = null;
+    this.membershipsCache = null;
+    this.closedDatesCache = null;
+  }
+
   // ----------------------------------------------------
   // CONFIGURACIÓN GENERAL DEL NEGOCIO (PÚBLICA - CERO FUGA DE CLAVES)
   // ----------------------------------------------------
   async getPublicConfig() {
+    const now = Date.now();
+    if (this.configCache && now - this.configCache.timestamp < this.CACHE_TTL_MS) {
+      return this.configCache.data;
+    }
+
     let config = await this.prisma.businessConfig.findUnique({
       where: { id: 'singleton' },
     });
@@ -21,7 +38,7 @@ export class ConfigNegocioService {
     }
 
     // Exponer ÚNICAMENTE datos comerciales públicos. Cero PINs, cero hashes, cero correos privados.
-    return {
+    const result = {
       id: config.id,
       businessName: config.businessName,
       whatsappNumber: config.whatsappNumber,
@@ -34,6 +51,9 @@ export class ConfigNegocioService {
       promoBanner: config.promoBanner,
       updatedAt: config.updatedAt,
     };
+
+    this.configCache = { data: result, timestamp: now };
+    return result;
   }
 
   // ----------------------------------------------------
@@ -56,6 +76,7 @@ export class ConfigNegocioService {
   }
 
   async updateConfig(data: any) {
+    this.invalidateCache();
     // Sanitización: prevenir inyección o manipulación directa de hash
     const { id, masterPinHash, ...cleanData } = data;
     if (cleanData.masterPin && typeof cleanData.masterPin === 'string') {
@@ -72,10 +93,22 @@ export class ConfigNegocioService {
   // PLANES DE MEMBRESÍA VIP
   // ----------------------------------------------------
   async getAllMemberships(onlyActive = true) {
-    return this.prisma.membership.findMany({
+    if (onlyActive) {
+      const now = Date.now();
+      if (this.membershipsCache && now - this.membershipsCache.timestamp < this.CACHE_TTL_MS) {
+        return this.membershipsCache.data;
+      }
+    }
+
+    const data = await this.prisma.membership.findMany({
       where: onlyActive ? { active: true } : {},
       orderBy: { price: 'asc' },
     });
+
+    if (onlyActive) {
+      this.membershipsCache = { data, timestamp: Date.now() };
+    }
+    return data;
   }
 
   async createMembership(data: {
@@ -85,6 +118,7 @@ export class ConfigNegocioService {
     color?: string;
     features: string[];
   }) {
+    this.invalidateCache();
     return this.prisma.membership.create({
       data: {
         name: data.name,
@@ -97,6 +131,7 @@ export class ConfigNegocioService {
   }
 
   async updateMembership(id: string, data: any) {
+    this.invalidateCache();
     return this.prisma.membership.update({
       where: { id },
       data,
@@ -104,6 +139,7 @@ export class ConfigNegocioService {
   }
 
   async deleteMembership(id: string) {
+    this.invalidateCache();
     return this.prisma.membership.delete({
       where: { id },
     });
@@ -113,12 +149,21 @@ export class ConfigNegocioService {
   // DÍAS DE CIERRE, FESTIVOS & VACACIONES
   // ----------------------------------------------------
   async getAllClosedDates() {
-    return this.prisma.closedDate.findMany({
+    const now = Date.now();
+    if (this.closedDatesCache && now - this.closedDatesCache.timestamp < this.CACHE_TTL_MS) {
+      return this.closedDatesCache.data;
+    }
+
+    const data = await this.prisma.closedDate.findMany({
       orderBy: { date: 'asc' },
     });
+
+    this.closedDatesCache = { data, timestamp: now };
+    return data;
   }
 
   async createClosedDate(data: { date: string; reason: string; type?: string }) {
+    this.invalidateCache();
     return this.prisma.closedDate.upsert({
       where: { date: data.date },
       update: {
@@ -134,6 +179,7 @@ export class ConfigNegocioService {
   }
 
   async deleteClosedDate(id: string) {
+    this.invalidateCache();
     return this.prisma.closedDate.delete({
       where: { id },
     });

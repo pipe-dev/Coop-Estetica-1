@@ -5,11 +5,25 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
+  // Micro-Caché en memoria RAM para 10,000+ usuarios concurrentes (TTL: 60s)
+  private publicCache: { data: any[]; timestamp: number } | null = null;
+  private readonly CACHE_TTL_MS = 60 * 1000;
+
+  private invalidateCache() {
+    this.publicCache = null;
+  }
+
   async getAllPublic() {
-    return this.prisma.product.findMany({
+    const now = Date.now();
+    if (this.publicCache && now - this.publicCache.timestamp < this.CACHE_TTL_MS) {
+      return this.publicCache.data;
+    }
+    const data = await this.prisma.product.findMany({
       where: { active: true },
       orderBy: { createdAt: 'desc' },
     });
+    this.publicCache = { data, timestamp: now };
+    return data;
   }
 
   async getAllAdmin() {
@@ -35,6 +49,7 @@ export class ProductsService {
     image?: string;
     featured?: boolean;
   }) {
+    this.invalidateCache();
     return this.prisma.product.create({
       data: {
         name: data.name,
@@ -59,6 +74,7 @@ export class ProductsService {
     const newStock = data.stock !== undefined ? Number(data.stock) : exists.stock;
     const newStatus = newStock > 0 ? (data.status || 'Disponible') : 'Agotado';
 
+    this.invalidateCache();
     return this.prisma.product.update({
       where: { id },
       data: {
@@ -75,6 +91,7 @@ export class ProductsService {
     const prod = await this.getById(id);
     const isAvail = prod.status === 'Disponible' && prod.stock > 0;
 
+    this.invalidateCache();
     return this.prisma.product.update({
       where: { id },
       data: {
@@ -85,6 +102,7 @@ export class ProductsService {
   }
 
   async delete(id: string) {
+    this.invalidateCache();
     return this.prisma.product.delete({ where: { id } });
   }
 }
