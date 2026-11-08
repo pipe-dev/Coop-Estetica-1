@@ -310,7 +310,7 @@ export default function AdminConfiguracion() {
         popular: false,
         color: '#C0C0C0',
         features: [
-          '1 Sesión de Manicure & Pedicure Spa al mes',
+          '1 Sesión de Manicure & Pedicure Completo al mes',
           '10% de descuento en tratamientos faciales',
           'Bebida de cortesía en cada visita',
           'Atención preferencial en agenda'
@@ -322,7 +322,7 @@ export default function AdminConfiguracion() {
         popular: true,
         color: '#D4AF37',
         features: [
-          '2 Sesiones completas de Uñas y Pedicure Spa',
+          '2 Sesiones completas de Uñas y Pedicure Especializado',
           '1 Limpieza Facial Profunda al mes',
           '15% de descuento en todos los servicios adicionales',
           'Acceso a agenda prioritaria en fines de semana',

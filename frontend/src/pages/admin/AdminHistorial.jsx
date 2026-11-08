@@ -233,7 +233,7 @@ export default function AdminHistorial() {
           <p className={styles.subtitle}>
             {isSpecialist 
               ? `Registro de servicios atendidos y cálculo de honorarios netos correspondientes al ${specRate}% de comisión.`
-              : 'Registro cronológico e inmutable de todos los movimientos de caja, ventas y operaciones del spa.'
+              : 'Registro cronológico e inmutable de todos los movimientos de caja, ventas y operaciones de la estética.'
             }
           </p>
         </div>

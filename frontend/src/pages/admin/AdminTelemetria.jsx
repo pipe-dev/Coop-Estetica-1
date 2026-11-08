@@ -599,7 +599,7 @@ export default function AdminTelemetria() {
 
           <h1 className={styles.mainTitle}>Telemetría & Logs del Sistema</h1>
           <p className={styles.mainSubtitle}>
-            Consola resiliente de costo cero: captura excepciones, fallos secundarios, eventos de IA y auditorías sin interrumpir la operación del spa.
+            Consola resiliente de costo cero: captura excepciones, fallos secundarios, eventos de IA y auditorías sin interrumpir la operación de la estética.
           </p>
         </div>
 
