@@ -462,3 +462,105 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+/* COMMISSION FLEXIBLE SECTION */
+.commissionSection {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.commissionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.commissionTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modeToggleGroup {
+  display: flex;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modeToggleBtn {
+  background: transparent;
+  border: none;
+  color: #A0A0A0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.activeModeBtn {
+  background: var(--color-gold);
+  color: #0E0E0E;
+  font-weight: 800;
+}
+
+.commissionInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.commissionChipsRow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.commChip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: #E5E5E5;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.commChip:hover, .activeChip {
+  background: rgba(212, 175, 55, 0.2);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.liveMarginBanner {
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.specialistEarning {
+  color: #10B981;
+  font-weight: 700;
+}
+
+.esteticaMargin {
+  color: var(--color-gold);
+  font-weight: 700;
+}

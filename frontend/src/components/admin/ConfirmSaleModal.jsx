@@ -14,6 +14,38 @@ export default function ConfirmSaleModal({ appointment, onClose, onConfirm }) {
   const [notes, setNotes] = useState('')
   const [saleCompletedData, setSaleCompletedData] = useState(null)
 
+  // Comisión Flexible de la Especialista
+  const defaultRate = appointment.commissionRate !== undefined 
+    ? appointment.commissionRate 
+    : (appointment.specialistRate || 40)
+  
+  const [commissionMode, setCommissionMode] = useState('percent') // 'percent' | 'amount'
+  const [commissionRate, setCommissionRate] = useState(String(defaultRate))
+  const [commissionAmount, setCommissionAmount] = useState(
+    formatCOPInput(Math.round((totalPrice * defaultRate) / 100))
+  )
+
+  const parsedCommAmount = parseCOPInput(commissionAmount)
+  const esteticaMargin = Math.max(0, totalPrice - parsedCommAmount)
+
+  const handleRateChange = (newRateStr) => {
+    setCommissionRate(newRateStr)
+    const r = parseFloat(newRateStr) || 0
+    setCommissionAmount(formatCOPInput(Math.round((totalPrice * r) / 100)))
+  }
+
+  const handleAmountChange = (newAmtStr) => {
+    setCommissionAmount(formatCOPInput(newAmtStr))
+    const amt = parseCOPInput(newAmtStr)
+    const calcRate = totalPrice > 0 ? Number(((amt / totalPrice) * 100).toFixed(1)) : 0
+    setCommissionRate(String(calcRate))
+  }
+
+  const handleSelectQuickChip = (pct) => {
+    handleRateChange(String(pct))
+    setCommissionMode('percent')
+  }
+
   const receivedVal = parseCOPInput(cashReceived)
   const changeToGive = receivedVal - totalPrice
 
@@ -44,7 +76,9 @@ export default function ConfirmSaleModal({ appointment, onClose, onConfirm }) {
       cashReceived: paymentMethod === 'Efectivo' ? receivedVal : totalPrice,
       changeToGive: paymentMethod === 'Efectivo' ? Math.max(0, changeToGive) : 0,
       notes,
-      receiptNo
+      receiptNo,
+      commissionRate: parseFloat(commissionRate) || 0,
+      commissionAmount: parsedCommAmount
     })
 
     // Advance to Step 2: Digital Receipt & WhatsApp Dispatch
@@ -53,6 +87,8 @@ export default function ConfirmSaleModal({ appointment, onClose, onConfirm }) {
       paymentMethod,
       totalPrice,
       notes,
+      commissionRate: parseFloat(commissionRate) || 0,
+      commissionAmount: parsedCommAmount,
       date: appointment.date || getLocalDateString(),
       time: appointment.time || '10:00 AM'
     })
@@ -197,6 +233,85 @@ Esperamos verte pronto para seguir realzando tu belleza y bienestar.`
                   </div>
                 </div>
               )}
+
+              {/* FLEXIBLE COMMISSION SECTION */}
+              <div className={styles.commissionSection}>
+                <div className={styles.commissionHeader}>
+                  <span className={styles.commissionTitle}>
+                    ✂️ Comisión: <strong>{appointment.specialistName || 'Especialista'}</strong>
+                  </span>
+                  <div className={styles.modeToggleGroup}>
+                    <button
+                      type="button"
+                      className={`${styles.modeToggleBtn} ${commissionMode === 'percent' ? styles.activeModeBtn : ''}`}
+                      onClick={() => setCommissionMode('percent')}
+                    >
+                      % Porcentaje
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.modeToggleBtn} ${commissionMode === 'amount' ? styles.activeModeBtn : ''}`}
+                      onClick={() => setCommissionMode('amount')}
+                    >
+                      $ Valor Fijo
+                    </button>
+                  </div>
+                </div>
+
+                {/* QUICK PERCENTAGE CHIPS */}
+                <div className={styles.commissionChipsRow}>
+                  {[30, 35, 40, 45, 50].map(pct => (
+                    <button
+                      key={pct}
+                      type="button"
+                      className={`${styles.commChip} ${commissionRate === String(pct) ? styles.activeChip : ''}`}
+                      onClick={() => handleSelectQuickChip(pct)}
+                    >
+                      {pct}%
+                    </button>
+                  ))}
+                </div>
+
+                {/* INPUT FIELD ACCORDING TO MODE */}
+                <div className={styles.commissionInputRow}>
+                  {commissionMode === 'percent' ? (
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.5"
+                        value={commissionRate}
+                        onChange={e => handleRateChange(e.target.value)}
+                        placeholder="Porcentaje de comisión (0-100)"
+                        style={{ width: '100%' }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="text"
+                        value={commissionAmount}
+                        onChange={e => handleAmountChange(e.target.value)}
+                        placeholder="Valor fijo en pesos ($ COP)"
+                        style={{ width: '100%' }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* LIVE EARNINGS / MARGIN BANNER */}
+                <div className={styles.liveMarginBanner}>
+                  <div>
+                    👩‍⚕️ Ganancia ({commissionRate}%):{' '}
+                    <span className={styles.specialistEarning}>${parsedCommAmount.toLocaleString()} COP</span>
+                  </div>
+                  <div>
+                    🏢 Margen Estética:{' '}
+                    <span className={styles.esteticaMargin}>${esteticaMargin.toLocaleString()} COP</span>
+                  </div>
+                </div>
+              </div>
 
               <div className={styles.formGroup}>
                 <label>Notas (Opcional)</label>
