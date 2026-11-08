@@ -632,9 +632,9 @@ export function AdminProvider({ children }) {
     }
   }
 
-  const updateAppointmentStatus = (id, newStatus) => {
-    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a))
-    api.updateAppointmentStatus(id, newStatus)
+  const updateAppointmentStatus = (id, newStatus, extraData = {}) => {
+    setAppointments(prev => prev.map(a => a.id === id ? { ...a, status: newStatus, ...extraData } : a))
+    api.updateAppointmentStatus(id, newStatus, extraData)
   }
 
   const updateAppointment = (id, updatedData) => {

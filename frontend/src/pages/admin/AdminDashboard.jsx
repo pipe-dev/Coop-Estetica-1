@@ -216,9 +216,9 @@ export default function AdminDashboard() {
     setShowQuickSaleModal(false)
   }
 
-  const handleConfirmAppointmentSale = (appointmentId, totalPrice, paymentMethod, notes) => {
+  const handleConfirmSale = ({ appointmentId, totalPrice, paymentMethod, notes, commissionRate, commissionAmount }) => {
     const appObj = appointments.find(a => a.id === appointmentId)
-    updateAppointmentStatus(appointmentId, 'Pagada')
+    updateAppointmentStatus(appointmentId, 'Pagada', { commissionRate, commissionAmount })
     addTransaction({
       id: `tx-app-${Date.now()}`,
       type: 'Ingreso',
@@ -228,6 +228,7 @@ export default function AdminDashboard() {
       paymentMethod,
       date: todayStr
     })
+    setSelectedAppointmentForSale(null)
   }
 
   return (

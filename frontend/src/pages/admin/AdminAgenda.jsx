@@ -345,9 +345,9 @@ export default function AdminAgenda() {
     setShowAddModal(false)
   }
 
-  const handleConfirmSale = ({ appointmentId, paymentMethod, totalPrice, notes }) => {
+  const handleConfirmSale = ({ appointmentId, paymentMethod, totalPrice, notes, commissionRate, commissionAmount }) => {
     const appObj = appointments.find(a => a.id === appointmentId)
-    updateAppointmentStatus(appointmentId, 'Pagada')
+    updateAppointmentStatus(appointmentId, 'Pagada', { commissionRate, commissionAmount })
     addTransaction({
       id: `tx-app-${Date.now()}`,
       type: 'Ingreso',

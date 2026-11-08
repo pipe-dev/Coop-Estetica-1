@@ -501,6 +501,22 @@ export const api = {
   // ----------------------------------------------------
   // 8. CITAS & AGENDA
   // ----------------------------------------------------
+  async getAvailability(date, duration = 60, specialistId) {
+    try {
+      const params = new URLSearchParams()
+      if (date) params.append('date', date)
+      if (duration) params.append('duration', String(duration))
+      if (specialistId && specialistId !== 'any') params.append('specialistId', specialistId)
+
+      const res = await fetch(`${API_BASE_URL}/appointments/availability?${params.toString()}`)
+      if (!res.ok) throw new Error('Error al obtener disponibilidad')
+      return await res.json()
+    } catch (e) {
+      console.warn('Fallo al consultar disponibilidad continua:', e)
+      return null
+    }
+  },
+
   async getAppointments(dateStr, role, specialistId) {
     try {
       const params = new URLSearchParams()
@@ -518,11 +534,11 @@ export const api = {
     }
   },
 
-  async updateAppointmentStatus(id, status) {
+  async updateAppointmentStatus(id, status, extraData = {}) {
     try {
       const res = await authFetch(`${API_BASE_URL}/appointments/${id}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...extraData }),
       })
       return await res.json()
     } catch (e) {
