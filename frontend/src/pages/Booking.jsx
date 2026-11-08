@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { 
@@ -17,7 +17,10 @@ import {
   User,
   Mail,
   Send,
-  AlertTriangle
+  AlertTriangle,
+  ShoppingBag,
+  X,
+  Trash2
 } from 'lucide-react'
 import Button from '../components/ui/Button'
 import { useAdmin } from '../context/AdminContext'
@@ -62,6 +65,25 @@ function Booking() {
     date: '',
     time: ''
   })
+
+  // Bolsa de Tratamientos (Multi-Servicio)
+  const [selectedServices, setSelectedServices] = useState([])
+  const [showBagModal, setShowBagModal] = useState(false)
+  const [availableSlots, setAvailableSlots] = useState(timeSlots)
+  const [suggestedSpecialist, setSuggestedSpecialist] = useState(null)
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false)
+
+  // Duración e Inversión Total Acumulada
+  const totalDuration = useMemo(() => {
+    return selectedServices.reduce((sum, s) => {
+      const d = typeof s.duration === 'string' ? parseInt(s.duration.replace(/\D/g, '')) : Number(s.duration)
+      return sum + (isNaN(d) || !d ? 45 : d)
+    }, 0)
+  }, [selectedServices])
+
+  const totalPrice = useMemo(() => {
+    return selectedServices.reduce((sum, s) => sum + (Number(s.price) || 0), 0)
+  }, [selectedServices])
 
   // Contact Info State
   const [clientName, setClientName] = useState('')
@@ -117,26 +139,64 @@ function Booking() {
 
   // Selected entities resolution
   const selectedCategory = currentCategories.find(c => c.id === booking.category)
-  const selectedService = selectedCategory?.services?.find(s => s.id === booking.service)
-  const selectedSpecialist = currentTeam.find(t => t.id === booking.specialist)
+  const effectiveSpecialistId = booking.specialist === 'any' ? suggestedSpecialist : booking.specialist
+  const selectedSpecialist = currentTeam.find(t => t.id === effectiveSpecialistId) || (booking.specialist === 'any' ? { id: 'any', name: 'Asignación Inteligente', role: 'Especialista de Turno' } : null)
+
+  // Toggle Tratamiento en la Bolsa
+  const toggleService = (srv, catName) => {
+    setSelectedServices(prev => {
+      const exists = prev.some(item => item.id === srv.id)
+      if (exists) {
+        return prev.filter(item => item.id !== srv.id)
+      } else {
+        return [...prev, { ...srv, categoryName: catName || selectedCategory?.name }]
+      }
+    })
+  }
+
+  const removeService = (srvId) => {
+    setSelectedServices(prev => prev.filter(item => item.id !== srvId))
+  }
+
+  // Consulta de Disponibilidad de Bloque Continuo
+  useEffect(() => {
+    if (!booking.date) return
+
+    let isMounted = true
+    setIsLoadingSlots(true)
+
+    const dur = totalDuration > 0 ? totalDuration : 60
+    api.getAvailability(booking.date, dur, booking.specialist)
+      .then(res => {
+        if (!isMounted) return
+        if (res?.availableSlots && res.availableSlots.length > 0) {
+          setAvailableSlots(res.availableSlots)
+        } else if (res?.availableSlots && res.availableSlots.length === 0) {
+          setAvailableSlots([])
+        } else {
+          setAvailableSlots(timeSlots)
+        }
+        if (res?.suggestedSpecialistId) {
+          setSuggestedSpecialist(res.suggestedSpecialistId)
+        }
+      })
+      .catch(() => {
+        if (isMounted) setAvailableSlots(timeSlots)
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingSlots(false)
+      })
+
+    return () => { isMounted = false }
+  }, [booking.date, booking.specialist, totalDuration])
 
   // 1-CLICK AUTO-ADVANCE HANDLERS
   const handleCategorySelect = (catId) => {
     setBooking(prev => ({
       ...prev,
-      category: catId,
-      service: null // reset downstream service on category switch
+      category: catId
     }))
     setActiveStep(1) // Auto-advance to Step 1 (Servicios)
-    window.scrollTo({ top: 120, behavior: 'smooth' })
-  }
-
-  const handleServiceSelect = (serviceId) => {
-    setBooking(prev => ({
-      ...prev,
-      service: serviceId
-    }))
-    setActiveStep(2) // Auto-advance to Step 2 (Especialistas)
     window.scrollTo({ top: 120, behavior: 'smooth' })
   }
 
@@ -161,8 +221,8 @@ function Booking() {
   const handleConfirmReservation = async () => {
     setBookingError('')
 
-    if (!selectedService || !selectedSpecialist || !booking.date || !booking.time) {
-      setBookingError('Por favor selecciona un día y una hora para tu cita.')
+    if (selectedServices.length === 0 || !selectedSpecialist || !booking.date || !booking.time) {
+      setBookingError('Por favor selecciona al menos un tratamiento, especialista, día y hora.')
       return
     }
 
@@ -173,17 +233,23 @@ function Booking() {
 
     setIsSubmitting(true)
 
+    const combinedServiceName = selectedServices.map(s => s.name).join(' + ')
+    const assignedSpec = booking.specialist === 'any'
+      ? (currentTeam.find(t => t.id === suggestedSpecialist) || currentTeam[0])
+      : selectedSpecialist
+
     const payload = {
       clientName: clientName.trim(),
       clientPhone: clientPhone.trim(),
       clientEmail: clientEmail.trim() || undefined,
-      serviceId: selectedService.id,
-      serviceName: selectedService.name,
-      specialistId: selectedSpecialist.id,
-      specialistName: selectedSpecialist.name,
+      serviceIds: selectedServices.map(s => s.id),
+      serviceId: selectedServices[0]?.id,
+      serviceName: combinedServiceName,
+      specialistId: assignedSpec?.id || 'spec-default',
+      specialistName: assignedSpec?.name || 'Catheryne Ríos',
       date: booking.date,
       time: booking.time,
-      price: selectedService.price || 150000,
+      price: totalPrice,
     }
 
     try {
@@ -200,7 +266,7 @@ function Booking() {
       setConfirmedData({
         ...payload,
         id: serverResult?.id || `app-${Date.now()}`,
-        categoryName: selectedCategory?.name
+        categoryName: selectedServices[0]?.categoryName || selectedCategory?.name
       })
 
       setActiveStep(4)
@@ -221,6 +287,7 @@ function Booking() {
       date: '',
       time: ''
     })
+    setSelectedServices([])
     setClientName('')
     setClientPhone('')
     setClientEmail('')
@@ -295,12 +362,14 @@ function Booking() {
                 <Edit3 size={12} className={styles.crumbEditIcon} />
               </div>
 
-              {booking.service && (
+              {selectedServices.length > 0 && (
                 <>
                   <span className={styles.crumbDivider}>/</span>
                   <div className={styles.crumbItem} onClick={() => setActiveStep(1)}>
-                    <span className={styles.crumbLabel}>Servicio:</span>
-                    <span className={styles.crumbValue}>{selectedService?.name || '—'}</span>
+                    <span className={styles.crumbLabel}>Tratamientos ({selectedServices.length}):</span>
+                    <span className={styles.crumbValue}>
+                      {selectedServices.map(s => s.name).join(', ')}
+                    </span>
                     <Edit3 size={12} className={styles.crumbEditIcon} />
                   </div>
                 </>
@@ -311,7 +380,7 @@ function Booking() {
                   <span className={styles.crumbDivider}>/</span>
                   <div className={styles.crumbItem} onClick={() => setActiveStep(2)}>
                     <span className={styles.crumbLabel}>Especialista:</span>
-                    <span className={styles.crumbValue}>{selectedSpecialist?.name || '—'}</span>
+                    <span className={styles.crumbValue}>{booking.specialist === 'any' ? 'Asignación Inteligente' : selectedSpecialist?.name || '—'}</span>
                     <Edit3 size={12} className={styles.crumbEditIcon} />
                   </div>
                 </>
@@ -399,7 +468,7 @@ function Booking() {
               )}
 
               {/* ─────────────────────────────────────────────────────────────────
-                  PASO 1: SERVICIOS (Click -> Pasa automáticamente a Especialistas)
+                  PASO 1: SERVICIOS (Multi-Servicio «Bolsa de Tratamientos»)
                  ───────────────────────────────────────────────────────────────── */}
               {activeStep === 1 && (
                 <motion.div
@@ -425,18 +494,18 @@ function Booking() {
                   </div>
 
                   <div className={styles.stepHeader}>
-                    <h2 className={styles.stepTitle}>Selecciona el tratamiento</h2>
-                    <p className={styles.stepSubtitle}>Toca el servicio que deseas para continuar</p>
+                    <h2 className={styles.stepTitle}>Selecciona tus tratamientos</h2>
+                    <p className={styles.stepSubtitle}>Puedes elegir varios tratamientos para consentirte en una sola sesión</p>
                   </div>
 
                   <div className={styles.servicesList}>
                     {selectedCategory?.services.map(s => {
-                      const isServiceSelected = booking.service === s.id
+                      const isServiceSelected = selectedServices.some(item => item.id === s.id)
                       return (
                         <div
                           key={s.id}
                           className={`${styles.serviceOption} ${isServiceSelected ? styles.serviceSelected : ''}`}
-                          onClick={() => handleServiceSelect(s.id)}
+                          onClick={() => toggleService(s, selectedCategory?.name)}
                         >
                           <div className={styles.serviceMainInfo}>
                             <div className={styles.serviceRadioCircle}>
@@ -452,6 +521,9 @@ function Booking() {
                               <Clock size={13} /> {s.duration}
                             </span>
                             <span className={styles.serviceOptPrice}>${s.price.toLocaleString()}</span>
+                            <span style={{ fontSize: '0.75rem', color: isServiceSelected ? 'var(--color-gold)' : '#A3A3A3', fontWeight: 700 }}>
+                              {isServiceSelected ? '✓ En la Bolsa' : '+ Agregar'}
+                            </span>
                           </div>
                         </div>
                       )
@@ -461,7 +533,7 @@ function Booking() {
               )}
 
               {/* ─────────────────────────────────────────────────────────────────
-                  PASO 2: ESPECIALISTAS (Click -> Pasa automáticamente a Fecha y Hora)
+                  PASO 2: ESPECIALISTAS (Específica o Asignación Inteligente)
                  ───────────────────────────────────────────────────────────────── */}
               {activeStep === 2 && (
                 <motion.div
@@ -479,19 +551,36 @@ function Booking() {
                       className={styles.backBtn}
                       onClick={() => setActiveStep(1)}
                     >
-                      <ArrowLeft size={16} /> Cambiar Servicio
+                      <ArrowLeft size={16} /> Cambiar Tratamientos
                     </button>
                     <span className={styles.currentCategoryBadge}>
-                      {selectedService?.name} (${selectedService?.price.toLocaleString()})
+                      {selectedServices.length} Tratamiento{selectedServices.length > 1 ? 's' : ''} (${totalPrice.toLocaleString()})
                     </span>
                   </div>
 
                   <div className={styles.stepHeader}>
                     <h2 className={styles.stepTitle}>Elige tu especialista</h2>
-                    <p className={styles.stepSubtitle}>Toca a tu profesional de preferencia para continuar</p>
+                    <p className={styles.stepSubtitle}>Toca a tu profesional de preferencia o elige asignación automática</p>
                   </div>
 
                   <div className={styles.specialistsGrid}>
+                    {/* CUALQUIERA - ASIGNACIÓN INTELIGENTE */}
+                    <div
+                      className={`${styles.specialistCard} ${styles.specialistCardAny} ${booking.specialist === 'any' ? styles.specialistSelected : ''}`}
+                      onClick={() => handleSpecialistSelect('any')}
+                    >
+                      <span className={styles.smartBadge}>Recomendado</span>
+                      <div className={styles.specialistAvatarWrapper}>
+                        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(212, 175, 55, 0.2)', border: '1.5px solid var(--color-gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-gold)', fontSize: 24, margin: '0 auto' }}>
+                          ✦
+                        </div>
+                        {booking.specialist === 'any' && <span className={styles.specialistCheckBadge}>✓</span>}
+                      </div>
+                      <h4 className={styles.specialistName}>Cualquiera</h4>
+                      <p className={styles.specialistRole}>Asignación Inteligente</p>
+                      <p className={styles.specialistExp}>Mayor disponibilidad y balance de citas</p>
+                    </div>
+
                     {currentTeam.map(member => {
                       const isSelected = booking.specialist === member.id
                       return (
@@ -663,9 +752,24 @@ function Booking() {
                           <p className={styles.closedPromptDesc}>{isDateClosed(booking.date)?.reason || 'Cierre programado'}</p>
                           <span className={styles.closedPromptSub}>Por favor selecciona otro día en el calendario para apartar tu cita.</span>
                         </div>
+                      ) : isLoadingSlots ? (
+                        <div style={{ textAlign: 'center', padding: '36px 16px', color: 'var(--color-gold)' }}>
+                          <Clock size={28} style={{ animation: 'spin 1.5s linear infinite', margin: '0 auto 8px' }} />
+                          <p style={{ fontSize: '0.85rem', fontWeight: 600 }}>Calculando horarios continuos...</p>
+                        </div>
+                      ) : availableSlots.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '32px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: 14, border: '1px solid rgba(212,175,55,0.2)' }}>
+                          <AlertTriangle size={28} style={{ color: '#F59E0B', margin: '0 auto 8px' }} />
+                          <strong style={{ color: '#FFFFFF', fontSize: '0.9rem', display: 'block', marginBottom: 4 }}>
+                            Sin Horarios Continuos Libres
+                          </strong>
+                          <p style={{ color: '#A0A0A0', fontSize: '0.78rem', margin: 0 }}>
+                            No encontramos un bloque continuo de {Math.floor(totalDuration / 60)}h {totalDuration % 60}m libre para esta fecha. Por favor elige otro día.
+                          </p>
+                        </div>
                       ) : (
                         <div className={styles.timeGrid}>
-                          {timeSlots.map(slot => {
+                          {availableSlots.map(slot => {
                             const isTimeSelected = booking.time === slot
                             return (
                               <button
@@ -694,14 +798,17 @@ function Booking() {
                       >
                         <div className={styles.readySummaryRow}>
                           <div className={styles.readyDetail}>
-                            <span className={styles.readyLabel}>Cita Seleccionada:</span>
+                            <span className={styles.readyLabel}>Tratamientos ({selectedServices.length}):</span>
                             <span className={styles.readyValue}>
-                              {selectedService?.name} con {selectedSpecialist?.name} el {booking.date} a las {booking.time}
+                              {selectedServices.map(s => s.name).join(' + ')}
+                            </span>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--color-gold)', marginTop: 4, display: 'block' }}>
+                              Especialista: {booking.specialist === 'any' ? 'Asignación Inteligente' : selectedSpecialist?.name} • Fecha: {booking.date} • Hora: {booking.time} • Duración: {Math.floor(totalDuration / 60)}h {totalDuration % 60}m
                             </span>
                           </div>
                           <div className={styles.readyPriceGroup}>
                             <span className={styles.readyPriceLabel}>Inversión Total</span>
-                            <span className={styles.readyPrice}>${selectedService?.price.toLocaleString()} COP</span>
+                            <span className={styles.readyPrice}>${totalPrice.toLocaleString()} COP</span>
                           </div>
                         </div>
 
@@ -773,7 +880,9 @@ function Booking() {
                             {(() => {
                               const cleanPhone = (businessConfig?.whatsappNumber || '').replace(/\D/g, '')
                               if (!cleanPhone) return null
-                              const msg = `Hola Catheryne Ríos Estética, tuve una falla de internet al intentar agendar en la página web. ¿Me podrían ayudar a apartar mi cita manualmente por favor?\n\n• Tratamiento: ${selectedService?.name}\n• Especialista: ${selectedSpecialist?.name}\n• Fecha deseada: ${booking.date}\n• Hora deseada: ${booking.time}\n• Mi Nombre: ${clientName || 'Cliente'}\n• Mi Celular: ${clientPhone || 'No especificado'}\n\nQuedo atenta a su confirmación.`
+                              const combinedNames = selectedServices.map(s => s.name).join(' + ')
+                              const specName = booking.specialist === 'any' ? 'Asignación Inteligente' : selectedSpecialist?.name
+                              const msg = `Hola Catheryne Ríos Estética, tuve una falla de internet al intentar agendar en la página web. ¿Me podrían ayudar a apartar mi cita manualmente por favor?\n\n• Tratamientos: ${combinedNames}\n• Especialista: ${specName}\n• Fecha deseada: ${booking.date}\n• Hora deseada: ${booking.time}\n• Inversión Total: $${totalPrice.toLocaleString()} COP\n• Mi Nombre: ${clientName || 'Cliente'}\n• Mi Celular: ${clientPhone || 'No especificado'}\n\nQuedo atenta a su confirmación.`
                               return (
                                 <a 
                                   href={`https://wa.me/57${cleanPhone}?text=${encodeURIComponent(msg)}`}
@@ -921,6 +1030,123 @@ function Booking() {
             </AnimatePresence>
           </div>
         </div>
+        {/* BARRA FLOTANTE DORADA INFERIOR (STICKY LUXURY CART BAR) */}
+        {selectedServices.length > 0 && activeStep <= 1 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className={styles.floatingCartBar}
+          >
+            <div className={styles.cartBarInfo}>
+              <span className={styles.cartBadge}>
+                ✦ {selectedServices.length} Tratamiento{selectedServices.length > 1 ? 's' : ''}
+              </span>
+              <span className={styles.cartDuration}>
+                ⏳ {Math.floor(totalDuration / 60)}h {totalDuration % 60}m
+              </span>
+              <span className={styles.cartTotal}>
+                ${totalPrice.toLocaleString()} COP
+              </span>
+            </div>
+
+            <div className={styles.cartActions}>
+              <button
+                type="button"
+                className={styles.cartBagBtn}
+                onClick={() => setShowBagModal(true)}
+              >
+                <ShoppingBag size={15} />
+                <span>Ver Bolsa</span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.cartContinueBtn}
+                onClick={() => {
+                  setActiveStep(2)
+                  window.scrollTo({ top: 120, behavior: 'smooth' })
+                }}
+              >
+                <span>Elegir Especialista</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* MODAL DE BOLSA DE TRATAMIENTOS */}
+        {showBagModal && (
+          <div className={styles.bagModalOverlay} onClick={() => setShowBagModal(false)}>
+            <div className={styles.bagModalCard} onClick={e => e.stopPropagation()}>
+              <div className={styles.bagModalHeader}>
+                <h3 className={styles.bagModalTitle}>Bolsa de Tratamientos</h3>
+                <button
+                  type="button"
+                  className={styles.bagCloseBtn}
+                  onClick={() => setShowBagModal(false)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className={styles.bagItemList}>
+                {selectedServices.map(item => (
+                  <div key={item.id} className={styles.bagItem}>
+                    <div className={styles.bagItemDetails}>
+                      <span className={styles.bagItemName}>{item.name}</span>
+                      <span className={styles.bagItemSub}>{item.duration} • {item.categoryName || 'Tratamiento'}</span>
+                    </div>
+                    <div className={styles.bagItemRight}>
+                      <span className={styles.bagItemPrice}>${item.price.toLocaleString()}</span>
+                      <button
+                        type="button"
+                        className={styles.bagRemoveBtn}
+                        onClick={() => removeService(item.id)}
+                        title="Quitar de la bolsa"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.bagSummaryRow}>
+                <div>
+                  <span className={styles.bagTotalLabel}>Duración estimada: </span>
+                  <strong style={{ color: '#FFFFFF', fontSize: '0.85rem' }}>{Math.floor(totalDuration / 60)}h {totalDuration % 60}m</strong>
+                </div>
+                <div>
+                  <span className={styles.bagTotalLabel}>Inversión Total: </span>
+                  <span className={styles.bagTotalVal}>${totalPrice.toLocaleString()} COP</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                <button
+                  type="button"
+                  className={styles.cartBagBtn}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={() => setShowBagModal(false)}
+                >
+                  Seguir Agregando
+                </button>
+                <button
+                  type="button"
+                  className={styles.cartContinueBtn}
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={() => {
+                    setShowBagModal(false)
+                    setActiveStep(2)
+                    window.scrollTo({ top: 120, behavior: 'smooth' })
+                  }}
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   )
