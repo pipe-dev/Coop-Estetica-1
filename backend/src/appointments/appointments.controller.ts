@@ -8,6 +8,19 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   // ----------------------------------------------------
+  // PUBLIC AVAILABILITY & CONTINUOUS BLOCK CALCULATION
+  // ----------------------------------------------------
+  @Throttle({ short: { limit: 15, ttl: 60000 }, medium: { limit: 60, ttl: 300000 } })
+  @Get('availability')
+  async getAvailability(
+    @Query('date') date: string,
+    @Query('duration') duration?: string,
+    @Query('specialistId') specialistId?: string,
+  ) {
+    return this.appointmentsService.getAvailability(date, Number(duration) || 60, specialistId);
+  }
+
+  // ----------------------------------------------------
   // PUBLIC BOOKING ENDPOINT (S.H.I.E.L.D. Anti-Spam / Rate-Limited)
   // ----------------------------------------------------
   @Throttle({ short: { limit: 3, ttl: 60000 }, medium: { limit: 6, ttl: 300000 } })
@@ -37,8 +50,12 @@ export class AppointmentsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/status')
-  async updateStatus(@Param('id') id: string, @Body() body: { status: string }, @Request() req: any) {
-    return this.appointmentsService.updateStatus(id, body.status, req.user);
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string; commissionAmount?: number; commissionRate?: number; paymentMethod?: string },
+    @Request() req: any
+  ) {
+    return this.appointmentsService.updateStatus(id, body.status, req.user, body);
   }
 
   @UseGuards(JwtAuthGuard)

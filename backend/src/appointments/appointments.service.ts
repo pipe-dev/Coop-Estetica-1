@@ -24,13 +24,106 @@ export class AppointmentsService {
   }
 
   // ----------------------------------------------------
+  // HELPERS DE TIEMPO
+  // ----------------------------------------------------
+  private parseTimeToMinutes(tStr: string): number {
+    const match = tStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+    if (!match) return 540;
+    let h = parseInt(match[1], 10);
+    const m = parseInt(match[2], 10);
+    const ampm = (match[3] || '').toUpperCase();
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
+  }
+
+  private formatMinutesTo12h(totalMins: number): string {
+    let h = Math.floor(totalMins / 60);
+    const m = totalMins % 60;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    if (h > 12) h -= 12;
+    if (h === 0) h = 12;
+    return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+  }
+
+  // ----------------------------------------------------
+  // DISPONIBILIDAD EN BLOQUE CONTINUO & AUTO-ASIGNACIÓN
+  // ----------------------------------------------------
+  async getAvailability(date: string, durationMinutes = 60, specialistId?: string) {
+    const allSpecialists = await this.prisma.teamMember.findMany({
+      where: { active: true },
+    });
+
+    const isAny = !specialistId || specialistId === 'any';
+    const targetSpecialists = isAny ? allSpecialists : allSpecialists.filter(s => s.id === specialistId);
+
+    if (targetSpecialists.length === 0) {
+      return { availableSlots: [], suggestedSpecialistId: null };
+    }
+
+    const existingAppointments = await this.prisma.appointment.findMany({
+      where: {
+        date,
+        status: { notIn: ['Cancelada'] },
+        specialistId: { in: targetSpecialists.map(s => s.id) },
+      },
+    });
+
+    // Horario laboral: 8:00 AM (480 min) a 7:00 PM (1140 min)
+    const openTimeMin = 8 * 60;
+    const closeTimeMin = 19 * 60;
+    const intervalStep = 30; // cada 30 min
+
+    const validSlotsSet = new Set<string>();
+
+    for (let current = openTimeMin; current + durationMinutes <= closeTimeMin; current += intervalStep) {
+      const slotEnd = current + durationMinutes;
+
+      // Al menos una especialista disponible para el bloque continuo completo
+      const freeSpecialist = targetSpecialists.find(spec => {
+        const specApps = existingAppointments.filter(a => a.specialistId === spec.id);
+        const hasCollision = specApps.some(app => {
+          const appStart = this.parseTimeToMinutes(app.time);
+          const appEnd = appStart + 60; // 60 min de duración por defecto en cita existente
+          return Math.max(current, appStart) < Math.min(slotEnd, appEnd);
+        });
+        return !hasCollision;
+      });
+
+      if (freeSpecialist) {
+        validSlotsSet.add(this.formatMinutesTo12h(current));
+      }
+    }
+
+    // Auto-selección inteligente por menor carga del día
+    let suggestedSpecialistId = targetSpecialists[0]?.id;
+    if (isAny && targetSpecialists.length > 0) {
+      const counts: Record<string, number> = {};
+      targetSpecialists.forEach(s => { counts[s.id] = 0; });
+      existingAppointments.forEach(a => {
+        if (counts[a.specialistId] !== undefined) counts[a.specialistId]++;
+      });
+
+      suggestedSpecialistId = targetSpecialists.reduce((prev, curr) => {
+        return (counts[curr.id] || 0) < (counts[prev.id] || 0) ? curr : prev;
+      }, targetSpecialists[0]).id;
+    }
+
+    return {
+      availableSlots: Array.from(validSlotsSet),
+      suggestedSpecialistId,
+    };
+  }
+
+  // ----------------------------------------------------
   // PUBLIC BOOKING (Atomic write in PostgreSQL)
   // ----------------------------------------------------
   async bookAppointment(data: {
     clientName: string;
     clientPhone: string;
     clientEmail?: string;
-    serviceId: string;
+    serviceId?: string;
+    serviceIds?: string[];
     specialistId: string;
     date: string;
     time: string;
@@ -49,39 +142,82 @@ export class AppointmentsService {
       throw new BadRequestException('Por favor proporciona un número de teléfono válido.');
     }
 
-    // 1. Validate service
-    const service = await this.prisma.service.findUnique({
-      where: { id: data.serviceId },
-    });
-    if (!service || !service.active) {
-      throw new BadRequestException('El servicio seleccionado no está disponible.');
+    // 1. Validate services (Single or Multiple)
+    let targetServices: any[] = [];
+    if (data.serviceIds && Array.isArray(data.serviceIds) && data.serviceIds.length > 0) {
+      targetServices = await this.prisma.service.findMany({
+        where: { id: { in: data.serviceIds }, active: true },
+      });
+      if (targetServices.length === 0) {
+        throw new BadRequestException('Los servicios seleccionados no están disponibles.');
+      }
+    } else if (data.serviceId) {
+      const singleService = await this.prisma.service.findUnique({
+        where: { id: data.serviceId },
+      });
+      if (!singleService || !singleService.active) {
+        throw new BadRequestException('El servicio seleccionado no está disponible.');
+      }
+      targetServices = [singleService];
+    } else {
+      throw new BadRequestException('Debes seleccionar al menos un servicio.');
     }
 
-    // 2. Validate specialist
+    const primaryService = targetServices[0];
+    const combinedServiceName = targetServices.map(s => s.name).join(' + ');
+    const combinedPrice = targetServices.reduce((sum, s) => sum + (Number(s.price) || 0), 0);
+    const combinedDuration = targetServices.reduce((sum, s) => sum + (Number(s.duration) || 45), 0);
+
+    // 2. Validate specialist (Specific or Auto "any")
+    let targetSpecialistId = data.specialistId;
+    if (!targetSpecialistId || targetSpecialistId === 'any') {
+      const allActiveSpecs = await this.prisma.teamMember.findMany({ where: { active: true } });
+      if (allActiveSpecs.length === 0) {
+        throw new BadRequestException('No hay especialistas disponibles en este momento.');
+      }
+      const appsOnDate = await this.prisma.appointment.findMany({
+        where: { date: data.date, status: { notIn: ['Cancelada'] } },
+      });
+      const counts: Record<string, number> = {};
+      allActiveSpecs.forEach(s => { counts[s.id] = 0; });
+      appsOnDate.forEach(a => { if (counts[a.specialistId] !== undefined) counts[a.specialistId]++; });
+      targetSpecialistId = allActiveSpecs.reduce((minSpec, currSpec) => {
+        return (counts[currSpec.id] || 0) < (counts[minSpec.id] || 0) ? currSpec : minSpec;
+      }, allActiveSpecs[0]).id;
+    }
+
     const specialist = await this.prisma.teamMember.findUnique({
-      where: { id: data.specialistId },
+      where: { id: targetSpecialistId },
     });
     if (!specialist || !specialist.active) {
       throw new BadRequestException('La especialista seleccionada no se encuentra disponible.');
     }
 
-    // 3. Conflict detection (Double-booking lock)
-    const existingConflict = await this.prisma.appointment.findFirst({
+    // 3. Conflict detection (Continuous Interval Lock)
+    const existingApps = await this.prisma.appointment.findMany({
       where: {
-        specialistId: data.specialistId,
+        specialistId: targetSpecialistId,
         date: data.date,
-        time: data.time,
         status: { notIn: ['Cancelada'] },
       },
     });
 
-    if (existingConflict) {
-      throw new BadRequestException('Este horario ya ha sido reservado para esta especialista. Por favor elige otro horario.');
+    const newStartMins = this.parseTimeToMinutes(data.time);
+    const newEndMins = newStartMins + combinedDuration;
+
+    const hasCollision = existingApps.some(app => {
+      const appStartMins = this.parseTimeToMinutes(app.time);
+      const appEndMins = appStartMins + 60; // 60 min por cita existente
+      return Math.max(newStartMins, appStartMins) < Math.min(newEndMins, appEndMins);
+    });
+
+    if (hasCollision) {
+      throw new BadRequestException('Este horario ya no cuenta con el tiempo continuo suficiente para estos tratamientos con esta especialista.');
     }
 
     // 4. Calculate Net Commission for the specialist
     const commissionPercent = specialist.commissionRate || 45;
-    const netCommission = (service.price * commissionPercent) / 100;
+    const netCommission = (combinedPrice * commissionPercent) / 100;
 
     // 5. Atomic Upsert of Client & Appointment in Supabase PostgreSQL
     const clientRecord = await this.prisma.client.upsert({
@@ -104,31 +240,30 @@ export class AppointmentsService {
         clientPhone: cleanPhone,
         clientEmail: cleanEmail || null,
         clientId: clientRecord.id,
-        serviceId: service.id,
-        serviceName: service.name,
+        serviceId: primaryService.id,
+        serviceName: combinedServiceName,
         specialistId: specialist.id,
         specialistName: specialist.name,
         date: data.date,
         time: data.time,
-        price: service.price,
+        price: combinedPrice,
         commissionAmount: netCommission,
         status: 'Reservada',
       },
     });
 
     // 6. Despacho Asíncrono de Correos a las 4 Partes:
-    // (1. Clienta, 2. Dueña, 3. Administradora, 4. Especialista asignada)
     this.dispatchAllAppointmentNotifications({
       clientName: cleanName,
       clientPhone: cleanPhone,
       clientEmail: cleanEmail || undefined,
-      serviceName: service.name,
+      serviceName: combinedServiceName,
       specialistId: specialist.id,
       specialistName: specialist.name,
       specialistEmail: specialist.email || undefined,
       date: data.date,
       time: data.time,
-      price: service.price,
+      price: combinedPrice,
       commissionAmount: netCommission,
     }).catch(err => console.warn('Aviso: Envío de correos omitido en desarrollo:', err.message));
 
@@ -526,7 +661,12 @@ export class AppointmentsService {
     };
   }
 
-  async updateStatus(id: string, newStatus: string, user?: any) {
+  async updateStatus(
+    id: string,
+    newStatus: string,
+    user?: any,
+    extraData?: { commissionAmount?: number; commissionRate?: number; paymentMethod?: string }
+  ) {
     const app = await this.prisma.appointment.findUnique({ where: { id } });
     if (!app) throw new NotFoundException('Cita no encontrada.');
 
@@ -534,9 +674,14 @@ export class AppointmentsService {
       throw new ForbiddenException('Acceso denegado: No estás autorizada para modificar citas de otra especialista.');
     }
 
+    const dataToUpdate: any = { status: newStatus };
+    if (extraData?.commissionAmount !== undefined && extraData.commissionAmount !== null) {
+      dataToUpdate.commissionAmount = Number(extraData.commissionAmount);
+    }
+
     return this.prisma.appointment.update({
       where: { id },
-      data: { status: newStatus },
+      data: dataToUpdate,
     });
   }
 
