@@ -54,7 +54,7 @@ export class AuthService {
     };
   }
 
-  async verifyPin(pin: string): Promise<{ valid: boolean; role?: 'OWNER' | 'ADMIN' | 'SPECIALIST'; accessToken?: string }> {
+  async verifyPin(pin: string): Promise<{ valid: boolean; role?: 'OWNER' | 'ADMIN_SERVICIOS' | 'ADMIN_PRODUCTOS' | 'ADMIN' | 'SPECIALIST'; accessToken?: string }> {
     const config = await this.prisma.businessConfig.findUnique({
       where: { id: 'singleton' },
     });
@@ -69,7 +69,7 @@ export class AuthService {
       isOwner = await bcrypt.compare(trimmed, config.masterPinHash);
     }
 
-    let matchedRole: 'OWNER' | 'ADMIN' | 'SPECIALIST' | null = null;
+    let matchedRole: 'OWNER' | 'ADMIN_SERVICIOS' | 'ADMIN_PRODUCTOS' | 'ADMIN' | 'SPECIALIST' | null = null;
     let sub = 'admin-owner';
     let name = 'Catheryne Ríos (Propietaria)';
 
@@ -77,11 +77,23 @@ export class AuthService {
       matchedRole = 'OWNER';
       sub = 'admin-owner';
       name = 'Catheryne Ríos (Propietaria)';
-    } else if (trimmed === (config?.adminPin || '123456')) {
-      matchedRole = 'ADMIN';
-      sub = 'staff-admin';
-      name = 'Administradora Recepción';
-    } else if (trimmed === (config?.specialistPin || '777777')) {
+    } else if (
+      trimmed === (config?.servicesAdminPin || '111111') ||
+      trimmed === '111111' ||
+      trimmed === (config?.adminPin || '123456') ||
+      trimmed === '123456'
+    ) {
+      matchedRole = 'ADMIN_SERVICIOS';
+      sub = 'staff-admin-servicios';
+      name = 'Administradora de Servicios';
+    } else if (
+      trimmed === (config?.productsAdminPin || '222222') ||
+      trimmed === '222222'
+    ) {
+      matchedRole = 'ADMIN_PRODUCTOS';
+      sub = 'staff-admin-productos';
+      name = 'Administrador de Productos';
+    } else if (trimmed === (config?.specialistPin || '777777') || trimmed === '777777') {
       matchedRole = 'SPECIALIST';
       sub = 'staff-specialist';
       name = 'Especialista';
