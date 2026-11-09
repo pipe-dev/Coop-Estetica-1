@@ -82,6 +82,9 @@ export class ConfigNegocioService {
     if (cleanData.masterPin && typeof cleanData.masterPin === 'string') {
       cleanData.masterPinHash = await bcrypt.hash(cleanData.masterPin.trim(), 10);
     }
+    if (cleanData.servicesAdminPin && !cleanData.adminPin) {
+      cleanData.adminPin = cleanData.servicesAdminPin;
+    }
     return this.prisma.businessConfig.upsert({
       where: { id: 'singleton' },
       update: cleanData,
