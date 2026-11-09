@@ -1,14 +1,40 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Wallet, ArrowUpRight, ArrowDownRight, TrendingUp, TrendingDown, DollarSign, Calendar, Lock, Unlock, ShieldAlert, CheckCircle2, AlertTriangle, UserCheck, Download, Plus, History, Scale, FileCheck2 } from 'lucide-react'
+import { 
+  Wallet, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Calendar, 
+  Lock, 
+  Unlock, 
+  ShieldAlert, 
+  CheckCircle2, 
+  AlertTriangle, 
+  UserCheck, 
+  Download, 
+  Plus, 
+  History, 
+  Scale, 
+  FileCheck2,
+  FileSpreadsheet,
+  BookOpen,
+  Layers
+} from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { formatCOP, formatCOPInput, parseCOPInput, getLocalDateString } from '../../utils/currencyUtils'
 import { exportCajaTransactions } from '../../utils/exportUtils'
 import ExecutiveAnalyticsModal from '../../components/admin/ExecutiveAnalyticsModal'
+import PlanillaDiariaView from '../../components/admin/caja/PlanillaDiariaView'
+import LibroMensualView from '../../components/admin/caja/LibroMensualView'
+import FlujoCategoriasView from '../../components/admin/caja/FlujoCategoriasView'
 import styles from './AdminCaja.module.css'
 
 export default function AdminCaja() {
   const [selectedAnalyticsCard, setSelectedAnalyticsCard] = useState(null)
+  const [activeFinancialTab, setActiveFinancialTab] = useState('turno') // 'turno' | 'planilla' | 'mensual' | 'categorias'
   const {
     transactions,
     teamMembers,
@@ -201,8 +227,53 @@ export default function AdminCaja() {
   return (
     <div className={styles.cajaContainer}>
       
-      {/* CASH BOX SESSION CONTROL BANNER */}
-      <div className={`${styles.sessionBanner} ${activeCashSession ? styles.bannerOpen : styles.bannerClosed}`}>
+      {/* NAVEGACIÓN POR PESTAÑAS DE LA SUITE FINANCIERA */}
+      <div className={styles.tabsNavRow}>
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeFinancialTab === 'turno' ? styles.tabActive : ''}`}
+          onClick={() => setActiveFinancialTab('turno')}
+        >
+          <Wallet size={16} />
+          <span>Arqueo y Turno Actual</span>
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeFinancialTab === 'planilla' ? styles.tabActive : ''}`}
+          onClick={() => setActiveFinancialTab('planilla')}
+        >
+          <FileSpreadsheet size={16} />
+          <span>Planilla Diaria de Liquidación</span>
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeFinancialTab === 'mensual' ? styles.tabActive : ''}`}
+          onClick={() => setActiveFinancialTab('mensual')}
+        >
+          <BookOpen size={16} />
+          <span>Libro Mensual de Tesorería</span>
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.tabBtn} ${activeFinancialTab === 'categorias' ? styles.tabActive : ''}`}
+          onClick={() => setActiveFinancialTab('categorias')}
+        >
+          <Layers size={16} />
+          <span>Flujo por Categorías</span>
+        </button>
+      </div>
+
+      {activeFinancialTab === 'planilla' && <PlanillaDiariaView />}
+      {activeFinancialTab === 'mensual' && <LibroMensualView />}
+      {activeFinancialTab === 'categorias' && <FlujoCategoriasView />}
+
+      {activeFinancialTab === 'turno' && (
+        <>
+          {/* CASH BOX SESSION CONTROL BANNER */}
+          <div className={`${styles.sessionBanner} ${activeCashSession ? styles.bannerOpen : styles.bannerClosed}`}>
         <div className={styles.bannerLeft}>
           <div className={styles.bannerIconBox}>
             {activeCashSession ? <UserCheck size={22} /> : <ShieldAlert size={22} />}
@@ -520,6 +591,8 @@ export default function AdminCaja() {
           </table>
         </div>
       </div>
+      </>
+      )}
 
       {/* OPEN CASH MODAL */}
       {showOpenModal && (

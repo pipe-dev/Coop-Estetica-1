@@ -4,6 +4,44 @@
   gap: 24px;
 }
 
+/* TABS NAVIGATION ROW */
+.tabsNavRow {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #A3A3A3;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+}
+
+.tabActive {
+  background: rgba(212, 175, 55, 0.12) !important;
+  border-color: #D4AF37 !important;
+  color: #F0D78C !important;
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.2);
+}
+
 /* SESSION BANNER */
 .sessionBanner {
   background: rgba(255, 255, 255, 0.03);

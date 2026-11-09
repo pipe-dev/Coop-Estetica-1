@@ -1,0 +1,168 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.topControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+
+.monthSelectBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selectInput {
+  background: #1C1C21;
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  color: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.selectInput:focus {
+  border-color: #D4AF37;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.kpiCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpiTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888888;
+  font-weight: 600;
+}
+
+.kpiValue {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.kpiGold { color: #F0D78C; }
+.kpiGreen { color: #34D399; }
+.kpiBlue { color: #60A5FA; }
+.kpiRed { color: #F87171; }
+
+.tableCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tableHeaderBar {
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tableHeaderBar h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tableScrollWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.ledgerTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+  min-width: 900px;
+}
+
+.ledgerTable th {
+  background: #18181D;
+  color: #D4AF37;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.ledgerTable td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  color: #E5E5E5;
+}
+
+.ledgerRowActive {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.ledgerRowEmpty {
+  color: #555555;
+}
+
+.cutRow {
+  background: rgba(212, 175, 55, 0.12) !important;
+}
+
+.cutRow td {
+  color: #F0D78C;
+  font-weight: 700;
+  padding: 6px 12px;
+}
+
+.totalsRow {
+  background: #1C1C22;
+  font-weight: 800;
+}
+
+.totalsRow td {
+  color: #F0D78C;
+  border-top: 2px solid rgba(212, 175, 55, 0.4);
+  padding: 12px;
+}
+
+.posVal { color: #34D399; font-weight: 600; }
+.negVal { color: #F87171; font-weight: 600; }

@@ -1,0 +1,453 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* TOP CONTROLS & DATE SELECTOR */
+.topControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 20px;
+  border-radius: 14px;
+}
+
+.datePickerBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.datePickerLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #A3A3A3;
+}
+
+.dateInput {
+  background: #1C1C21;
+  border: 1.5px solid rgba(212, 175, 55, 0.4);
+  color: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.dateInput:focus {
+  border-color: #D4AF37;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.25);
+}
+
+.quickDateBtn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #E5E5E5;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickDateBtn:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: #D4AF37;
+  color: #F0D78C;
+}
+
+.actionBtnGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.primaryGoldBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #D4AF37 0%, #AA820A 100%);
+  color: #0B0B0D;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primaryGoldBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+}
+
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  padding: 9px 15px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.secondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* KPIS CARDS ROW */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.kpiCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpiTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888888;
+  font-weight: 600;
+}
+
+.kpiValue {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.kpiGold { color: #F0D78C; }
+.kpiGreen { color: #34D399; }
+.kpiBlue { color: #60A5FA; }
+.kpiOrange { color: #F59E0B; }
+.kpiRed { color: #F87171; }
+
+.kpiSub {
+  font-size: 0.72rem;
+  color: #A3A3A3;
+}
+
+/* EXCEL TABLE WRAPPER */
+.tableCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tableHeaderBar {
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tableHeaderBar h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tableScrollWrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.excelTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  text-align: left;
+  min-width: 850px;
+}
+
+.excelTable th {
+  background: #18181D;
+  color: #D4AF37;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-bottom: 1.5px solid rgba(212, 175, 55, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: nowrap;
+}
+
+.excelTable td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  color: #E5E5E5;
+}
+
+.categorySectionRow {
+  background: rgba(212, 175, 55, 0.08) !important;
+}
+
+.categorySectionRow td {
+  font-weight: 800;
+  color: #F0D78C;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+}
+
+.subtotalsRow {
+  background: #1C1C22;
+  font-weight: 800;
+}
+
+.subtotalsRow td {
+  color: #F0D78C;
+  border-top: 2px solid rgba(212, 175, 55, 0.4);
+  padding: 12px;
+}
+
+.specColumnHeader {
+  text-align: center;
+  color: #60A5FA !important;
+}
+
+.specColumnCell {
+  text-align: right;
+  font-weight: 600;
+}
+
+.paymentTag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.tagCash {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34D399;
+}
+
+.tagElectronic {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60A5FA;
+}
+
+/* BOTTOM PANELS GRID */
+.bottomPanelsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .bottomPanelsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.subCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.subCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.subCardHeader h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.miniAddBtn {
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #F0D78C;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.miniAddBtn:hover {
+  background: #D4AF37;
+  color: #000000;
+}
+
+.emptyMsg {
+  font-size: 0.8rem;
+  color: #777777;
+  font-style: italic;
+  padding: 12px 0;
+  text-align: center;
+}
+
+.expenseItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.82rem;
+}
+
+.expenseDesc {
+  color: #E5E5E5;
+  font-weight: 500;
+}
+
+.expenseVal {
+  color: #F87171;
+  font-weight: 700;
+}
+
+.specPayoutItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+}
+
+.specPayoutDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.specPayoutName {
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.specPayoutBreakdown {
+  font-size: 0.74rem;
+  color: #A3A3A3;
+}
+
+.specNetTotal {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #34D399;
+}
+
+/* MODAL STYLES */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modalBox {
+  background: #141418;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 440px;
+  padding: 22px;
+  color: #FFFFFF;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modalBox h3 {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  color: #F0D78C;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.formGroup label {
+  font-size: 0.78rem;
+  color: #A3A3A3;
+  font-weight: 600;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  background: #1C1C22;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  border-color: #D4AF37;
+}
+
+.modalBtnRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
