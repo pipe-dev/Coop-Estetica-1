@@ -342,7 +342,15 @@ export function AdminProvider({ children }) {
   const updateRolePin = async (role, newPin) => {
     let updatePayload = {}
     if (role === 'OWNER') updatePayload = { masterPin: String(newPin).trim() }
-    if (role === 'ADMIN') updatePayload = { adminPin: String(newPin).trim() }
+    if (role === 'ADMIN' || role === 'ADMIN_SERVICIOS') {
+      updatePayload = {
+        adminPin: String(newPin).trim(),
+        servicesAdminPin: String(newPin).trim()
+      }
+    }
+    if (role === 'ADMIN_PRODUCTOS') {
+      updatePayload = { productsAdminPin: String(newPin).trim() }
+    }
     if (role === 'SPECIALIST') updatePayload = { specialistPin: String(newPin).trim() }
 
     return await api.updateConfig(updatePayload)

@@ -16,6 +16,7 @@ import {
   Sparkles,
   Crown,
   Scissors,
+  Package,
   CalendarX,
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -86,8 +87,8 @@ export default function AdminConfiguracion() {
   // Status message
   const [savedSuccess, setSavedSuccess] = useState(false)
 
-  // PIN Change Modal State (Dueña, Administradora, Especialistas)
-  const [pinModalRole, setPinModalRole] = useState(null) // 'OWNER' | 'ADMIN' | 'SPECIALIST' | null
+  // PIN Change Modal State (Dueña, Admin Servicios, Admin Productos, Especialistas)
+  const [pinModalRole, setPinModalRole] = useState(null) // 'OWNER' | 'ADMIN' | 'ADMIN_SERVICIOS' | 'ADMIN_PRODUCTOS' | 'SPECIALIST' | null
   const [currentPin, setCurrentPin] = useState('')
   const [newPin, setNewPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
@@ -191,6 +192,8 @@ export default function AdminConfiguracion() {
     const roleLabels = {
       OWNER: 'de la Propietaria (PIN Maestro)',
       ADMIN: 'de la Administradora',
+      ADMIN_SERVICIOS: 'del Administrador de Servicios',
+      ADMIN_PRODUCTOS: 'del Administrador de Productos',
       SPECIALIST: 'de las Especialistas'
     }
 
@@ -656,12 +659,12 @@ export default function AdminConfiguracion() {
                 )}
               </div>
 
-              {/* ROL 2: ADMINISTRADORA */}
+              {/* ROL 2: ADMINISTRADOR DE SERVICIOS */}
               <div className={styles.rolePinCard}>
                 <div className={styles.rolePinHeader}>
-                  <div className={styles.roleBadgeAdmin}>
-                    <UserCheck size={15} />
-                    <span>Administradora (Recepción)</span>
+                  <div className={styles.roleBadgeServices}>
+                    <Scissors size={15} />
+                    <span>Admin Servicios</span>
                   </div>
                   <span className={styles.roleScopeTag}>Operativo</span>
                 </div>
@@ -670,25 +673,53 @@ export default function AdminConfiguracion() {
                   <code className={styles.rolePinCode}>•••••• (Protegido por Hash)</code>
                 </div>
                 <p className={styles.rolePinDesc}>
-                  Manejo de agenda global, apertura/cierre de caja con arqueo ciego, cobros y registro de clientas.
+                  Gestión integral de citas, especialistas, caja y finanzas, categorías de servicios, CRM y recordatorios de WhatsApp.
                 </p>
                 {currentUserRole === 'OWNER' && (
                   <button 
                     type="button" 
                     className={styles.changeRolePinBtn}
-                    onClick={() => handleOpenPinModal('ADMIN')}
+                    onClick={() => handleOpenPinModal('ADMIN_SERVICIOS')}
                   >
                     <Lock size={13} />
-                    <span>Cambiar Clave de Admin</span>
+                    <span>Cambiar Clave Servicios</span>
                   </button>
                 )}
               </div>
 
-              {/* ROL 3: ESPECIALISTAS */}
+              {/* ROL 3: ADMINISTRADOR DE PRODUCTOS */}
+              <div className={styles.rolePinCard}>
+                <div className={styles.rolePinHeader}>
+                  <div className={styles.roleBadgeProducts}>
+                    <Package size={15} />
+                    <span>Admin Productos</span>
+                  </div>
+                  <span className={styles.roleScopeTag}>Comercial</span>
+                </div>
+                <div className={styles.rolePinValueRow}>
+                  <span className={styles.rolePinLabel}>Clave de Acceso:</span>
+                  <code className={styles.rolePinCode}>•••••• (Protegido por Hash)</code>
+                </div>
+                <p className={styles.rolePinDesc}>
+                  Administración del catálogo de productos, control de stock e inventario, categorías de tienda y anuncios publicitarios web.
+                </p>
+                {currentUserRole === 'OWNER' && (
+                  <button 
+                    type="button" 
+                    className={styles.changeRolePinBtn}
+                    onClick={() => handleOpenPinModal('ADMIN_PRODUCTOS')}
+                  >
+                    <Lock size={13} />
+                    <span>Cambiar Clave Productos</span>
+                  </button>
+                )}
+              </div>
+
+              {/* ROL 4: ESPECIALISTAS */}
               <div className={styles.rolePinCard}>
                 <div className={styles.rolePinHeader}>
                   <div className={styles.roleBadgeSpecialist}>
-                    <Scissors size={15} />
+                    <Sparkles size={15} />
                     <span>Especialistas (Equipo)</span>
                   </div>
                   <span className={styles.roleScopeTag}>Restringido</span>
@@ -992,12 +1023,14 @@ export default function AdminConfiguracion() {
                 <ShieldCheck size={28} className={styles.modalShieldIcon} />
                 <h3>
                   {pinModalRole === 'OWNER' && 'Cambiar Clave de la Propietaria (PIN Maestro)'}
-                  {pinModalRole === 'ADMIN' && 'Actualizar Clave de Administradora'}
+                  {(pinModalRole === 'ADMIN' || pinModalRole === 'ADMIN_SERVICIOS') && 'Actualizar Clave de Admin Servicios'}
+                  {pinModalRole === 'ADMIN_PRODUCTOS' && 'Actualizar Clave de Admin Productos'}
                   {pinModalRole === 'SPECIALIST' && 'Actualizar Clave de Especialistas'}
                 </h3>
                 <p>
                   {pinModalRole === 'OWNER' && 'Ingresa tu clave actual de propietaria y define la nueva clave de 6 dígitos.'}
-                  {pinModalRole === 'ADMIN' && 'Como propietaria, define la nueva clave de 6 dígitos para la recepción y administración.'}
+                  {(pinModalRole === 'ADMIN' || pinModalRole === 'ADMIN_SERVICIOS') && 'Como propietaria, define la nueva clave de 6 dígitos para la gestión operativa de citas, caja, servicios y especialistas.'}
+                  {pinModalRole === 'ADMIN_PRODUCTOS' && 'Como propietaria, define la nueva clave de 6 dígitos para la gestión de productos, inventario y anuncios.'}
                   {pinModalRole === 'SPECIALIST' && 'Como propietaria, define la nueva clave de 6 dígitos para el equipo de especialistas.'}
                 </p>
               </div>

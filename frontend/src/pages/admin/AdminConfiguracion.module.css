@@ -384,6 +384,24 @@ select option {
   font-weight: 700;
 }
 
+.roleBadgeServices {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #60A5FA;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.roleBadgeProducts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #F59E0B;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .roleBadgeSpecialist {
   display: inline-flex;
   align-items: center;
