@@ -66,8 +66,8 @@
 
 .roleTabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
 
 .roleTab {
@@ -98,10 +98,17 @@
   font-weight: 700;
 }
 
-.tabAdminActive {
+.tabServicesActive {
   background: rgba(59, 130, 246, 0.18) !important;
   border-color: #3B82F6 !important;
   color: #93C5FD !important;
+  font-weight: 700;
+}
+
+.tabProductsActive {
+  background: rgba(16, 185, 129, 0.18) !important;
+  border-color: #10B981 !important;
+  color: #A7F3D0 !important;
   font-weight: 700;
 }
 

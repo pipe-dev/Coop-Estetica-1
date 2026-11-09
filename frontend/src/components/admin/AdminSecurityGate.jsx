@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShieldCheck, Lock, KeyRound, AlertTriangle, Crown, UserCheck, Scissors, CheckCircle2, ChevronRight } from 'lucide-react'
+import { ShieldCheck, Lock, KeyRound, AlertTriangle, Crown, UserCheck, Scissors, CheckCircle2, ChevronRight, ShoppingBag } from 'lucide-react'
 import { useAdmin } from '../../context/AdminContext'
 import { api } from '../../services/api'
 import styles from './AdminSecurityGate.module.css'
@@ -89,7 +89,8 @@ export default function AdminSecurityGate({ children }) {
 
       // Fallback resiliente: Si la API no responde o el backend en Render está en reposo
       const expectedOwner = businessConfig?.masterPin || '202626'
-      const expectedAdmin = businessConfig?.adminPin || '123456'
+      const expectedServicesAdmin = businessConfig?.servicesAdminPin || businessConfig?.adminPin || '111111'
+      const expectedProductsAdmin = businessConfig?.productsAdminPin || '222222'
       const expectedSpecialist = businessConfig?.specialistPin || '777777'
 
       if (input === expectedOwner || input === '202626') {
@@ -106,16 +107,30 @@ export default function AdminSecurityGate({ children }) {
         setIsAuthenticated(true)
         setIsSubmitting(false)
         return
-      } else if (input === expectedAdmin || input === '123456') {
-        setCurrentUserRole('ADMIN')
+      } else if (input === expectedServicesAdmin || input === '111111' || input === '123456') {
+        setCurrentUserRole('ADMIN_SERVICIOS')
         try {
-          const fallbackToken = 'local-admin-token-' + Date.now()
+          const fallbackToken = 'local-services-token-' + Date.now()
           sessionStorage.setItem('spa_admin_token', fallbackToken)
           sessionStorage.setItem('spa_admin_authed', 'true')
-          sessionStorage.setItem('spa_admin_role', 'ADMIN')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN_SERVICIOS')
           localStorage.setItem('spa_admin_token', fallbackToken)
           localStorage.setItem('spa_admin_authed', 'true')
-          localStorage.setItem('spa_admin_current_role', 'ADMIN')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN_SERVICIOS')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === expectedProductsAdmin || input === '222222') {
+        setCurrentUserRole('ADMIN_PRODUCTOS')
+        try {
+          const fallbackToken = 'local-products-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN_PRODUCTOS')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN_PRODUCTOS')
         } catch (e) {}
         setIsAuthenticated(true)
         setIsSubmitting(false)
@@ -148,16 +163,30 @@ export default function AdminSecurityGate({ children }) {
         setIsAuthenticated(true)
         setIsSubmitting(false)
         return
-      } else if (input === '123456' || input === (businessConfig?.adminPin || '123456')) {
-        setCurrentUserRole('ADMIN')
+      } else if (input === '111111' || input === '123456' || input === (businessConfig?.servicesAdminPin || '111111')) {
+        setCurrentUserRole('ADMIN_SERVICIOS')
         try {
-          const fallbackToken = 'local-admin-token-' + Date.now()
+          const fallbackToken = 'local-services-token-' + Date.now()
           sessionStorage.setItem('spa_admin_token', fallbackToken)
           sessionStorage.setItem('spa_admin_authed', 'true')
-          sessionStorage.setItem('spa_admin_role', 'ADMIN')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN_SERVICIOS')
           localStorage.setItem('spa_admin_token', fallbackToken)
           localStorage.setItem('spa_admin_authed', 'true')
-          localStorage.setItem('spa_admin_current_role', 'ADMIN')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN_SERVICIOS')
+        } catch (e) {}
+        setIsAuthenticated(true)
+        setIsSubmitting(false)
+        return
+      } else if (input === '222222' || input === (businessConfig?.productsAdminPin || '222222')) {
+        setCurrentUserRole('ADMIN_PRODUCTOS')
+        try {
+          const fallbackToken = 'local-products-token-' + Date.now()
+          sessionStorage.setItem('spa_admin_token', fallbackToken)
+          sessionStorage.setItem('spa_admin_authed', 'true')
+          sessionStorage.setItem('spa_admin_role', 'ADMIN_PRODUCTOS')
+          localStorage.setItem('spa_admin_token', fallbackToken)
+          localStorage.setItem('spa_admin_authed', 'true')
+          localStorage.setItem('spa_admin_current_role', 'ADMIN_PRODUCTOS')
         } catch (e) {}
         setIsAuthenticated(true)
         setIsSubmitting(false)
@@ -301,16 +330,25 @@ export default function AdminSecurityGate({ children }) {
                     onClick={() => handlePresetSelect('OWNER')}
                   >
                     <Crown size={14} />
-                    <span>CEO</span>
+                    <span>Dueña (CEO)</span>
                   </button>
 
                   <button 
                     type="button" 
-                    className={`${styles.roleTab} ${selectedRolePreset === 'ADMIN' ? styles.tabAdminActive : ''}`}
-                    onClick={() => handlePresetSelect('ADMIN')}
+                    className={`${styles.roleTab} ${selectedRolePreset === 'ADMIN_SERVICIOS' ? styles.tabServicesActive : ''}`}
+                    onClick={() => handlePresetSelect('ADMIN_SERVICIOS')}
                   >
-                    <UserCheck size={14} />
-                    <span>Administradora</span>
+                    <Scissors size={14} />
+                    <span>Admin Servicios</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    className={`${styles.roleTab} ${selectedRolePreset === 'ADMIN_PRODUCTOS' ? styles.tabProductsActive : ''}`}
+                    onClick={() => handlePresetSelect('ADMIN_PRODUCTOS')}
+                  >
+                    <ShoppingBag size={14} />
+                    <span>Admin Productos</span>
                   </button>
 
                   <button 
@@ -318,9 +356,36 @@ export default function AdminSecurityGate({ children }) {
                     className={`${styles.roleTab} ${selectedRolePreset === 'SPECIALIST' ? styles.tabSpecialistActive : ''}`}
                     onClick={() => handlePresetSelect('SPECIALIST')}
                   >
-                    <Scissors size={14} />
+                    <UserCheck size={14} />
                     <span>Especialista</span>
                   </button>
+                </div>
+
+                <div className={styles.roleDescriptionBox}>
+                  {selectedRolePreset === 'OWNER' && (
+                    <>
+                      <strong>👑 Catheryne Ríos (Propietaria)</strong>
+                      <p>Control total e irrestricto de agenda, caja, productos, anuncios y configuración general.</p>
+                    </>
+                  )}
+                  {selectedRolePreset === 'ADMIN_SERVICIOS' && (
+                    <>
+                      <strong>✂️ Administrador de Servicios (Operaciones)</strong>
+                      <p>Gestión de citas, agenda, caja diaria, especialistas, clientas y recordatorios.</p>
+                    </>
+                  )}
+                  {selectedRolePreset === 'ADMIN_PRODUCTOS' && (
+                    <>
+                      <strong>🛍️ Administrador de Productos (Tienda & Marketing)</strong>
+                      <p>Control de inventario, catálogo, stock, marcas, precios y gestión de anuncios en la web.</p>
+                    </>
+                  )}
+                  {selectedRolePreset === 'SPECIALIST' && (
+                    <>
+                      <strong>👩‍⚕️ Especialistas de la Estética</strong>
+                      <p>Acceso a tu propia agenda personal y cálculo de tus honorarios correspondientes.</p>
+                    </>
+                  )}
                 </div>
               </div>
 
