@@ -74,11 +74,25 @@ export default function AdminLayout() {
     setIsMoreOpen(false)
   }, [location.pathname])
 
-  // Guardia de ruta estricta: Las especialistas SOLO pueden acceder a /admin/agenda y /admin/historial
+  // Guardia de ruta estricta por rol (Anti-intrusión)
   useEffect(() => {
     if (currentUserRole === 'SPECIALIST') {
       if (location.pathname !== '/admin/agenda' && location.pathname !== '/admin/historial') {
         navigate('/admin/agenda', { replace: true })
+      }
+    } else if (currentUserRole === 'ADMIN_SERVICIOS') {
+      const allowedServicios = ['/admin', '/admin/agenda', '/admin/caja', '/admin/historial', '/admin/clientes', '/admin/equipo', '/admin/servicios']
+      if (!allowedServicios.includes(location.pathname)) {
+        navigate('/admin/agenda', { replace: true })
+      }
+    } else if (currentUserRole === 'ADMIN_PRODUCTOS') {
+      const allowedProductos = ['/admin', '/admin/productos', '/admin/notificaciones']
+      if (!allowedProductos.includes(location.pathname)) {
+        navigate('/admin/productos', { replace: true })
+      }
+    } else if (currentUserRole === 'ADMIN') {
+      if (location.pathname === '/admin/configuracion' || location.pathname === '/admin/telemetria') {
+        navigate('/admin', { replace: true })
       }
     }
   }, [currentUserRole, location.pathname, navigate])
@@ -97,23 +111,29 @@ export default function AdminLayout() {
   }
 
   // Filtrado estricto de navegación según el rol autenticado
-  // Especialista: ÚNICAMENTE Agenda e Historial (Gestión de servicios eliminada)
   const visibleNavItems = navItems.filter(item => {
     if (currentUserRole === 'SPECIALIST') {
       return item.path === '/admin/agenda' || item.path === '/admin/historial'
     }
+    if (currentUserRole === 'ADMIN_SERVICIOS') {
+      return ['/admin', '/admin/agenda', '/admin/caja', '/admin/historial', '/admin/clientes', '/admin/equipo', '/admin/servicios'].includes(item.path)
+    }
+    if (currentUserRole === 'ADMIN_PRODUCTOS') {
+      return ['/admin', '/admin/productos', '/admin/notificaciones'].includes(item.path)
+    }
     if (currentUserRole === 'ADMIN') {
       return item.path !== '/admin/configuracion' && item.path !== '/admin/telemetria'
     }
-    return true
+    return true // OWNER
   })
 
-  // Para Especialistas mostramos sus rutas directas; para Dueña/Admin usamos 4 principales + Más
-  const isSpecialist = currentUserRole === 'SPECIALIST'
-  
-  const primaryMobilePaths = isSpecialist 
-    ? ['/admin/agenda', '/admin/historial']
-    : ['/admin', '/admin/agenda', '/admin/caja', '/admin/clientes']
+  // Rutas primarias y secundarias para móvil según rol
+  const primaryMobilePaths = React.useMemo(() => {
+    if (currentUserRole === 'SPECIALIST') return ['/admin/agenda', '/admin/historial']
+    if (currentUserRole === 'ADMIN_PRODUCTOS') return ['/admin/productos', '/admin/notificaciones', '/admin']
+    if (currentUserRole === 'ADMIN_SERVICIOS') return ['/admin/agenda', '/admin/caja', '/admin/servicios', '/admin/equipo']
+    return ['/admin', '/admin/agenda', '/admin/caja', '/admin/clientes']
+  }, [currentUserRole])
 
   const primaryMobileItems = visibleNavItems.filter(item => primaryMobilePaths.includes(item.path))
   const moreMobileItems = visibleNavItems.filter(item => !primaryMobilePaths.includes(item.path))
@@ -152,7 +172,19 @@ export default function AdminLayout() {
           {currentUserRole === 'OWNER' && (
             <div className={styles.roleHeaderBadgeOwner}>
               <Crown size={13} />
-              <span>CEO</span>
+              <span>Dueña (CEO)</span>
+            </div>
+          )}
+          {currentUserRole === 'ADMIN_SERVICIOS' && (
+            <div className={styles.roleHeaderBadgeServices}>
+              <Scissors size={13} />
+              <span>Admin Servicios</span>
+            </div>
+          )}
+          {currentUserRole === 'ADMIN_PRODUCTOS' && (
+            <div className={styles.roleHeaderBadgeProducts}>
+              <ShoppingBag size={13} />
+              <span>Admin Productos</span>
             </div>
           )}
           {currentUserRole === 'ADMIN' && (
@@ -179,7 +211,7 @@ export default function AdminLayout() {
             <span>{todayFormatted}</span>
           </div>
           
-          {currentUserRole !== 'SPECIALIST' && (
+          {currentUserRole !== 'SPECIALIST' && currentUserRole !== 'ADMIN_PRODUCTOS' && (
             activeCashSession ? (
               <div className={styles.cashBoxPill}>
                 <span className={styles.greenDot} />
