@@ -245,6 +245,20 @@
   color: var(--color-gold-dark);
 }
 
+.supplyCostBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #D97706;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 6px;
+}
+
 /* CATEGORIES GRID */
 .categoriesGrid {
   display: grid;

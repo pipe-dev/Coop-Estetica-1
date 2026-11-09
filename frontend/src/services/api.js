@@ -675,6 +675,73 @@ export const api = {
   },
 
   // ----------------------------------------------------
+  // SUITE FINANCIERA (EXCEL A WEB)
+  // ----------------------------------------------------
+  async getDailyMatrix(date) {
+    try {
+      const query = date ? `?date=${encodeURIComponent(date)}` : ''
+      const res = await authFetch(`${API_BASE_URL}/cash/daily-matrix${query}`)
+      if (!res.ok) return null
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      return null
+    }
+  },
+
+  async getMonthlyLedger(year, month) {
+    try {
+      const query = `?year=${year}&month=${month}`
+      const res = await authFetch(`${API_BASE_URL}/cash/monthly-ledger${query}`)
+      if (!res.ok) return null
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      return null
+    }
+  },
+
+  async getCategoryFlow(startDate, endDate) {
+    try {
+      const query = `?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
+      const res = await authFetch(`${API_BASE_URL}/cash/category-flow${query}`)
+      if (!res.ok) return null
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      return null
+    }
+  },
+
+  async createCashExpense(data) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/cash/expenses`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Fallo al registrar gasto:', e)
+      return null
+    }
+  },
+
+  async createCashAdvance(data) {
+    try {
+      const res = await authFetch(`${API_BASE_URL}/cash/advances`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
+      return await res.json()
+    } catch (e) {
+      if (e.message?.includes('401')) throw e
+      console.warn('Fallo al registrar anticipo:', e)
+      return null
+    }
+  },
+
+  // ----------------------------------------------------
   // 10. AUTENTICACIÓN
   // ----------------------------------------------------
   async login(email, password) {

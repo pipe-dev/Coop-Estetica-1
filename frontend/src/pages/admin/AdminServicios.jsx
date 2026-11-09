@@ -48,6 +48,7 @@ export default function AdminServicios() {
   const [serviceCategoryId, setServiceCategoryId] = useState('')
   const [serviceName, setServiceName] = useState('')
   const [servicePrice, setServicePrice] = useState('')
+  const [serviceSupplyCost, setServiceSupplyCost] = useState('')
   const [serviceDuration, setServiceDuration] = useState(60)
   const [serviceDescription, setServiceDescription] = useState('')
   const [serviceIncludes, setServiceIncludes] = useState('')
@@ -68,6 +69,7 @@ export default function AdminServicios() {
     setServiceCategoryId(serviceCategories[0]?.id || '')
     setServiceName('')
     setServicePrice('')
+    setServiceSupplyCost('')
     setServiceDuration(60)
     setServiceDescription('')
     setServiceIncludes('')
@@ -80,6 +82,7 @@ export default function AdminServicios() {
     setServiceCategoryId(categoryId || serviceCategories[0]?.id || '')
     setServiceName(service.name || '')
     setServicePrice(formatCOPInput(service.price || ''))
+    setServiceSupplyCost(formatCOPInput(service.supplyCost || ''))
     setServiceDuration(parseInt(service.duration, 10) || 60)
     setServiceDescription(service.description || '')
     setServiceIncludes(service.includes || '')
@@ -90,6 +93,7 @@ export default function AdminServicios() {
   const handleServiceSubmit = (e) => {
     e.preventDefault()
     const numericPrice = parseCOPInput(servicePrice)
+    const numericSupplyCost = parseCOPInput(serviceSupplyCost) || 0
     if (!serviceName || !numericPrice || !serviceCategoryId) return
 
     const durationText = typeof serviceDuration === 'string' && serviceDuration.includes('min')
@@ -99,6 +103,7 @@ export default function AdminServicios() {
     const payload = {
       name: serviceName,
       price: numericPrice,
+      supplyCost: numericSupplyCost,
       duration: durationText,
       description: serviceDescription,
       includes: serviceIncludes,
@@ -278,6 +283,14 @@ export default function AdminServicios() {
                 </div>
                 <span className={styles.priceTag}>${(s.price || 0).toLocaleString()} COP</span>
               </div>
+
+              {s.supplyCost > 0 && (
+                <div style={{ marginTop: '6px' }}>
+                  <span className={styles.supplyCostBadge}>
+                    Insumos: ${(s.supplyCost || 0).toLocaleString()} COP
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -379,15 +392,27 @@ export default function AdminServicios() {
                   </div>
                 </div>
 
-                <div className={styles.formGroup}>
-                  <label>Precio Oficial ($ COP)</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. 120.000"
-                    value={servicePrice}
-                    onChange={e => setServicePrice(formatCOPInput(e.target.value))}
-                    required
-                  />
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Precio Oficial ($ COP)</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. 120.000"
+                      value={servicePrice}
+                      onChange={e => setServicePrice(formatCOPInput(e.target.value))}
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Costo Sugerido de Insumos ($ COP)</label>
+                    <input
+                      type="text"
+                      placeholder="Ej. 2.000 (Opcional)"
+                      value={serviceSupplyCost}
+                      onChange={e => setServiceSupplyCost(formatCOPInput(e.target.value))}
+                    />
+                  </div>
                 </div>
 
                 <div className={styles.formGroup}>
