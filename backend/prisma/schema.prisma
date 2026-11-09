@@ -113,6 +113,7 @@ model Service {
   includes    String?         // Texto o JSON de beneficios incluidos
   image       String?
   active      Boolean         @default(true)
+  supplyCost  Float?          @default(0)
 
   appointments Appointment[]
   createdAt   DateTime        @default(now())
@@ -179,6 +180,10 @@ model Appointment {
   time             String      // HH:mm AM/PM
   price            Float       // Valor bruto del servicio en COP
   commissionAmount Float       // Monto NETO que le corresponde a la especialista
+  commissionRate   Float?      // Porcentaje acordado
+  supplyCost       Float?      @default(0) // Costo de insumos deducido
+  aestheticAmount  Float?      // Monto que le queda a la estética
+  paymentMethod    String?     @default("Efectivo") // Efectivo, Transferencia, etc.
   status           String      @default("Reservada") // Reservada, En Atención, Pagada, Cancelada
   
   // Auditoría de cancelación
@@ -221,6 +226,10 @@ model Transaction {
   description   String
   category      String       // Servicios, Venta de Productos, Insumos, Ajuste de Caja
   paymentMethod String       // Efectivo, Nequi, Daviplata, Tarjeta, Transferencia
+  specialistId  String?
+  specialistName String?
+  serviceCategoryId String?
+  serviceCategoryName String?
   date          DateTime     @default(now())
 }
 

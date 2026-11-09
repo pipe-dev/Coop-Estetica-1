@@ -118,6 +118,7 @@ export class ServicesService {
     description?: string;
     includes?: string;
     image?: string;
+    supplyCost?: number;
   }) {
     this.invalidateCache();
     return this.prisma.service.create({
@@ -129,6 +130,7 @@ export class ServicesService {
         description: data.description || '',
         includes: data.includes || '',
         image: data.image || '',
+        supplyCost: data.supplyCost !== undefined ? Number(data.supplyCost) : 0,
         active: true,
       },
     });
@@ -144,6 +146,7 @@ export class ServicesService {
       description?: string;
       includes?: string;
       image?: string;
+      supplyCost?: number;
       active?: boolean;
     },
   ) {
@@ -157,6 +160,7 @@ export class ServicesService {
         ...data,
         price: data.price !== undefined ? Number(data.price) : undefined,
         duration: data.duration !== undefined ? Number(data.duration) : undefined,
+        supplyCost: data.supplyCost !== undefined ? Number(data.supplyCost) : undefined,
       },
     });
   }

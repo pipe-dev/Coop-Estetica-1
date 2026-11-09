@@ -665,7 +665,13 @@ export class AppointmentsService {
     id: string,
     newStatus: string,
     user?: any,
-    extraData?: { commissionAmount?: number; commissionRate?: number; paymentMethod?: string }
+    extraData?: {
+      commissionAmount?: number;
+      commissionRate?: number;
+      supplyCost?: number;
+      aestheticAmount?: number;
+      paymentMethod?: string;
+    }
   ) {
     const app = await this.prisma.appointment.findUnique({ where: { id } });
     if (!app) throw new NotFoundException('Cita no encontrada.');
@@ -677,6 +683,18 @@ export class AppointmentsService {
     const dataToUpdate: any = { status: newStatus };
     if (extraData?.commissionAmount !== undefined && extraData.commissionAmount !== null) {
       dataToUpdate.commissionAmount = Number(extraData.commissionAmount);
+    }
+    if (extraData?.commissionRate !== undefined && extraData.commissionRate !== null) {
+      dataToUpdate.commissionRate = Number(extraData.commissionRate);
+    }
+    if (extraData?.supplyCost !== undefined && extraData.supplyCost !== null) {
+      dataToUpdate.supplyCost = Number(extraData.supplyCost);
+    }
+    if (extraData?.aestheticAmount !== undefined && extraData.aestheticAmount !== null) {
+      dataToUpdate.aestheticAmount = Number(extraData.aestheticAmount);
+    }
+    if (extraData?.paymentMethod) {
+      dataToUpdate.paymentMethod = String(extraData.paymentMethod).trim();
     }
 
     return this.prisma.appointment.update({
