@@ -216,9 +216,15 @@ export default function AdminDashboard() {
     setShowQuickSaleModal(false)
   }
 
-  const handleConfirmSale = ({ appointmentId, totalPrice, paymentMethod, notes, commissionRate, commissionAmount }) => {
+  const handleConfirmSale = ({ appointmentId, totalPrice, paymentMethod, notes, commissionRate, commissionAmount, supplyCost, aestheticAmount }) => {
     const appObj = appointments.find(a => a.id === appointmentId)
-    updateAppointmentStatus(appointmentId, 'Pagada', { commissionRate, commissionAmount })
+    updateAppointmentStatus(appointmentId, 'Pagada', { 
+      commissionRate, 
+      commissionAmount,
+      supplyCost: supplyCost || 0,
+      aestheticAmount: aestheticAmount !== undefined ? aestheticAmount : (totalPrice - commissionAmount),
+      paymentMethod
+    })
     addTransaction({
       id: `tx-app-${Date.now()}`,
       type: 'Ingreso',
@@ -226,7 +232,11 @@ export default function AdminDashboard() {
       description: `Cita Pagada: ${appObj?.serviceName || 'Servicio'} - ${appObj?.clientName || 'Cliente'}${notes ? ` (${notes})` : ''}`,
       category: 'Servicios',
       paymentMethod,
-      date: todayStr
+      date: todayStr,
+      specialistId: appObj?.specialistId,
+      specialistName: appObj?.specialistName,
+      serviceCategoryId: appObj?.service?.categoryId,
+      serviceCategoryName: appObj?.service?.category?.name,
     })
     setSelectedAppointmentForSale(null)
   }

@@ -345,9 +345,15 @@ export default function AdminAgenda() {
     setShowAddModal(false)
   }
 
-  const handleConfirmSale = ({ appointmentId, paymentMethod, totalPrice, notes, commissionRate, commissionAmount }) => {
+  const handleConfirmSale = ({ appointmentId, paymentMethod, totalPrice, notes, commissionRate, commissionAmount, supplyCost, aestheticAmount }) => {
     const appObj = appointments.find(a => a.id === appointmentId)
-    updateAppointmentStatus(appointmentId, 'Pagada', { commissionRate, commissionAmount })
+    updateAppointmentStatus(appointmentId, 'Pagada', { 
+      commissionRate, 
+      commissionAmount,
+      supplyCost: supplyCost || 0,
+      aestheticAmount: aestheticAmount !== undefined ? aestheticAmount : (totalPrice - commissionAmount),
+      paymentMethod
+    })
     addTransaction({
       id: `tx-app-${Date.now()}`,
       type: 'Ingreso',
@@ -355,7 +361,11 @@ export default function AdminAgenda() {
       description: `Cita Pagada: ${appObj?.serviceName || 'Servicio'} - ${appObj?.clientName || 'Cliente'}${notes ? ` (${notes})` : ''}`,
       category: 'Servicios',
       paymentMethod,
-      date: selectedDate
+      date: selectedDate,
+      specialistId: appObj?.specialistId,
+      specialistName: appObj?.specialistName,
+      serviceCategoryId: appObj?.service?.categoryId,
+      serviceCategoryName: appObj?.service?.category?.name,
     })
     setSelectedAppointmentForSale(null)
   }

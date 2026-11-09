@@ -25,8 +25,15 @@ export default function ConfirmSaleModal({ appointment, onClose, onConfirm }) {
     formatCOPInput(Math.round((totalPrice * defaultRate) / 100))
   )
 
+  const defaultSupply = appointment.supplyCost !== undefined && appointment.supplyCost !== null
+    ? appointment.supplyCost
+    : (appointment.service?.supplyCost || 0)
+  const [supplyCost, setSupplyCost] = useState(formatCOPInput(defaultSupply))
+  const parsedSupplyCost = parseCOPInput(supplyCost) || 0
+
   const parsedCommAmount = parseCOPInput(commissionAmount)
-  const esteticaMargin = Math.max(0, totalPrice - parsedCommAmount)
+  const esteticaGross = Math.max(0, totalPrice - parsedCommAmount)
+  const esteticaMargin = Math.max(0, esteticaGross - parsedSupplyCost)
 
   const handleRateChange = (newRateStr) => {
     setCommissionRate(newRateStr)
@@ -78,7 +85,9 @@ export default function ConfirmSaleModal({ appointment, onClose, onConfirm }) {
       notes,
       receiptNo,
       commissionRate: parseFloat(commissionRate) || 0,
-      commissionAmount: parsedCommAmount
+      commissionAmount: parsedCommAmount,
+      supplyCost: parsedSupplyCost,
+      aestheticAmount: esteticaGross,
     })
 
     // Advance to Step 2: Digital Receipt & WhatsApp Dispatch
@@ -306,11 +315,31 @@ Esperamos verte pronto para seguir realzando tu belleza y bienestar.`
                     👩‍⚕️ Ganancia ({commissionRate}%):{' '}
                     <span className={styles.specialistEarning}>${parsedCommAmount.toLocaleString()} COP</span>
                   </div>
+                  {parsedSupplyCost > 0 && (
+                    <div>
+                      💅 Insumos:{' '}
+                      <span style={{ color: '#F59E0B', fontWeight: 700 }}>${parsedSupplyCost.toLocaleString()} COP</span>
+                    </div>
+                  )}
                   <div>
-                    🏢 Margen Estética:{' '}
+                    🏢 Estética (Neto):{' '}
                     <span className={styles.esteticaMargin}>${esteticaMargin.toLocaleString()} COP</span>
                   </div>
                 </div>
+              </div>
+
+              {/* COSTO DE INSUMOS DEDUCIBLE */}
+              <div className={styles.formGroup} style={{ marginTop: '10px' }}>
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>💅 Costo de Insumos ($ COP)</span>
+                  <span style={{ fontSize: '0.72rem', color: '#F59E0B' }}>Deducible en liquidación</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. 2.000 (Opcional)"
+                  value={supplyCost}
+                  onChange={e => setSupplyCost(formatCOPInput(e.target.value))}
+                />
               </div>
 
               <div className={styles.formGroup}>
